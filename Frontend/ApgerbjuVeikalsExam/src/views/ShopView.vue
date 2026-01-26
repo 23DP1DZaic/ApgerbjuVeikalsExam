@@ -18,4 +18,6 @@ const products = ref([
   { id: 2, name: 'V', price: 50 },
   { id: 3, name: '67', price: 120 }
 ])
+
+const res = await fetch('http://127.0.0.1:8000/api/products')
 </script>
