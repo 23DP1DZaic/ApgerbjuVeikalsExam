@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <!-- Герой-секция -->
+    <!-- Hero -->
     <section class="hero">
       <div class="container">
         <div class="hero-content">
