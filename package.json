@@ -2,5 +2,8 @@
   "dependencies": {
     "vue-router": "^4.6.4",
     "vuetify": "^3.11.7"
+  },
+  "devDependencies": {
+    "@vue/tsconfig": "^0.8.1"
   }
 }
