@@ -3,16 +3,8 @@ import HomeView from '../views/HomeView.vue'
 import ShopView from '../views/ShopView.vue'
 
 const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/shop',
-    name: 'shop',
-    component: ShopView
-  }
+  { path: '/', name: 'home', component: HomeView },
+  { path: '/shop', name: 'shop', component: ShopView }
 ]
 
 const router = createRouter({
