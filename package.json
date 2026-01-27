@@ -4,6 +4,7 @@
     "vuetify": "^3.11.7"
   },
   "devDependencies": {
+    "@types/node": "^25.0.10",
     "@vue/tsconfig": "^0.8.1"
   }
 }
