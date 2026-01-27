@@ -87,7 +87,7 @@ const products = ref<Product[]>([
 ])
 
 const categories = ref([
-  { id: 'all', name: 'All items' },
+  // { id: 'all', name: 'All items' },
   { id: 'Tshirt', name: 'Tshirt' },
   { id: 'Jeans', name: 'Jeans' },
   { id: 'Hoodie', name: 'Hoodie' },
@@ -96,7 +96,8 @@ const categories = ref([
 ])
 
 // Filters
-const selectedCategories = ref<string[]>(['all'])
+const selectedCategories = ref<string[]>([]) // empty - all items
+
 const sortOption = ref('newest')
 
 // Filter and sort
@@ -104,9 +105,9 @@ const filteredProducts = computed(() => {
   let filtered = [...products.value]
   
   // FIlter by category
-  if (!selectedCategories.value.includes('all')) {
+  if (selectedCategories.value.length > 0) {
     filtered = filtered.filter(p => selectedCategories.value.includes(p.category))
-  }
+  } // if any filter selected, show filtered items
   
   // Sort by price
   switch (sortOption.value) {
@@ -118,16 +119,15 @@ const filteredProducts = computed(() => {
       break
     case 'newest':
     default:
-
       break
   }
-  
+
   return filtered
 })
 
 // Methods
 const resetFilters = () => {
-  selectedCategories.value = ['all']
+  selectedCategories.value = [] // empty - all items
   sortOption.value = 'newest'
 }
 
