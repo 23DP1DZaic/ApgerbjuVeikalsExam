@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
+Route::get('/', function () {
+    return view('welcome');
+});
+
 Route::get('/api/products', function (Request $request) {
     $products = [
         ['id' => 1, 'name' => '1', 'price' => 29, 'image' => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab', 'category' => 'Tshirt'],
