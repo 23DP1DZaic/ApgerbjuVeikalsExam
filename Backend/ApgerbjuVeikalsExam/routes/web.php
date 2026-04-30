@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ListingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,4 +19,13 @@ Route::get('/api/products', function (Request $request) {
     ];
 
     return response()->json($products);
+
 });
+
+Route::withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->group(function () {
+        Route::get('/api/listings', [ListingController::class, 'index']);
+        Route::get('/api/listings/{listing}', [ListingController::class, 'show']);
+        Route::post('/api/listings', [ListingController::class, 'store']);
+        Route::delete('/api/listings/{listing}', [ListingController::class, 'destroy']);
+    });
