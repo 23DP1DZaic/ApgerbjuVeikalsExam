@@ -23,7 +23,7 @@
                 :value="category.id"
                 v-model="selectedCategories"
               >
-              <span>{{ category.name }}</span>
+              <span>{{ category.title }}</span>
             </label>
           </div>
         </div>
@@ -54,10 +54,14 @@
             @click="viewProduct(product)"
           >
             <div class="product-image">
-              <img :src="product.image" :alt="product.name">
+               <!-- <img :src="product.image" :alt="product.title"> -->
+                <img
+    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab"
+    :alt="product.title"
+>
             </div>
             <div class="product-info">
-              <h3>{{ product.name }}</h3>
+              <h3>{{ product.title }}</h3>
               <p>{{ product.category }}</p>
               <span class="price">{{ product.price }} €</span>
             </div>
@@ -69,11 +73,12 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref, computed, onMounted } from 'vue'
 
 type Product = {
   id: number
-  name: string
+  title: string
   price: number
   image: string
   category: string
@@ -85,11 +90,11 @@ const error = ref<string | null>(null)
 
 // Categories
 const categories = ref([
-  { id: 'Tshirt', name: 'Tshirt' },
-  { id: 'Jeans', name: 'Jeans' },
-  { id: 'Hoodie', name: 'Hoodie' },
-  { id: 'Jacket', name: 'Jacket' },
-  { id: 'Shirt', name: 'Shirt' },
+  { id: 'Tshirt', title: 'Tshirt' },
+  { id: 'Jeans', title: 'Jeans' },
+  { id: 'Hoodie', title: 'Hoodie' },
+  { id: 'Jacket', title: 'Jacket' },
+  { id: 'Shirt', title: 'Shirt' },
 ])
 
 // FIlters
@@ -99,8 +104,8 @@ const sortOption = ref('newest')
 // Load info from backend
 const fetchProducts = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/products')
-    products.value = await response.json()
+const response = await fetch('http://127.0.0.1:8000/api/listings')
+products.value = await response.json()
   } catch (e) {
     error.value = 'Failed to load products'
   } finally {
