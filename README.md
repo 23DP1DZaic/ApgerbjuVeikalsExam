@@ -1,26 +1,64 @@
-# Apgerbju veikals
+# ApģērbuVeikalsExam (vēl neizdomaju nosaukumu)
+Mūsdienīga tīmekļa platforma apģērbu tirdzniecībai un sludinājumu publicēšanai, iedvesmota no tādiem risinājumiem kā Depop. Projekts tiek izstrādāts kā mācību darbs, izmantojot Vue 3 Frontend pusē un Laravel Backend pusē.
 
-**ApgerbjuVeikalsExam** is a web project for an online clothing store.  
-The project is divided into **Backend** and **Frontend** parts and demonstrates a full-stack web application with server-side logic and a client-side user interface.
+---
+---
+---
+## Projekta apraksts
 
+ApģērbuVeikalsExam ir Full-stack tīmekļa lietotne, kas paredzēta apģērbu sludinājumu publicēšanai, pārlūkošanai un filtrēšanai. Platforma paredzēta gan pircējiem, gan pārdevējiem, nodrošinot vienkāršu un pārskatāmu lietošanas pieredzi.
 
-## Features
+**Platforma ļauj:**
+👕 Pārlūkot apģērbu sludinājumus
 
-The project includes the following functionality:
+🔍 Filtrēt apģērbus pēc kategorijām un cenas
 
-- clothing products catalog
-- product categories
-- product management
-- interaction between Frontend and Backend via API
-- separated application architecture
+📦 Apskatīt detalizētu informāciju par preci
 
+🛒 Sagatavot pamatu groza un pirkuma funkcionalitātei
 
-## Requirements
+🔗 Saņemt datus no back-end caur API
 
-To run the project locally, you need:
+---
 
-- PHP 8.0 or higher
+## Projekta struktūra
+ApgerbjuVeikalsExam/
+1. Backend/ApgerbjuVeikalsExam/ - **Laravel API**
+2. Frontend/ApgerbjuVeikalsExam/ - **Vue 3 + Vite**
+
+---
+
+# Sākšana
+Priekšnoteikumi:
+- PHP 8.2+
+- Node.js 18+
+- npm
 - Composer
-- Node.js and npm
-- MySQL or MariaDB
-- Web server (Apache or Nginx)
+- MySQL (vai cita SQL datubāze)
+
+---
+
+# Instalācija
+## Repozitorija klonēšana
+
+**`git clone`**
+**`cd ApgerbjuVeikalsExam`**
+
+---
+
+## Backend iestatīšana
+
+**`cd Backend/ApgerbjuVeikalsExam`**
+
+**`composer install`**
+**`cp .env.example .env`**
+**`php artisan key:generate`**
+
+---
+
+## Frontend iestatīšana
+
+**`cd Frontend/ApgerbjuVeikalsExam`**
+
+**`npm install`**
+**`npm run dev`**
