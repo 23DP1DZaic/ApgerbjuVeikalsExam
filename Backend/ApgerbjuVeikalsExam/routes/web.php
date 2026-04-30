@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\AuthController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,9 @@ Route::get('/api/products', function (Request $request) {
 
 Route::withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
     ->group(function () {
+        Route::post('/api/register', [AuthController::class, 'register']);
+        Route::post('/api/login', [AuthController::class, 'login']);
+
         Route::get('/api/listings', [ListingController::class, 'index']);
         Route::get('/api/listings/{listing}', [ListingController::class, 'show']);
         Route::post('/api/listings', [ListingController::class, 'store']);
