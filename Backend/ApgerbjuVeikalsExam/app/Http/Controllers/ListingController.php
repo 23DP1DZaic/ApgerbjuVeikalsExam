@@ -25,7 +25,7 @@ class ListingController extends Controller
             'condition' => 'required|string',
         ]);
 
-        $data['user_id'] = 1;
+        $data['user_id'] = $request->user_id ?? 1;
 
         return Listing::create($data);
     }
