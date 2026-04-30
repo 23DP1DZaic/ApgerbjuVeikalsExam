@@ -11,6 +11,14 @@
           <router-link to="/">Home</router-link>
           <router-link to="/shop">Shop</router-link>
           <router-link to="/cart">Cart ({{ cartCount }})</router-link>
+          <div v-if="user" class="user-menu">
+            <span>Hello, {{ user.name }}</span>
+            <button @click="logout">Logout</button>
+          </div>
+          <div v-else class="auth-links">
+            <router-link to="/login">Login</router-link>
+            <router-link to="/register">Register</router-link>
+          </div>
         </nav>
       </div>
     </header>
@@ -52,8 +60,39 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-const cartCount = ref(0)
-</script>
 
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const cartCount = ref(0)
+
+// User
+type User = {
+  id: number
+  name: string
+  email: string
+}
+
+// User status
+const user = ref<User | null>(null)
+
+const router = useRouter()
+
+// Load user from localStorage
+onMounted(() => {
+  const savedUser = localStorage.getItem('user')
+
+  if (savedUser) {
+    user.value = JSON.parse(savedUser)
+  }
+})
+
+// Logout
+const logout = () => {
+  localStorage.removeItem('user')
+  user.value = null
+  router.push('/login')
+}
+</script>
