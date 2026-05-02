@@ -32,4 +32,5 @@ Route::withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken
         Route::get('/api/listings/{listing}', [ListingController::class, 'show']);
         Route::post('/api/listings', [ListingController::class, 'store']);
         Route::delete('/api/listings/{listing}', [ListingController::class, 'destroy']);
+        Route::put('/api/listings/{listing}', [ListingController::class, 'update']);
     });

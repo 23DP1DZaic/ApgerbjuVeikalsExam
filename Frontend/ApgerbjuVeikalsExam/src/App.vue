@@ -8,6 +8,7 @@
           <router-link to="/">Name</router-link>
         </div>
         <nav class="main-nav">
+          <router-link v-if="user" to="/create-listing">Add listing</router-link>
           <router-link to="/">Home</router-link>
           <router-link to="/shop">Shop</router-link>
           <router-link to="/cart">Cart ({{ cartCount }})</router-link>
