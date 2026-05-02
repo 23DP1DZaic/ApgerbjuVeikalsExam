@@ -55,10 +55,11 @@
           >
             <div class="product-image">
                <!-- <img :src="product.image" :alt="product.title"> -->
-                <img
-    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab"
-    :alt="product.title"
->
+              <img
+                v-if="product.image_path"
+                :src="`http://127.0.0.1:8000/storage/${product.image_path}`"
+                :alt="product.title"
+              />
             </div>
             <div class="product-info">
               <h3>{{ product.title }}</h3>
@@ -82,6 +83,7 @@ type Product = {
   price: number
   image: string
   category: string
+  image_path: string | null
 }
 
 const products = ref<Product[]>([])

@@ -17,6 +17,7 @@ class Listing extends Model
         'color',
         'size',
         'condition',
+        'image_path',
     ];
 
     public function user()

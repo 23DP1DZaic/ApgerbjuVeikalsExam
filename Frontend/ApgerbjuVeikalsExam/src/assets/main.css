@@ -483,3 +483,19 @@
   margin-top: 15px;
   text-align: center;
 }
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #000;
+  font-size: 1rem;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}

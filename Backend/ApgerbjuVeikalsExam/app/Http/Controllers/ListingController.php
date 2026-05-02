@@ -24,7 +24,15 @@ class ListingController extends Controller
         'color' => 'nullable|string',
         'size' => 'nullable|string',
         'condition' => 'required|string',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
+
+    
+
+        if ($request->hasFile('image')) {
+        $path = $request->file('image')->store('listings', 'public');
+        $data['image_path'] = $path;
+    }
 
     return Listing::create($data);
 }
