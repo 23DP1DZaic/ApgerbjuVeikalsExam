@@ -53,14 +53,17 @@
             :key="product.id"
             @click="viewProduct(product)"
           >
-            <div class="product-image">
-               <!-- <img :src="product.image" :alt="product.title"> -->
-              <img
-                v-if="product.image_path"
-                :src="`http://127.0.0.1:8000/storage/${product.image_path}`"
-                :alt="product.title"
-              />
+          <div class="product-image">
+            <img
+              v-if="product.image_path"
+              :src="`http://127.0.0.1:8000/storage/${product.image_path}`"
+              :alt="product.title"
+            >
+
+            <div v-else class="no-image">
+              No image
             </div>
+          </div>
             <div class="product-info">
               <h3>{{ product.title }}</h3>
               <p>{{ product.category }}</p>
