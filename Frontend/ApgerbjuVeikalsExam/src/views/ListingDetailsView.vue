@@ -10,22 +10,46 @@
       <div class="listing-gallery">
         <div class="thumbnails">
           <div
+            v-for="image in imageUrls"
+            :key="image"
             class="thumbnail"
-            :class="{ active: selectedImage === mainImage }"
-            @click="selectedImage = mainImage"
+            :class="{ active: selectedImage === image }"
+            @click="selectedImage = image"
           >
-            <img v-if="mainImage" :src="mainImage" :alt="listing.title">
-            <div v-else class="thumb-placeholder">No image</div>
+            <img :src="image" :alt="listing.title">
+          </div>
+
+          <div v-if="imageUrls.length === 0" class="thumbnail">
+            <div class="thumb-placeholder">No image</div>
           </div>
         </div>
 
         <div class="main-image">
-          <button class="image-arrow left" @click="previousImage">‹</button>
+          <button
+            v-if="imageUrls.length > 1"
+            class="image-arrow left"
+            @click="previousImage"
+          >
+            ‹
+          </button>
 
-          <img v-if="selectedImage" :src="selectedImage" :alt="listing.title">
-          <div v-else class="details-no-image">No image</div>
+          <img
+            v-if="selectedImage"
+            :src="selectedImage"
+            :alt="listing.title"
+          >
 
-          <button class="image-arrow right" @click="nextImage">›</button>
+          <div v-else class="details-no-image">
+            No image
+          </div>
+
+          <button
+            v-if="imageUrls.length > 1"
+            class="image-arrow right"
+            @click="nextImage"
+          >
+            ›
+          </button>
         </div>
       </div>
 
@@ -64,6 +88,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+type ListingImage = {
+  id: number
+  image_path: string
+}
+
 type Listing = {
   id: number
   title: string
@@ -74,7 +103,7 @@ type Listing = {
   color: string | null
   size: string | null
   condition: string
-  image_path: string | null
+  images: ListingImage[]
 }
 
 const route = useRoute()
@@ -84,14 +113,20 @@ const loading = ref(true)
 const error = ref('')
 const selectedImage = ref<string | null>(null)
 
-const mainImage = computed(() => {
-  if (!listing.value?.image_path) return null
-  return `http://127.0.0.1:8000/storage/${listing.value.image_path}`
+const imageUrls = computed(() => {
+  if (!listing.value?.images?.length) return []
+
+  return listing.value.images.map((image) => {
+    return `http://127.0.0.1:8000/storage/${image.image_path}`
+  })
 })
 
 const fetchListing = async () => {
   try {
-    const response = await fetch(`http://127.0.0.1:8000/api/listings/${route.params.id}`)
+    const response = await fetch(
+      `http://127.0.0.1:8000/api/listings/${route.params.id}`
+    )
+
     const data = await response.json()
 
     if (!response.ok) {
@@ -100,7 +135,7 @@ const fetchListing = async () => {
     }
 
     listing.value = data
-    selectedImage.value = mainImage.value
+    selectedImage.value = imageUrls.value[0] || null
   } catch {
     error.value = 'Failed to load listing'
   } finally {
@@ -109,11 +144,21 @@ const fetchListing = async () => {
 }
 
 const nextImage = () => {
-  selectedImage.value = mainImage.value
+  if (!imageUrls.value.length || !selectedImage.value) return
+
+  const index = imageUrls.value.indexOf(selectedImage.value)
+  const nextIndex = (index + 1) % imageUrls.value.length
+
+  selectedImage.value = imageUrls.value[nextIndex] ?? null
 }
 
 const previousImage = () => {
-  selectedImage.value = mainImage.value
+  if (!imageUrls.value.length || !selectedImage.value) return
+
+  const index = imageUrls.value.indexOf(selectedImage.value)
+  const previousIndex = (index - 1 + imageUrls.value.length) % imageUrls.value.length
+
+  selectedImage.value = imageUrls.value[previousIndex] ?? null
 }
 
 onMounted(fetchListing)

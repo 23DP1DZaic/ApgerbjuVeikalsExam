@@ -9,39 +9,45 @@ class ListingController extends Controller
 {
     public function index()
     {
-        return Listing::latest()->get();
+        return Listing::with('images')->latest()->get();
     }
 
     public function store(Request $request)
-{
-    $data = $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'price' => 'required|numeric|min:0',
-        'category' => 'required|string',
-        'brand' => 'nullable|string',
-        'color' => 'nullable|string',
-        'size' => 'nullable|string',
-        'condition' => 'required|string',
-        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-    ]);
-
-    
-
-        if ($request->hasFile('image')) {
-        $path = $request->file('image')->store('listings', 'public');
-        $data['image_path'] = $path;
-    }
-
-    return Listing::create($data);
-}
-
-
-    public function show(Listing $listing)
     {
-        return $listing;
+        $data = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'category' => 'required|string',
+            'brand' => 'required|string',
+            'color' => 'required|string',
+            'size' => 'required|string',
+            'condition' => 'required|string',
+            'images' => 'required|array|min:1|max:5',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
+        unset($data['images']);
+
+        $listing = Listing::create($data);
+
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('listings', 'public');
+
+            $listing->images()->create([
+                'image_path' => $path,
+            ]);
+        }
+
+        return $listing->load('images');
     }
+
+
+        public function show(Listing $listing)
+        {
+            return $listing->load('images');
+        }
 
 
 

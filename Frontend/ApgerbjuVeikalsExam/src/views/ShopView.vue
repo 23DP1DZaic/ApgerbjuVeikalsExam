@@ -55,8 +55,8 @@
           >
           <div class="product-image">
             <img
-              v-if="product.image_path"
-              :src="`http://127.0.0.1:8000/storage/${product.image_path}`"
+              v-if="product.images && product.images.length"
+              :src="`http://127.0.0.1:8000/storage/${product.images?.[0]?.image_path}`"
               :alt="product.title"
             >
 
@@ -82,14 +82,6 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-type Product = {
-  id: number
-  title: string
-  price: number
-  image: string
-  category: string
-  image_path: string | null
-}
 
 const products = ref<Product[]>([])
 const loading = ref(true)
@@ -103,6 +95,24 @@ const categories = ref([
   { id: 'Jacket', title: 'Jacket' },
   { id: 'Shirt', title: 'Shirt' },
 ])
+
+type ListingImage = {
+  id: number
+  image_path: string
+}
+
+type Product = {
+  id: number
+  title: string
+  description: string
+  price: number
+  category: string
+  brand: string | null
+  color: string | null
+  size: string | null
+  condition: string
+  images: ListingImage[]
+}
 
 // FIlters
 const selectedCategories = ref<string[]>([])

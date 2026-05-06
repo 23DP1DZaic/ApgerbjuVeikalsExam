@@ -81,7 +81,7 @@
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
-            @change="handleImage"
+            @change="handleImages"
             required
           >
         </div>
@@ -105,7 +105,7 @@ const router = useRouter()
 
 const message = ref('')
 const error = ref('')
-const imageFile = ref<File | null>(null)
+const imageFiles = ref<File[]>([])
 
 const savedUser = localStorage.getItem('user')
 const user = savedUser ? JSON.parse(savedUser) : null
@@ -121,13 +121,13 @@ const form = reactive({
   condition: '',
 })
 
-const handleImage = (event: Event) => {
+const handleImages = (event: Event) => {
   const input = event.target as HTMLInputElement
 
-  if (input.files && input.files[0]) {
-    imageFile.value = input.files[0]
+  if (input.files) {
+    imageFiles.value = Array.from(input.files)
   } else {
-    imageFile.value = null
+    imageFiles.value = []
   }
 }
 
@@ -150,7 +150,7 @@ const createListing = async () => {
     !form.color ||
     !form.size ||
     !form.condition ||
-    !imageFile.value
+    !imageFiles.value
   ) {
     error.value = 'Fill in all fields'
     return
@@ -167,12 +167,19 @@ const createListing = async () => {
   formData.append('color', form.color)
   formData.append('size', form.size)
   formData.append('condition', form.condition)
-  formData.append('image', imageFile.value)
+  imageFiles.value.forEach((file) => {
+    formData.append('images[]', file)
+  })
+
+  // const response = await fetch(`${import.meta.env.VITE_API_URL}/api/listings`, {
+  //   method: 'POST',
+  //   body: formData,
+  // })
 
   const response = await fetch('http://127.0.0.1:8000/api/listings', {
-    method: 'POST',
-    body: formData,
-  })
+  method: 'POST',
+  body: formData,
+})
 
   const data = await response.json()
 

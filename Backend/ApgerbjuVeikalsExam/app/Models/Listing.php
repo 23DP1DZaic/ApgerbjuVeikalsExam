@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\ListingImage;
 
 class Listing extends Model
 {
@@ -17,11 +18,16 @@ class Listing extends Model
         'color',
         'size',
         'condition',
-        'image_path',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+
+    public function images()
+    {
+        return $this->hasMany(ListingImage::class);
     }
 }
