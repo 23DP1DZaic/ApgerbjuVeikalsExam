@@ -668,3 +668,34 @@
 .details-section h3 {
   margin-bottom: 15px;
 }
+
+
+.image-help {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 6px;
+}
+
+.selected-images {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selected-image {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.selected-image button {
+  border: none;
+  background: #000;
+  color: #fff;
+  padding: 5px 8px;
+  cursor: pointer;
+}

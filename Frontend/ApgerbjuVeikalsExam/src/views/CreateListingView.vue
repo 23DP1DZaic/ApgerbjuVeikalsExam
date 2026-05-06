@@ -75,16 +75,30 @@
         <!-- add brand list -->
 <!-- список потому что пользователи могут напечатать не правилньо -->
 
+<div class="form-group">
+  <label>Images</label>
 
-        <div class="form-group">
-          <label>Image</label>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            @change="handleImages"
-            required
-          >
-        </div>
+  <input
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    @change="addImage"
+  >
+
+  <p class="image-help">
+    Add 1–5 images. JPG, PNG, WEBP. Max 2MB each.
+  </p>
+
+  <div v-if="imageFiles.length" class="selected-images">
+    <div
+      v-for="(file, index) in imageFiles"
+      :key="index"
+      class="selected-image"
+    >
+      <span>{{ file.name }}</span>
+      <button type="button" @click="removeImage(index)">Remove</button>
+    </div>
+  </div>
+</div>
 
         <button class="auth-button" type="submit">
         <p>Create Listing</p>
@@ -121,14 +135,32 @@ const form = reactive({
   condition: '',
 })
 
-const handleImages = (event: Event) => {
+const addImage = (event: Event) => {
   const input = event.target as HTMLInputElement
 
-  if (input.files) {
-    imageFiles.value = Array.from(input.files)
-  } else {
-    imageFiles.value = []
+  if (!input.files || !input.files[0]) return
+
+  if (imageFiles.value.length >= 5) {
+    error.value = 'You can add maximum 5 images'
+    input.value = ''
+    return
   }
+
+  const file = input.files[0]
+
+  if (file.size > 2 * 1024 * 1024) {
+    error.value = 'Image must be less than 2MB'
+    input.value = ''
+    return
+  }
+
+  imageFiles.value.push(file)
+  error.value = ''
+  input.value = ''
+}
+
+const removeImage = (index: number) => {
+  imageFiles.value.splice(index, 1)
 }
 
 const createListing = async () => {
@@ -167,6 +199,8 @@ const createListing = async () => {
   formData.append('color', form.color)
   formData.append('size', form.size)
   formData.append('condition', form.condition)
+
+
   imageFiles.value.forEach((file) => {
     formData.append('images[]', file)
   })
