@@ -77,8 +77,10 @@
 </template>
 
 <script setup lang="ts">
-
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 type Product = {
   id: number
@@ -148,6 +150,6 @@ const resetFilters = () => {
 }
 
 const viewProduct = (product: Product) => {
-  console.log('See product:', product)
+  router.push(`/listing/${product.id}`)
 }
 </script>

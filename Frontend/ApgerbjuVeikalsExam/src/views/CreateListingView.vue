@@ -87,7 +87,7 @@
         </div>
 
         <button class="auth-button" type="submit">
-          Create listing
+        <p>Create Listing</p>
         </button>
 
         <p v-if="message" class="success">{{ message }}</p>

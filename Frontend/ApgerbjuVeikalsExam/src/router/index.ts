@@ -4,6 +4,7 @@ import ShopView from '../views/ShopView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import CreateListingView from '../views/CreateListingView.vue'
+import ListingDetailsView from '../views/ListingDetailsView.vue'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
@@ -38,6 +39,11 @@ const router = createRouter({
       name: 'create-listing',
       component: CreateListingView,
     },
-  ],
+    {
+      path: '/listing/:id',
+      name: 'listing-details',
+      component: ListingDetailsView,
+    },
+    ],
 })
 export default router
