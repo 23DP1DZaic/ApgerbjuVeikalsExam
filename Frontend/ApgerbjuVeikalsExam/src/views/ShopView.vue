@@ -69,7 +69,16 @@
               <p>{{ product.category }}</p>
               <span class="price">{{ product.price }} €</span>
             </div>
+            <div>
+            <button
+              v-if="canDelete(product)"
+              class="delete-btn"
+              @click.stop="deleteListing(product.id)"
+            >
+              Delete
+            </button>
           </div>
+        </div>
         </div>
       </main>
     </div>
@@ -86,6 +95,8 @@ const router = useRouter()
 const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+
+  
 
 // Categories
 const categories = ref([
@@ -112,6 +123,7 @@ type Product = {
   size: string | null
   condition: string
   images: ListingImage[]
+  user_id: number
 }
 
 // FIlters
@@ -162,4 +174,35 @@ const resetFilters = () => {
 const viewProduct = (product: Product) => {
   router.push(`/listing/${product.id}`)
 }
+
+
+const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+
+const canDelete = (product: Product) => {
+  if (!currentUser) return false
+
+  return currentUser.role === 'admin' || product.user_id === currentUser.id
+}
+
+const deleteListing = async (id: number) => {
+  if (!currentUser) {
+    alert('Login first')
+    return
+  }
+
+  if (!confirm('Delete listing?')) return
+
+  await fetch(`http://127.0.0.1:8000/api/listings/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      user_id: currentUser.id,
+    }),
+  })
+
+  fetchProducts()
+}
+
 </script>

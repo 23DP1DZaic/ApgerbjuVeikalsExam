@@ -11,7 +11,6 @@
           <router-link v-if="user" to="/create-listing">Add listing</router-link>
           <router-link to="/">Home</router-link>
           <router-link to="/shop">Shop</router-link>
-          <router-link to="/cart">Cart ({{ cartCount }})</router-link>
           <div v-if="user" class="user-menu">
             <span>Hello, {{ user.name }}</span>
             <button @click="logout">Logout</button>
@@ -67,7 +66,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-const cartCount = ref(0)
+
 
 // User
 type User = {

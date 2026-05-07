@@ -64,10 +64,22 @@ class ListingController extends Controller
 
 
 
-    public function destroy(Listing $listing)
+    public function destroy(Request $request, Listing $listing)
     {
+        $userId = $request->input('user_id');
+
+        $user = \App\Models\User::find($userId);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 401);
+        }
+
+        if ($user->role !== 'admin' && $listing->user_id !== $user->id) {
+            return response()->json(['message' => 'No permission'], 403);
+        }
+
         $listing->delete();
 
-        return response()->json(['message' => ' Listing deleted']);
+        return response()->json(['message' => 'Listing deleted']);
     }
 }
