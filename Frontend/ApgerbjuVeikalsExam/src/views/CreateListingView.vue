@@ -45,7 +45,9 @@
           </select>
         </div>
 
-<div class="form-group color-dropdown-wrapper">
+<div class="form-group color-dropdown-wrapper"
+      ref="colorDropdownRef"
+>
   <label>Color</label>
 
   <button
@@ -132,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
 
@@ -273,11 +275,31 @@ const selectedColor = computed(() => {
   return colors.find(color => color.name === form.color) || null
 })
 
-const isColorDropdownOpen = ref(false)
-
 const selectColor = (colorName: string) => {
   form.color = colorName
   isColorDropdownOpen.value = false
 }
+
+const isColorDropdownOpen = ref(false)
+const colorDropdownRef = ref<HTMLElement | null>(null)
+
+  const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as Node
+
+  if (
+    colorDropdownRef.value &&
+    !colorDropdownRef.value.contains(target)
+  ) {
+    isColorDropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 </script>
