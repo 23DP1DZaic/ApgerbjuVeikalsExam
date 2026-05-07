@@ -45,20 +45,40 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Color</label>
-          <select v-model="form.color" required>
-            <option value="">Select color</option>
-            <option value="Black">Black</option>
-            <option value="White">White</option>
-            <option value="Blue">Blue</option>
-            <option value="Red">Red</option>
-            <option value="Green">Green</option>
-            <option value="Brown">Brown</option>
-            <option value="Grey">Grey</option>
-            <option value="Beige">Beige</option>
-          </select>
-        </div>
+<div class="form-group color-dropdown-wrapper">
+  <label>Color</label>
+
+  <button
+    type="button"
+    class="custom-color-select"
+    @click="isColorDropdownOpen = !isColorDropdownOpen"
+  >
+    <span
+      v-if="selectedColor"
+      class="color-dot"
+      :style="{ background: selectedColor.value }"
+    ></span>
+
+    <span>{{ selectedColor ? selectedColor.name : 'Select color' }}</span>
+  </button>
+
+  <div v-if="isColorDropdownOpen" class="custom-color-menu">
+    <button
+      v-for="color in colors"
+      :key="color.name"
+      type="button"
+      class="custom-color-option"
+      @click="selectColor(color.name)"
+    >
+      <span
+        class="color-dot"
+        :style="{ background: color.value }"
+      ></span>
+
+      <span>{{ color.name }}</span>
+    </button>
+  </div>
+</div>
 
         <div class="form-group">
           <label>Size</label>
@@ -112,8 +132,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+
 
 const router = useRouter()
 
@@ -228,4 +249,35 @@ const createListing = async () => {
     router.push('/shop')
   }, 1200)
 }
+
+
+const colors = [ 
+  { name: 'Black', value: '#000000' },
+  { name: 'White', value: '#ffffff' },
+  { name: 'Gray', value: '#e5e5e5' },
+  { name: 'Brown', value: '#6b4a3a' },
+  { name: 'Beige', value: '#e6cf91' },
+  { name: 'Yellow', value: '#ffd91a' },
+  { name: 'Red', value: '#f10b0b' },
+  { name: 'Orange', value: '#ff6500' },
+  { name: 'Pink', value: '#ec5aaa' },
+  { name: 'Purple', value: '#5f1fd6' },
+  { name: 'Blue', value: '#1177bd' },
+  { name: 'Green', value: '#4faf0b' },
+  { name: 'Multi', value: 'linear-gradient(135deg, red, orange, yellow, green, blue, purple)' },
+  { name: 'Silver', value: 'linear-gradient(135deg, #777, #eee, #aaa)' },
+  { name: 'Gold', value: 'linear-gradient(135deg, #b99b22, #f3e37c, #c8a600)' },
+]
+
+const selectedColor = computed(() => {
+  return colors.find(color => color.name === form.color) || null
+})
+
+const isColorDropdownOpen = ref(false)
+
+const selectColor = (colorName: string) => {
+  form.color = colorName
+  isColorDropdownOpen.value = false
+}
+
 </script>
