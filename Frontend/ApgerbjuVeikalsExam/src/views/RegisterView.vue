@@ -53,6 +53,10 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter()
 
 const form = reactive({
   name: '',
@@ -84,6 +88,12 @@ const register = async () => {
     }
 
     message.value = 'Registration successful'
+
+    router.push('/')
+
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
 
     console.log('Registered user:', data.user)
 

@@ -43,6 +43,10 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter()
 
 const form = reactive({
   email: '',
@@ -74,6 +78,13 @@ const login = async () => {
 
     localStorage.setItem('user', JSON.stringify(data.user))
     message.value = 'Login successful'
+
+    router.push('/')
+
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
+    
 
     console.log('Logged in user:', data.user)
   } catch {

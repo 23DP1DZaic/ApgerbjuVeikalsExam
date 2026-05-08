@@ -7,10 +7,38 @@ use Illuminate\Http\Request;
 
 class ListingController extends Controller
 {
-    public function index()
-    {
-        return Listing::with('images')->latest()->get();
-    }
+        public function index(Request $request)
+        {
+            $query = Listing::with('images')->latest();
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('color', 'like', "%{$search}%")
+                    ->orWhere('size', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->filled('gender')) {
+                $query->where('gender', $request->gender);
+            }
+
+            if ($request->filled('section')) {
+                if ($request->section === 'trending') {
+                    $query->orderBy('created_at', 'desc');
+                }
+            }
+
+            return $query->get();
+
+            if ($request->filled('category')) {
+                $query->where('category', $request->category);
+}
+        }
 
     public function store(Request $request)
     {
@@ -26,6 +54,7 @@ class ListingController extends Controller
             'condition' => 'required|string',
             'images' => 'required|array|min:1|max:5',
             'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'gender' => 'required|string',
         ]);
 
         unset($data['images']);
@@ -82,4 +111,8 @@ class ListingController extends Controller
 
         return response()->json(['message' => 'Listing deleted']);
     }
+
+
+
+
 }

@@ -1,25 +1,16 @@
 <template>
   <div class="shop">
-
-    <!-- Header -->
-    <div class="shop-header">
-      <div class="container">
-        <h1>SHOP</h1>
-        <p>All items</p>
-      </div>
+    <div class="container">
     </div>
-
     <div class="container shop-container">
-
-
-      <!-- Sidebar with filters -->
       <aside class="shop-sidebar">
         <div class="filter-section">
           <h3>Categories</h3>
+
           <div class="filter-options">
             <label v-for="category in categories" :key="category.id">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 :value="category.id"
                 v-model="selectedCategories"
               >
@@ -37,39 +28,41 @@
           </select>
         </div>
 
-        <button class="reset-filters" @click="resetFilters">Reset filters</button>
+        <button class="reset-filters" @click="resetFilters">
+          Reset filters
+        </button>
       </aside>
 
-      <!-- Main area with items -->
       <main class="shop-main">
         <div class="products-header">
           <p>{{ filteredProducts.length }} items</p>
         </div>
 
         <div class="products-grid">
-          <div 
-            class="product-card" 
-            v-for="product in filteredProducts" 
+          <div
+            class="product-card"
+            v-for="product in filteredProducts"
             :key="product.id"
             @click="viewProduct(product)"
           >
-          <div class="product-image">
-            <img
-              v-if="product.images && product.images.length"
-              :src="`http://127.0.0.1:8000/storage/${product.images?.[0]?.image_path}`"
-              :alt="product.title"
-            >
+            <div class="product-image">
+              <img
+                v-if="product.images && product.images.length"
+                :src="`http://127.0.0.1:8000/storage/${product.images?.[0]?.image_path}`"
+                :alt="product.title"
+              >
 
-            <div v-else class="no-image">
-              No image
+              <div v-else class="no-image">
+                No image
+              </div>
             </div>
-          </div>
+
             <div class="product-info">
               <h3>{{ product.title }}</h3>
               <p>{{ product.category }}</p>
               <span class="price">{{ product.price }} €</span>
             </div>
-            <div>
+
             <button
               v-if="canDelete(product)"
               class="delete-btn"
@@ -79,15 +72,16 @@
             </button>
           </div>
         </div>
-        </div>
       </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+
+
 
 const router = useRouter()
 
@@ -95,6 +89,9 @@ const router = useRouter()
 const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+
+const route = useRoute()
+const searchText = ref(String(route.query.search || ''))
 
   
 
@@ -132,15 +129,57 @@ const sortOption = ref('newest')
 
 // Load info from backend
 const fetchProducts = async () => {
-  try {
-const response = await fetch('http://127.0.0.1:8000/api/listings')
-products.value = await response.json()
-  } catch (e) {
-    error.value = 'Failed to load products'
-  } finally {
-    loading.value = false
+  loading.value = true
+
+  const params = new URLSearchParams()
+
+  if (route.query.search) {
+    params.append('search', String(route.query.search))
   }
+
+  if (route.query.gender) {
+    params.append('gender', String(route.query.gender))
+  }
+
+  if (route.query.category) {
+    params.append('category', String(route.query.category))
+  }
+
+  if (route.query.section) {
+    params.append('section', String(route.query.section))
+  }
+
+  const response = await fetch(
+    `http://127.0.0.1:8000/api/listings?${params.toString()}`
+  )
+
+  products.value = await response.json()
+  loading.value = false
 }
+
+
+
+const submitSearch = () => {
+  router.push({
+    path: '/shop',
+    query: {
+      ...route.query,
+      search: searchText.value || undefined,
+    },
+  })
+}
+
+
+watch(
+  () => route.query,
+  () => {
+    searchText.value = String(route.query.search || '')
+    fetchProducts()
+  }
+)
+
+
+
 
 onMounted(fetchProducts)
 

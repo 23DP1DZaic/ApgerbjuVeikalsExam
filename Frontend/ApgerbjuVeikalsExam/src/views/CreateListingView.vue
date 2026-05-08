@@ -31,6 +31,18 @@
           </select>
         </div>
 
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select v-model="form.gender" required>
+            <option disabled value="">Select gender</option>
+            <option value="men">Men</option>
+            <option value="women">Women</option>
+            <option value="unisex">Unisex</option>
+          </select>
+        </div>
+
+
         <div class="form-group">
           <label>Brand</label>
           <input v-model="form.brand" placeholder="Nike, Adidas, Zara..." required>
@@ -156,6 +168,7 @@ const form = reactive({
   color: '',
   size: '',
   condition: '',
+  gender: '',
 })
 
 const addImage = (event: Event) => {
@@ -201,11 +214,13 @@ const createListing = async () => {
     !form.description ||
     !form.price ||
     !form.category ||
+    !form.gender ||
     !form.brand ||
     !form.color ||
     !form.size ||
     !form.condition ||
     !imageFiles.value
+    
   ) {
     error.value = 'Fill in all fields'
     return
@@ -218,6 +233,7 @@ const createListing = async () => {
   formData.append('description', form.description)
   formData.append('price', form.price)
   formData.append('category', form.category)
+  formData.append('gender', form.gender)
   formData.append('brand', form.brand)
   formData.append('color', form.color)
   formData.append('size', form.size)

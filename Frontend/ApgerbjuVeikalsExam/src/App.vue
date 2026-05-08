@@ -2,26 +2,45 @@
   <div id="app">
 
     <!-- Main header -->
-    <header class="main-header">
-      <div class="container">
-        <div class="logo">
-          <router-link to="/">Name</router-link>
-        </div>
-        <nav class="main-nav">
-          <router-link v-if="user" to="/create-listing">Add listing</router-link>
-          <router-link to="/">Home</router-link>
-          <router-link to="/shop">Shop</router-link>
-          <div v-if="user" class="user-menu">
-            <span>Hello, {{ user.name }}</span>
-            <button @click="logout">Logout</button>
-          </div>
-          <div v-else class="auth-links">
-            <router-link to="/login">Login</router-link>
-            <router-link to="/register">Register</router-link>
-          </div>
-        </nav>
+<header class="main-header">
+  <div class="header-top container">
+    <div class="logo">
+      <router-link to="/">Name</router-link>
+    </div>
+
+    <form class="header-search" @submit.prevent="submitHeaderSearch">
+      <input
+        v-model="headerSearch"
+        placeholder="Search for anything"
+      >
+      <button type="submit">Search</button>
+    </form>
+
+    <nav class="header-actions">
+      <router-link v-if="user" to="/create-listing">Sell</router-link>
+      <router-link to="/shop">My Feed</router-link>
+
+      <div v-if="user" class="user-menu">
+        <span>{{ user.name }}</span>
+        <button @click="logout">Logout</button>
       </div>
-    </header>
+
+      <div v-else class="auth-links">
+        <router-link to="/login">Login</router-link>
+        <router-link to="/register">Register</router-link>
+      </div>
+    </nav>
+  </div>
+
+  <nav class="category-nav">
+    <router-link to="/shop">Shop</router-link>
+    <router-link :to="{ path: '/shop', query: { gender: 'men' } }">Menswear</router-link>
+    <router-link :to="{ path: '/shop', query: { gender: 'women' } }">Womenswear</router-link>
+    <router-link :to="{ path: '/shop', query: { category: 'Sneakers' } }">Sneakers</router-link>
+    <router-link :to="{ path: '/shop', query: { section: 'trending' } }">Trending</router-link>
+    <router-link to="/about">About us</router-link>
+  </nav>
+</header>
 
     <!-- Content -->
     <main class="main-content">
@@ -95,4 +114,25 @@ const logout = () => {
   user.value = null
   router.push('/login')
 }
+
+const headerSearch = ref('')
+
+const submitHeaderSearch = () => {
+  router.push({
+    path: '/shop',
+    query: {
+      search: headerSearch.value || undefined,
+    },
+  })
+}
+
+
+onMounted(() => {
+  const savedUser = localStorage.getItem('user')
+  if (savedUser) {
+    user.value = JSON.parse(savedUser)
+  }
+})
+
+
 </script>

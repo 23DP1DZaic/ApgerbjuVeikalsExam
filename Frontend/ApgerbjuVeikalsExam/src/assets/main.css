@@ -12,8 +12,8 @@
 
 /* header */
 .main-header {
-  padding: 30px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #ddd;
+  padding: 0;
 }
 
 .main-header .container {
@@ -22,12 +22,82 @@
   align-items: center;
 }
 
-.logo a {
-  font-size: 1.8rem;
+.header-top {
+  height: 62px;
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: center;
+  gap: 30px;
+}
+
+.header-search {
+  display: flex;
+  height: 40px;
+  border: 1px solid #000;
+}
+
+
+.header-search input {
+  flex: 1;
+  border: none;
+  padding: 0 15px;
+  font-size: 1rem;
+}
+
+.header-search button {
+  width: 95px;
+  border: none;
+  border-left: 1px solid #ddd;
+  background: #fff;
   font-weight: 700;
-  letter-spacing: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-actions a {
   color: #000;
   text-decoration: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+
+
+.category-nav {
+  height: 48px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 70px;
+}
+
+.category-nav a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+
+
+
+
+.logo a {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #000;
+  text-decoration: none;
+  letter-spacing: -1px;
 }
 
 .main-nav {
@@ -859,4 +929,33 @@
 
 .contact-info p {
   margin-bottom: 10px;
+}
+
+
+
+
+.shop-search {
+  display: flex;
+  gap: 10px;
+  margin: 0 auto 40px;
+  max-width: 700px;
+}
+
+.shop-search input {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #000;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.shop-search button {
+  height: 44px;
+  padding: 0 28px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
 }
