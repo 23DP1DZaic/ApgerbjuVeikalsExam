@@ -7,59 +7,58 @@ use Illuminate\Http\Request;
 
 class ListingController extends Controller
 {
-        public function index(Request $request)
-        {
-            $query = Listing::with('images')->latest();
+    public function index(Request $request)
+    {
+        $query = Listing::with('images')->latest();
 
-            if ($request->filled('search')) {
-                $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->search;
 
-                $query->where(function ($q) use ($search) {
-                    $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('brand', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('color', 'like', "%{$search}%")
-                    ->orWhere('size', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->filled('gender')) {
-                $query->where('gender', $request->gender);
-            }
-
-            if ($request->filled('section')) {
-                if ($request->section === 'trending') {
-                    $query->orderBy('created_at', 'desc');
-                }
-            }
-
-            return $query->get();
-
-            if ($request->filled('category')) {
-                $query->where('category', $request->category);
-}
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('brand', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%");
+            });
         }
+
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->gender);
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function show(Listing $listing)
+    {
+        return response()->json($listing->load('images'));
+    }
 
     public function store(Request $request)
     {
+        $user = $request->user();
+
         $data = $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'category' => 'required|string',
+            'gender' => 'required|string',
             'brand' => 'required|string',
             'color' => 'required|string',
             'size' => 'required|string',
             'condition' => 'required|string',
             'images' => 'required|array|min:1|max:5',
             'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-            'gender' => 'required|string',
         ]);
 
         unset($data['images']);
 
-        $listing = Listing::create($data);
+        $listing = $user->listings()->create($data);
 
         foreach ($request->file('images') as $image) {
             $path = $image->store('listings', 'public');
@@ -69,39 +68,29 @@ class ListingController extends Controller
             ]);
         }
 
-        return $listing->load('images');
+        return response()->json($listing->load('images'), 201);
     }
-
-
-        public function show(Listing $listing)
-        {
-            return $listing->load('images');
-        }
-
-
 
     public function update(Request $request, Listing $listing)
     {
-    $data = $request->validate([
-        'price' => 'required|numeric|min:0',
-    ]);
+        $user = $request->user();
 
-    $listing->update($data);
+        if ($user->role !== 'admin' && $listing->user_id !== $user->id) {
+            return response()->json(['message' => 'No permission'], 403);
+        }
 
-    return response()->json($listing);
-}
+        $data = $request->validate([
+            'price' => 'required|numeric|min:0',
+        ]);
 
+        $listing->update($data);
 
+        return response()->json($listing);
+    }
 
     public function destroy(Request $request, Listing $listing)
     {
-        $userId = $request->input('user_id');
-
-        $user = \App\Models\User::find($userId);
-
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 401);
-        }
+        $user = $request->user();
 
         if ($user->role !== 'admin' && $listing->user_id !== $user->id) {
             return response()->json(['message' => 'No permission'], 403);
@@ -111,8 +100,4 @@ class ListingController extends Controller
 
         return response()->json(['message' => 'Listing deleted']);
     }
-
-
-
-
 }

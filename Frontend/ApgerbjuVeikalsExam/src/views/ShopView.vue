@@ -1,7 +1,7 @@
 <template>
   <div class="shop">
-    <div class="container">
-    </div>
+    <div class="container"></div>
+
     <div class="container shop-container">
       <aside class="shop-sidebar">
         <div class="filter-section">
@@ -10,9 +10,9 @@
           <div class="filter-options">
             <label v-for="category in categories" :key="category.id">
               <input
+                v-model="selectedCategories"
                 type="checkbox"
                 :value="category.id"
-                v-model="selectedCategories"
               >
               <span>{{ category.title }}</span>
             </label>
@@ -35,20 +35,23 @@
 
       <main class="shop-main">
         <div class="products-header">
-          <p>{{ filteredProducts.length }} items</p>
+          <p v-if="loading">Loading...</p>
+          <p v-else>{{ filteredProducts.length }} items</p>
         </div>
 
-        <div class="products-grid">
+        <p v-if="error" class="error">{{ error }}</p>
+
+        <div v-if="!loading" class="products-grid">
           <div
-            class="product-card"
             v-for="product in filteredProducts"
             :key="product.id"
+            class="product-card"
             @click="viewProduct(product)"
           >
             <div class="product-image">
               <img
                 v-if="product.images && product.images.length"
-                :src="`http://127.0.0.1:8000/storage/${product.images?.[0]?.image_path}`"
+                :src="`${API_URL}/storage/${product.images?.[0]?.image_path || ''}`"
                 :alt="product.title"
               >
 
@@ -81,28 +84,10 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 const router = useRouter()
-
-
-const products = ref<Product[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
-
 const route = useRoute()
-const searchText = ref(String(route.query.search || ''))
-
-  
-
-// Categories
-const categories = ref([
-  { id: 'Tshirt', title: 'Tshirt' },
-  { id: 'Jeans', title: 'Jeans' },
-  { id: 'Hoodie', title: 'Hoodie' },
-  { id: 'Jacket', title: 'Jacket' },
-  { id: 'Shirt', title: 'Shirt' },
-])
 
 type ListingImage = {
   id: number
@@ -119,56 +104,87 @@ type Product = {
   color: string | null
   size: string | null
   condition: string
+  gender?: string | null
   images: ListingImage[]
   user_id: number
 }
 
-// FIlters
+type User = {
+  id: number
+  name: string
+  email: string
+  role?: string
+}
+
+const products = ref<Product[]>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+const searchText = ref(String(route.query.search || ''))
+
+const categories = ref([
+  { id: 'Tshirt', title: 'Tshirt' },
+  { id: 'Jeans', title: 'Jeans' },
+  { id: 'Hoodie', title: 'Hoodie' },
+  { id: 'Jacket', title: 'Jacket' },
+  { id: 'Shirt', title: 'Shirt' },
+])
+
 const selectedCategories = ref<string[]>([])
 const sortOption = ref('newest')
 
-// Load info from backend
+const getCurrentUser = (): User | null => {
+  const savedUser = localStorage.getItem('user')
+  return savedUser ? JSON.parse(savedUser) : null
+}
+
 const fetchProducts = async () => {
   loading.value = true
+  error.value = null
 
-  const params = new URLSearchParams()
+  try {
+    const params = new URLSearchParams()
 
-  if (route.query.search) {
-    params.append('search', String(route.query.search))
+    if (route.query.search) {
+      params.append('search', String(route.query.search))
+    }
+
+    if (route.query.gender) {
+      params.append('gender', String(route.query.gender))
+    }
+
+    if (route.query.category) {
+      params.append('category', String(route.query.category))
+    }
+
+    if (route.query.section) {
+      params.append('section', String(route.query.section))
+    }
+
+    const queryString = params.toString()
+    const url = queryString
+      ? `${API_URL}/api/listings?${queryString}`
+      : `${API_URL}/api/listings`
+
+    const response = await fetch(url)
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      error.value = data.message || 'Failed to load listings'
+      products.value = []
+      return
+    }
+
+    products.value = data
+  } catch (err) {
+    console.error('Fetch listings error:', err)
+    error.value = 'Could not connect to backend'
+    products.value = []
+  } finally {
+    loading.value = false
   }
-
-  if (route.query.gender) {
-    params.append('gender', String(route.query.gender))
-  }
-
-  if (route.query.category) {
-    params.append('category', String(route.query.category))
-  }
-
-  if (route.query.section) {
-    params.append('section', String(route.query.section))
-  }
-
-  const response = await fetch(
-    `http://127.0.0.1:8000/api/listings?${params.toString()}`
-  )
-
-  products.value = await response.json()
-  loading.value = false
 }
-
-
-
-const submitSearch = () => {
-  router.push({
-    path: '/shop',
-    query: {
-      ...route.query,
-      search: searchText.value || undefined,
-    },
-  })
-}
-
 
 watch(
   () => route.query,
@@ -178,17 +194,13 @@ watch(
   }
 )
 
-
-
-
 onMounted(fetchProducts)
 
-// Filters and sorting by price
 const filteredProducts = computed(() => {
   let filtered = [...products.value]
 
   if (selectedCategories.value.length > 0) {
-    filtered = filtered.filter(p =>
+    filtered = filtered.filter((p) =>
       selectedCategories.value.includes(p.category)
     )
   }
@@ -204,7 +216,6 @@ const filteredProducts = computed(() => {
   return filtered
 })
 
-// Methods
 const resetFilters = () => {
   selectedCategories.value = []
   sortOption.value = 'newest'
@@ -214,34 +225,44 @@ const viewProduct = (product: Product) => {
   router.push(`/listing/${product.id}`)
 }
 
-
-const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
-
 const canDelete = (product: Product) => {
+  const currentUser = getCurrentUser()
+
   if (!currentUser) return false
 
   return currentUser.role === 'admin' || product.user_id === currentUser.id
 }
 
 const deleteListing = async (id: number) => {
-  if (!currentUser) {
+  const currentUser = getCurrentUser()
+  const token = localStorage.getItem('token')
+
+  if (!currentUser || !token) {
     alert('Login first')
     return
   }
 
   if (!confirm('Delete listing?')) return
 
-  await fetch(`http://127.0.0.1:8000/api/listings/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      user_id: currentUser.id,
-    }),
-  })
+  try {
+    const response = await fetch(`${API_URL}/api/listings/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
 
-  fetchProducts()
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to delete listing')
+      return
+    }
+
+    fetchProducts()
+  } catch (err) {
+    console.error('Delete error:', err)
+    alert('Server connection error')
+  }
 }
-
 </script>

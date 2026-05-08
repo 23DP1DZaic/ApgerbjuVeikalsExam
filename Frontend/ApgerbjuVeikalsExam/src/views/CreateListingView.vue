@@ -31,7 +31,6 @@
           </select>
         </div>
 
-
         <div class="form-group">
           <label>Gender</label>
           <select v-model="form.gender" required>
@@ -41,7 +40,6 @@
             <option value="unisex">Unisex</option>
           </select>
         </div>
-
 
         <div class="form-group">
           <label>Brand</label>
@@ -57,42 +55,43 @@
           </select>
         </div>
 
-<div class="form-group color-dropdown-wrapper"
-      ref="colorDropdownRef"
->
-  <label>Color</label>
+        <div
+          class="form-group color-dropdown-wrapper"
+          ref="colorDropdownRef"
+        >
+          <label>Color</label>
 
-  <button
-    type="button"
-    class="custom-color-select"
-    @click="isColorDropdownOpen = !isColorDropdownOpen"
-  >
-    <span
-      v-if="selectedColor"
-      class="color-dot"
-      :style="{ background: selectedColor.value }"
-    ></span>
+          <button
+            type="button"
+            class="custom-color-select"
+            @click="isColorDropdownOpen = !isColorDropdownOpen"
+          >
+            <span
+              v-if="selectedColor"
+              class="color-dot"
+              :style="{ background: selectedColor.value }"
+            ></span>
 
-    <span>{{ selectedColor ? selectedColor.name : 'Select color' }}</span>
-  </button>
+            <span>{{ selectedColor ? selectedColor.name : 'Select color' }}</span>
+          </button>
 
-  <div v-if="isColorDropdownOpen" class="custom-color-menu">
-    <button
-      v-for="color in colors"
-      :key="color.name"
-      type="button"
-      class="custom-color-option"
-      @click="selectColor(color.name)"
-    >
-      <span
-        class="color-dot"
-        :style="{ background: color.value }"
-      ></span>
+          <div v-if="isColorDropdownOpen" class="custom-color-menu">
+            <button
+              v-for="color in colors"
+              :key="color.name"
+              type="button"
+              class="custom-color-option"
+              @click="selectColor(color.name)"
+            >
+              <span
+                class="color-dot"
+                :style="{ background: color.value }"
+              ></span>
 
-      <span>{{ color.name }}</span>
-    </button>
-  </div>
-</div>
+              <span>{{ color.name }}</span>
+            </button>
+          </div>
+        </div>
 
         <div class="form-group">
           <label>Size</label>
@@ -106,36 +105,33 @@
           </select>
         </div>
 
-        <!-- add brand list -->
-<!-- список потому что пользователи могут напечатать не правилньо -->
+        <div class="form-group">
+          <label>Images</label>
 
-<div class="form-group">
-  <label>Images</label>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            @change="addImage"
+          >
 
-  <input
-    type="file"
-    accept="image/jpeg,image/png,image/webp"
-    @change="addImage"
-  >
+          <p class="image-help">
+            Add 1–5 images. JPG, PNG, WEBP. Max 2MB each.
+          </p>
 
-  <p class="image-help">
-    Add 1–5 images. JPG, PNG, WEBP. Max 2MB each.
-  </p>
-
-  <div v-if="imageFiles.length" class="selected-images">
-    <div
-      v-for="(file, index) in imageFiles"
-      :key="index"
-      class="selected-image"
-    >
-      <span>{{ file.name }}</span>
-      <button type="button" @click="removeImage(index)">Remove</button>
-    </div>
-  </div>
-</div>
+          <div v-if="imageFiles.length" class="selected-images">
+            <div
+              v-for="(file, index) in imageFiles"
+              :key="index"
+              class="selected-image"
+            >
+              <span>{{ file.name }}</span>
+              <button type="button" @click="removeImage(index)">Remove</button>
+            </div>
+          </div>
+        </div>
 
         <button class="auth-button" type="submit">
-        <p>Create Listing</p>
+          <p>Create Listing</p>
         </button>
 
         <p v-if="message" class="success">{{ message }}</p>
@@ -149,6 +145,7 @@
 import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 const router = useRouter()
 
@@ -203,7 +200,9 @@ const createListing = async () => {
   message.value = ''
   error.value = ''
 
-  if (!user) {
+  const token = localStorage.getItem('token')
+
+  if (!user || !token) {
     error.value = 'You need to login first'
     router.push('/login')
     return
@@ -219,8 +218,7 @@ const createListing = async () => {
     !form.color ||
     !form.size ||
     !form.condition ||
-    !imageFiles.value
-    
+    imageFiles.value.length === 0
   ) {
     error.value = 'Fill in all fields'
     return
@@ -228,7 +226,6 @@ const createListing = async () => {
 
   const formData = new FormData()
 
-  formData.append('user_id', String(user.id))
   formData.append('title', form.title)
   formData.append('description', form.description)
   formData.append('price', form.price)
@@ -239,37 +236,37 @@ const createListing = async () => {
   formData.append('size', form.size)
   formData.append('condition', form.condition)
 
-
   imageFiles.value.forEach((file) => {
     formData.append('images[]', file)
   })
 
-  // const response = await fetch(`${import.meta.env.VITE_API_URL}/api/listings`, {
-  //   method: 'POST',
-  //   body: formData,
-  // })
+  try {
+    const response = await fetch(`${API_URL}/api/listings`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    })
 
-  const response = await fetch('http://127.0.0.1:8000/api/listings', {
-  method: 'POST',
-  body: formData,
-})
+    const data = await response.json()
 
-  const data = await response.json()
+    if (!response.ok) {
+      error.value = data.message || 'Failed to create listing'
+      return
+    }
 
-  if (!response.ok) {
-    error.value = data.message || 'Failed to create listing'
-    return
+    message.value = 'Success'
+
+    setTimeout(() => {
+      router.push('/shop')
+    }, 1200)
+  } catch {
+    error.value = 'Server connection error'
   }
-
-  message.value = 'Success'
-
-  setTimeout(() => {
-    router.push('/shop')
-  }, 1200)
 }
 
-
-const colors = [ 
+const colors = [
   { name: 'Black', value: '#000000' },
   { name: 'White', value: '#ffffff' },
   { name: 'Gray', value: '#e5e5e5' },
@@ -299,7 +296,7 @@ const selectColor = (colorName: string) => {
 const isColorDropdownOpen = ref(false)
 const colorDropdownRef = ref<HTMLElement | null>(null)
 
-  const handleClickOutside = (event: MouseEvent) => {
+const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as Node
 
   if (
@@ -317,5 +314,4 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
-
 </script>

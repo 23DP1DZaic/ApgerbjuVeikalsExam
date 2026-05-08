@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import ShopView from '../views/ShopView.vue'
 import RegisterView from '../views/RegisterView.vue'
@@ -7,10 +7,6 @@ import CreateListingView from '../views/CreateListingView.vue'
 import ListingDetailsView from '../views/ListingDetailsView.vue'
 import AboutView from '../views/AboutView.vue'
 
-const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'home', component: HomeView },
-  { path: '/shop', name: 'shop', component: ShopView }
-]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

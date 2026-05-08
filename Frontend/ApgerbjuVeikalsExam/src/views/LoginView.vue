@@ -26,7 +26,7 @@
         </div>
 
         <button type="submit" class="auth-button">
-          <p> Login</p>
+          <p>Login</p>
         </button>
 
         <p v-if="message" class="success">{{ message }}</p>
@@ -45,6 +45,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 const router = useRouter()
 
@@ -61,13 +62,16 @@ const login = async () => {
   error.value = ''
 
   try {
-      const response = await fetch('http://127.0.0.1:8000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      })
+    const response = await fetch(`${API_URL}/api/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+      }),
+    })
 
     const data = await response.json()
 
@@ -77,6 +81,8 @@ const login = async () => {
     }
 
     localStorage.setItem('user', JSON.stringify(data.user))
+    localStorage.setItem('token', data.token)
+
     message.value = 'Login successful'
 
     router.push('/')
@@ -84,7 +90,6 @@ const login = async () => {
     setTimeout(() => {
       window.location.reload()
     }, 100)
-    
 
     console.log('Logged in user:', data.user)
   } catch {
