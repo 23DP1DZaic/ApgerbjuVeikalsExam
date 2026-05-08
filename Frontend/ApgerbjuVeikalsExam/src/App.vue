@@ -39,7 +39,7 @@
           <h4>Information</h4>
           <a href="#">Delivery</a>
           <a href="#">Refunds</a>
-          <a href="#">About Us</a>
+          <router-link to="/about">About us</router-link>
         </div>
         <div class="footer-section">
           <h4>Contact Us</h4>

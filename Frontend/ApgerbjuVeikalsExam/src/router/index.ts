@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue'
 import LoginView from '../views/LoginView.vue'
 import CreateListingView from '../views/CreateListingView.vue'
 import ListingDetailsView from '../views/ListingDetailsView.vue'
+import AboutView from '../views/AboutView.vue'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
@@ -43,6 +44,11 @@ const router = createRouter({
       path: '/listing/:id',
       name: 'listing-details',
       component: ListingDetailsView,
+    },
+    {
+    path: '/about',
+    name: 'about',
+    component: AboutView,
     },
     ],
 })
