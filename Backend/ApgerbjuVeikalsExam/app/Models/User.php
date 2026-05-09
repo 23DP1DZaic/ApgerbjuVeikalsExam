@@ -13,6 +13,9 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'display_name',
+        'avatar',
+        'bio',
         'email',
         'password',
         'role',
@@ -21,6 +24,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $appends = [
+        'avatar_url',
     ];
 
     protected function casts(): array
@@ -34,5 +41,14 @@ class User extends Authenticatable
     public function listings()
     {
         return $this->hasMany(Listing::class);
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        return asset('storage/' . $this->avatar);
     }
 }

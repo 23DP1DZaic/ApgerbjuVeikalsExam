@@ -54,7 +54,8 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { API_URL } from '../services/api'
+import { saveAuth } from '../services/auth'
 
 const router = useRouter()
 
@@ -72,13 +73,18 @@ const register = async () => {
   error.value = ''
 
   try {
-      const response = await fetch('http://127.0.0.1:8000/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      })
+    const response = await fetch(`${API_URL}/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      }),
+    })
 
     const data = await response.json()
 
@@ -87,6 +93,13 @@ const register = async () => {
       return
     }
 
+    if (!data.token) {
+      error.value = 'Token not received from server'
+      return
+    }
+
+    saveAuth(data.user, data.token)
+
     message.value = 'Registration successful'
 
     router.push('/')
@@ -94,12 +107,8 @@ const register = async () => {
     setTimeout(() => {
       window.location.reload()
     }, 100)
-
-    console.log('Registered user:', data.user)
-
-
-    localStorage.setItem('user', JSON.stringify(data.user))
-  } catch {
+  } catch (err) {
+    console.error('Register error:', err)
     error.value = 'Server connection error'
   }
 }

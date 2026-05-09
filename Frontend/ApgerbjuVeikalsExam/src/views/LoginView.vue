@@ -41,11 +41,13 @@
   </div>
 </template>
 
+
+
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+import { API_URL } from '../services/api'
+import { saveAuth } from '../services/auth'
 
 const router = useRouter()
 
@@ -66,6 +68,7 @@ const login = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify({
         email: form.email,
@@ -80,8 +83,12 @@ const login = async () => {
       return
     }
 
-    localStorage.setItem('user', JSON.stringify(data.user))
-    localStorage.setItem('token', data.token)
+    if (!data.token) {
+      error.value = 'Token not received from server'
+      return
+    }
+
+    saveAuth(data.user, data.token)
 
     message.value = 'Login successful'
 
@@ -90,9 +97,8 @@ const login = async () => {
     setTimeout(() => {
       window.location.reload()
     }, 100)
-
-    console.log('Logged in user:', data.user)
-  } catch {
+  } catch (err) {
+    console.error('Login error:', err)
     error.value = 'Server connection error'
   }
 }

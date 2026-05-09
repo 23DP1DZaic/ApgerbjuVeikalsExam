@@ -145,7 +145,6 @@
 import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
 
 const router = useRouter()
 
@@ -153,8 +152,12 @@ const message = ref('')
 const error = ref('')
 const imageFiles = ref<File[]>([])
 
-const savedUser = localStorage.getItem('user')
-const user = savedUser ? JSON.parse(savedUser) : null
+
+import { getUser, getToken, clearAuth } from '../services/auth'
+import { API_URL, fetchWithAuth } from '../services/api'
+
+const user = getUser()
+
 
 const form = reactive({
   title: '',
@@ -200,13 +203,21 @@ const createListing = async () => {
   message.value = ''
   error.value = ''
 
-  const token = localStorage.getItem('token')
+  
 
-  if (!user || !token) {
-    error.value = 'You need to login first'
-    router.push('/login')
-    return
-  }
+const token = localStorage.getItem('token')
+
+console.log('TOKEN FROM LOCALSTORAGE:', token)
+
+if (!token || token === 'undefined' || token === 'null') {
+  error.value = 'You need to login again'
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  router.push('/login')
+  return
+}
+
+
 
   if (
     !form.title ||
@@ -245,14 +256,24 @@ const createListing = async () => {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
       },
       body: formData,
     })
 
-    const data = await response.json()
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { message: rawText }
+    }
 
     if (!response.ok) {
-      error.value = data.message || 'Failed to create listing'
+      error.value = data.message || `Request failed with status ${response.status}`
+      console.error('Create listing backend error:', data)
       return
     }
 
@@ -261,7 +282,8 @@ const createListing = async () => {
     setTimeout(() => {
       router.push('/shop')
     }, 1200)
-  } catch {
+  } catch (err) {
+    console.error('Create listing fetch error:', err)
     error.value = 'Server connection error'
   }
 }

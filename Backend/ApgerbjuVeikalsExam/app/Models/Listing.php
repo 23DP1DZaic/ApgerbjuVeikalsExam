@@ -8,12 +8,13 @@ use App\Models\ListingImage;
 
 class Listing extends Model
 {
-        protected $fillable = [
+    protected $fillable = [
         'user_id',
         'title',
         'description',
         'price',
         'category',
+        'gender',
         'brand',
         'color',
         'size',
@@ -24,7 +25,6 @@ class Listing extends Model
     {
         return $this->belongsTo(User::class);
     }
-
 
     public function images()
     {

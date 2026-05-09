@@ -83,8 +83,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+import { API_URL, fetchWithAuth } from '../services/api'
+import { getUser, getToken, clearAuth, type AuthUser } from '../services/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -109,13 +109,6 @@ type Product = {
   user_id: number
 }
 
-type User = {
-  id: number
-  name: string
-  email: string
-  role?: string
-}
-
 const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -132,11 +125,6 @@ const categories = ref([
 
 const selectedCategories = ref<string[]>([])
 const sortOption = ref('newest')
-
-const getCurrentUser = (): User | null => {
-  const savedUser = localStorage.getItem('user')
-  return savedUser ? JSON.parse(savedUser) : null
-}
 
 const fetchProducts = async () => {
   loading.value = true
@@ -166,9 +154,21 @@ const fetchProducts = async () => {
       ? `${API_URL}/api/listings?${queryString}`
       : `${API_URL}/api/listings`
 
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
 
-    const data = await response.json()
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { message: rawText }
+    }
 
     if (!response.ok) {
       error.value = data.message || 'Failed to load listings'
@@ -226,7 +226,7 @@ const viewProduct = (product: Product) => {
 }
 
 const canDelete = (product: Product) => {
-  const currentUser = getCurrentUser()
+  const currentUser: AuthUser | null = getUser()
 
   if (!currentUser) return false
 
@@ -234,25 +234,32 @@ const canDelete = (product: Product) => {
 }
 
 const deleteListing = async (id: number) => {
-  const currentUser = getCurrentUser()
-  const token = localStorage.getItem('token')
+  const currentUser = getUser()
+  const token = getToken()
 
   if (!currentUser || !token) {
     alert('Login first')
+    clearAuth()
+    router.push('/login')
     return
   }
 
   if (!confirm('Delete listing?')) return
 
   try {
-    const response = await fetch(`${API_URL}/api/listings/${id}`, {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${id}`, {
       method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
 
-    const data = await response.json()
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { message: rawText }
+    }
 
     if (!response.ok) {
       alert(data.message || 'Failed to delete listing')

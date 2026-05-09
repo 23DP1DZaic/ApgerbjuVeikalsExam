@@ -38,38 +38,44 @@ class ListingController extends Controller
         return response()->json($listing->load('images'));
     }
 
-    public function store(Request $request)
-    {
-        $user = $request->user();
+public function store(Request $request)
+{
+    $user = $request->user();
 
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'category' => 'required|string',
-            'gender' => 'required|string',
-            'brand' => 'required|string',
-            'color' => 'required|string',
-            'size' => 'required|string',
-            'condition' => 'required|string',
-            'images' => 'required|array|min:1|max:5',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
-
-        unset($data['images']);
-
-        $listing = $user->listings()->create($data);
-
-        foreach ($request->file('images') as $image) {
-            $path = $image->store('listings', 'public');
-
-            $listing->images()->create([
-                'image_path' => $path,
-            ]);
-        }
-
-        return response()->json($listing->load('images'), 201);
+    if (!$user) {
+        return response()->json([
+            'message' => 'Unauthenticated',
+        ], 401);
     }
+
+    $data = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'price' => 'required|numeric|min:0',
+        'category' => 'required|string',
+        'gender' => 'required|string',
+        'brand' => 'required|string',
+        'color' => 'required|string',
+        'size' => 'required|string',
+        'condition' => 'required|string',
+        'images' => 'required|array|min:1|max:5',
+        'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
+
+    unset($data['images']);
+
+    $listing = $user->listings()->create($data);
+
+    foreach ($request->file('images') as $image) {
+        $path = $image->store('listings', 'public');
+
+        $listing->images()->create([
+            'image_path' => $path,
+        ]);
+    }
+
+    return response()->json($listing->load('images'), 201);
+}
 
     public function update(Request $request, Listing $listing)
     {
@@ -100,4 +106,13 @@ class ListingController extends Controller
 
         return response()->json(['message' => 'Listing deleted']);
     }
+
+
+    public function userListings(\App\Models\User $user)
+    {
+        return response()->json(
+            $user->listings()->with('images')->latest()->get()
+        );
+    }
+
 }
