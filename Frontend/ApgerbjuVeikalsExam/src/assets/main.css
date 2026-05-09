@@ -1209,22 +1209,20 @@
 .account-avatar-image {
   width: 78px;
   height: 78px;
+  min-width: 78px;
+  min-height: 78px;
   border-radius: 50%;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
-.account-avatar {
-  background: #111;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: 700;
-}
 
 .account-avatar-image {
   object-fit: cover;
+  object-position: center;
+  display: block;
+  border: 1px solid #ddd;
+  background: #f3f3f3;
 }
 
 .account-user-info h1 {
@@ -1407,6 +1405,8 @@
   background: #fafafa;
   border: 1px solid #eee;
   border-radius: 8px;
+  max-width: 420px;
+  overflow: hidden;
 }
 
 .profile-avatar {
@@ -1663,20 +1663,34 @@
 }
 
 .profile-avatar {
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
+  min-width: 84px;
+  min-height: 84px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
+  display: block;
+  border: 1px solid #ddd;
+  background: #f3f3f3;
+  overflow: hidden;
 }
 
+
 .profile-avatar.placeholder {
+  width: 84px;
+  height: 84px;
+  min-width: 84px;
+  min-height: 84px;
+  border-radius: 50%;
   background: #111;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 700;
+  overflow: hidden;
 }
 
 .form-group {
@@ -1726,4 +1740,18 @@
   .settings-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.header-avatar-image {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  background: #f3f3f3;
 }

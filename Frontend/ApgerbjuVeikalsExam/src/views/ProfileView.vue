@@ -8,22 +8,22 @@
           <h1>Profile Settings</h1>
           <p>Edit your public profile</p>
 
-          <div class="profile-preview">
+            <div class="profile-preview">
             <img
-              v-if="user?.avatar_url"
-              :src="user.avatar_url"
-              alt="Avatar"
-              class="profile-avatar"
+                v-if="user?.avatar_url"
+                :src="user.avatar_url"
+                alt="Avatar"
+                class="profile-avatar"
             >
             <div v-else class="profile-avatar placeholder">
-              {{ userInitial }}
+                {{ userInitial }}
             </div>
 
             <div>
-              <h2>{{ user?.display_name || user?.name }}</h2>
-              <p>{{ user?.bio || 'No bio yet' }}</p>
+                <h2>{{ user?.display_name || user?.name }}</h2>
+                <p>{{ user?.bio || 'No bio yet' }}</p>
             </div>
-          </div>
+            </div>
 
           <form @submit.prevent="saveProfile">
             <div class="form-group">
