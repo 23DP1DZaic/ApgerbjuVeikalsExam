@@ -1,56 +1,120 @@
 <template>
-  <div class="home">
-    <!-- Hero -->
-    <section class="hero">
-      <div class="container">
-        <div class="hero-content">
-          <h1>New Collection</h1>
-          <p>Minimalism and functionality in every detail.</p>
-          <router-link to="/shop" class="hero-link">Shop →</router-link>
-        </div>
-      </div>
-    </section>
+  <div class="home-page">
+    <section class="featured-section">
+      <h2>Featured</h2>
 
-    <!-- Featured -->
-    <section class="featured">
-      <div class="container">
-        <h2 class="section-title">Featured </h2>
-        <div class="products-grid">
-          <div class="product-card" v-for="product in featuredProducts" :key="product.id">
-            <div class="product-image">
-              <img :src="product.image" :alt="product.name">
-            </div>
-            <div class="product-info">
-              <h3>{{ product.name }}</h3>
-              <p>{{ product.price }} €</p>
+      <p v-if="loading" class="home-message">
+        Loading listings...
+      </p>
+
+      <p v-else-if="error" class="home-error">
+        {{ error }}
+      </p>
+
+      <div v-else-if="featuredListings.length" class="featured-grid">
+        <div
+          v-for="listing in featuredListings"
+          :key="listing.id"
+          class="featured-card"
+          @click="goToListing(listing.id)"
+        >
+          <div class="featured-image-wrapper">
+            <img
+              v-if="listing.images && listing.images.length"
+              :src="`${API_URL}/storage/${listing.images?.[0]?.image_path || ''}`"
+              :alt="listing.title"
+              class="featured-image"
+            >
+
+            <div v-else class="featured-placeholder">
+              No image
             </div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!--About -->
-    <section class="about">
-      <div class="container">
-        <div class="about-content">
-          <h2>About Us</h2>
-          <p>
-            Name creates clothes you can feel like yourself in. <br>
-            We focus on quality materials, thoughtful cuts, and timeless style.
-          </p>
-          <p>
-            Each piece is a balance between aesthetics and comfort, designed for urban life.
-          </p>
+          <h3>{{ listing.title }}</h3>
+          <p>{{ listing.price }} €</p>
         </div>
       </div>
+
+      <p v-else class="home-message">
+        No listings yet.
+      </p>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-const featuredProducts = [
-  { id: 1, name: '1', price: 29, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80' },
-  { id: 2, name: '2', price: 89, image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80' },
-  { id: 3, name: '3', price: 65, image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80' },
-]
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { API_URL } from '../services/api'
+
+type ListingImage = {
+  id: number
+  image_path: string
+}
+
+type Listing = {
+  id: number
+  title: string
+  description: string
+  price: number
+  category: string
+  gender?: string | null
+  brand?: string | null
+  color?: string | null
+  size?: string | null
+  condition: string
+  images: ListingImage[]
+  user_id: number
+}
+
+const router = useRouter()
+
+const featuredListings = ref<Listing[]>([])
+const loading = ref(true)
+const error = ref('')
+
+const loadFeaturedListings = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const response = await fetch(`${API_URL}/api/listings/random?limit=3`, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { message: rawText }
+    }
+
+    if (!response.ok) {
+      error.value = data.message || 'Failed to load featured listings'
+      featuredListings.value = []
+      return
+    }
+
+    featuredListings.value = Array.isArray(data) ? data : []
+  } catch (err) {
+    console.error('Load featured listings error:', err)
+    error.value = 'Server connection error'
+  } finally {
+    loading.value = false
+  }
+}
+
+const goToListing = (id: number) => {
+  router.push(`/listing/${id}`)
+}
+
+onMounted(() => {
+  loadFeaturedListings()
+})
 </script>

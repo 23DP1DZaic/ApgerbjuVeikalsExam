@@ -173,4 +173,25 @@ if (!$categoryExists) {
         );
     }
 
+    
+    public function random(Request $request)
+    {
+        $limit = (int) $request->get('limit', 3);
+
+        if ($limit < 1) {
+            $limit = 3;
+        }
+
+        if ($limit > 12) {
+            $limit = 12;
+        }
+
+        $listings = Listing::with('images')
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+
+        return response()->json($listings);
+    }
+
 }

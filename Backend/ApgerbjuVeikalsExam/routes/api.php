@@ -8,6 +8,8 @@ use App\Http\Controllers\CategoryController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/listings/random', [ListingController::class, 'random']);
+
 Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{listing}', [ListingController::class, 'show']);
 
@@ -30,4 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
+    
 });
