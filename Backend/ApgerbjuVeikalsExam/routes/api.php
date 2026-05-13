@@ -4,14 +4,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ListingInteractionController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::get('/listings/random', [ListingController::class, 'random']);
-
 Route::get('/listings', [ListingController::class, 'index']);
+Route::get('/listings/random', [ListingController::class, 'random']);
 Route::get('/listings/{listing}', [ListingController::class, 'show']);
+
+Route::get('/users/{user}/listings', [ListingController::class, 'userListings']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/tree', [CategoryController::class, 'tree']);
@@ -29,9 +31,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/listings/{listing}', [ListingController::class, 'update']);
     Route::delete('/listings/{listing}', [ListingController::class, 'destroy']);
 
+    Route::post('/listings/{listing}/like', [ListingInteractionController::class, 'toggleLike']);
+    Route::post('/listings/{listing}/favorite', [ListingInteractionController::class, 'toggleFavorite']);
+
+    Route::get('/me/likes', [ListingInteractionController::class, 'myLikes']);
+    Route::get('/me/favorites', [ListingInteractionController::class, 'myFavorites']);
+
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
-
-    
 });

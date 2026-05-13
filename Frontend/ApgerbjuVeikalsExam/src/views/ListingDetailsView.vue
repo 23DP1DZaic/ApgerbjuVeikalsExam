@@ -63,6 +63,24 @@
 
         <p class="price">{{ listing.price }} €</p>
 
+        <div class="listing-actions detail-actions">
+          <button
+            class="interaction-btn"
+            :class="{ active: listing.liked_by_me }"
+            @click="toggleLike"
+          >
+            ♥ {{ listing.likes_count || 0 }}
+          </button>
+
+          <button
+            class="interaction-btn"
+            :class="{ active: listing.favorited_by_me }"
+            @click="toggleFavorite"
+          >
+            ★ {{ listing.favorites_count || 0 }}
+          </button>
+        </div>
+
         <button class="purchase-btn">Purchase</button>
         <button class="secondary-btn">Offer</button>
         <button class="secondary-btn">Message</button>
@@ -74,10 +92,11 @@
 
         <div class="details-section">
           <h3>Details</h3>
-          <p><strong>Color:</strong> {{ listing.color }}</p>
-          <p><strong>Size:</strong> {{ listing.size }}</p>
+          <p><strong>Color:</strong> {{ listing.color || 'Not specified' }}</p>
+          <p><strong>Size:</strong> {{ listing.size || 'Not specified' }}</p>
           <p><strong>Condition:</strong> {{ listing.condition }}</p>
           <p><strong>Category:</strong> {{ listing.category }}</p>
+          <p><strong>Gender:</strong> {{ listing.gender || 'Not specified' }}</p>
         </div>
       </aside>
     </div>
@@ -86,7 +105,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { API_URL, fetchWithAuth } from '../services/api'
+import { getToken } from '../services/auth'
 
 type ListingImage = {
   id: number
@@ -99,14 +120,20 @@ type Listing = {
   description: string
   price: number
   category: string
+  gender?: string | null
   brand: string | null
   color: string | null
   size: string | null
   condition: string
   images: ListingImage[]
+  likes_count?: number
+  favorites_count?: number
+  liked_by_me?: boolean
+  favorited_by_me?: boolean
 }
 
 const route = useRoute()
+const router = useRouter()
 
 const listing = ref<Listing | null>(null)
 const loading = ref(true)
@@ -117,17 +144,28 @@ const imageUrls = computed(() => {
   if (!listing.value?.images?.length) return []
 
   return listing.value.images.map((image) => {
-    return `http://127.0.0.1:8000/storage/${image.image_path}`
+    return `${API_URL}/storage/${image.image_path}`
   })
 })
 
 const fetchListing = async () => {
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/api/listings/${route.params.id}`
-    )
+  loading.value = true
+  error.value = ''
 
-    const data = await response.json()
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${route.params.id}`, {
+      method: 'GET',
+    })
+
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { message: rawText }
+    }
 
     if (!response.ok) {
       error.value = data.message || 'Listing not found'
@@ -136,10 +174,71 @@ const fetchListing = async () => {
 
     listing.value = data
     selectedImage.value = imageUrls.value[0] || null
-  } catch {
+  } catch (err) {
+    console.error('Fetch listing error:', err)
     error.value = 'Failed to load listing'
   } finally {
     loading.value = false
+  }
+}
+
+const toggleLike = async () => {
+  const token = getToken()
+
+  if (!token) {
+    router.push('/login')
+    return
+  }
+
+  if (!listing.value) return
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${listing.value.id}/like`, {
+      method: 'POST',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to like listing')
+      return
+    }
+
+    listing.value.liked_by_me = data.liked
+    listing.value.likes_count = data.likes_count
+  } catch (err) {
+    console.error('Like error:', err)
+    alert('Server connection error')
+  }
+}
+
+const toggleFavorite = async () => {
+  const token = getToken()
+
+  if (!token) {
+    router.push('/login')
+    return
+  }
+
+  if (!listing.value) return
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${listing.value.id}/favorite`, {
+      method: 'POST',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to favorite listing')
+      return
+    }
+
+    listing.value.favorited_by_me = data.favorited
+    listing.value.favorites_count = data.favorites_count
+  } catch (err) {
+    console.error('Favorite error:', err)
+    alert('Server connection error')
   }
 }
 
@@ -161,5 +260,7 @@ const previousImage = () => {
   selectedImage.value = imageUrls.value[previousIndex] ?? null
 }
 
-onMounted(fetchListing)
+onMounted(() => {
+  fetchListing()
+})
 </script>

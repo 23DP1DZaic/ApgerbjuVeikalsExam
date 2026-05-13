@@ -141,6 +141,23 @@
               <h3>{{ product.title }}</h3>
               <p>{{ product.category }}</p>
               <span class="price">{{ product.price }} €</span>
+              <div class="listing-actions">
+              <button
+                class="interaction-btn"
+                :class="{ active: product.liked_by_me }"
+                @click.stop="toggleLike(product)"
+              >
+                ♥ {{ product.likes_count || 0 }}
+              </button>
+
+              <button
+                class="interaction-btn"
+                :class="{ active: product.favorited_by_me }"
+                @click.stop="toggleFavorite(product)"
+              >
+                ★ {{ product.favorites_count || 0 }}
+              </button>
+              </div>
             </div>
 
             <button
@@ -184,6 +201,10 @@ type Product = {
   gender?: string | null
   images: ListingImage[]
   user_id: number
+  likes_count?: number
+  favorites_count?: number
+  liked_by_me?: boolean
+  favorited_by_me?: boolean
 }
 
 type Category = {
@@ -343,10 +364,8 @@ const fetchProducts = async () => {
       ? `${API_URL}/api/listings?${queryString}`
       : `${API_URL}/api/listings`
 
-    const response = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-      },
+    const response = await fetchWithAuth(url, {
+      method: 'GET',
     })
 
     const rawText = await response.text()
@@ -461,6 +480,62 @@ const deleteListing = async (id: number) => {
     fetchProducts()
   } catch (err) {
     console.error('Delete error:', err)
+    alert('Server connection error')
+  }
+}
+
+const toggleLike = async (product: Product) => {
+  const token = getToken()
+
+  if (!token) {
+    router.push('/login')
+    return
+  }
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${product.id}/like`, {
+      method: 'POST',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to like listing')
+      return
+    }
+
+    product.liked_by_me = data.liked
+    product.likes_count = data.likes_count
+  } catch (err) {
+    console.error('Like error:', err)
+    alert('Server connection error')
+  }
+}
+
+const toggleFavorite = async (product: Product) => {
+  const token = getToken()
+
+  if (!token) {
+    router.push('/login')
+    return
+  }
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${product.id}/favorite`, {
+      method: 'POST',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to favorite listing')
+      return
+    }
+
+    product.favorited_by_me = data.favorited
+    product.favorites_count = data.favorites_count
+  } catch (err) {
+    console.error('Favorite error:', err)
     alert('Server connection error')
   }
 }

@@ -43,6 +43,26 @@ class User extends Authenticatable
         return $this->hasMany(Listing::class);
     }
 
+    public function likedListings()
+    {
+        return $this->belongsToMany(
+            Listing::class,
+            'listing_likes',
+            'user_id',
+            'listing_id'
+        )->withTimestamps();
+    }
+
+    public function favoriteListings()
+    {
+        return $this->belongsToMany(
+            Listing::class,
+            'listing_favorites',
+            'user_id',
+            'listing_id'
+        )->withTimestamps();
+    }
+
     public function getAvatarUrlAttribute(): ?string
     {
         if (!$this->avatar) {
