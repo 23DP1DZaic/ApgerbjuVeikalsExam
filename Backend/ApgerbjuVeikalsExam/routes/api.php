@@ -10,9 +10,9 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{listing}', [ListingController::class, 'show']);
-Route::get('/users/{user}/listings', [ListingController::class, 'userListings']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/tree', [CategoryController::class, 'tree']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);

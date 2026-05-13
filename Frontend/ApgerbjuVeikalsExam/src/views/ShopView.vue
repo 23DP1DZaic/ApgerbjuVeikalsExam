@@ -158,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { getUser, getToken, clearAuth, type AuthUser } from '../services/auth'
@@ -186,6 +186,51 @@ type Product = {
   user_id: number
 }
 
+type Category = {
+  id: number
+  name: string
+  slug: string
+  department?: string | null
+  parent_id?: number | null
+}
+
+const categories = ref<Category[]>([])
+
+const loadCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/categories`, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = []
+    }
+
+    if (!response.ok) {
+      console.error('Failed to load categories:', data)
+      return
+    }
+
+    categories.value = Array.isArray(data) ? data : []
+  } catch (err) {
+    console.error('Load categories error:', err)
+  }
+}
+
+const availableCategoryFilters = computed(() => {
+  return categories.value.filter((category) => category.parent_id !== null)
+})
+
+const categoryFilter = ref('')
+
 const products = ref<Product[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
@@ -210,6 +255,7 @@ const syncFiltersFromRoute = () => {
   maxPrice.value = String(route.query.max_price || '')
   sortOption.value = String(route.query.sort || 'newest')
   onlyWithImage.value = String(route.query.has_images || '') === '1'
+  categoryFilter.value = String(route.query.category || '')
 }
 
 const updateRouteWithFilters = () => {
@@ -217,9 +263,9 @@ const updateRouteWithFilters = () => {
     path: '/shop',
     query: {
       search: route.query.search || undefined,
-      category: route.query.category || undefined,
       section: route.query.section || undefined,
 
+      category: categoryFilter.value || undefined,
       brand: brandFilter.value || undefined,
       size: sizeFilter.value || undefined,
       color: colorFilter.value || undefined,
@@ -341,6 +387,7 @@ watch(
 
 onMounted(() => {
   syncFiltersFromRoute()
+  loadCategories()
   fetchProducts()
 })
 
@@ -354,6 +401,7 @@ const resetFilters = () => {
   maxPrice.value = ''
   onlyWithImage.value = false
   sortOption.value = 'newest'
+  categoryFilter.value = ''
 
   router.replace({
     path: '/shop',

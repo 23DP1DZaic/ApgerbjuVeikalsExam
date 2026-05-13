@@ -20,26 +20,40 @@
         </div>
 
         <div class="form-group">
-          <label>Category</label>
-          <select v-model="form.category" required>
-            <option value="">Select category</option>
-            <option
-              v-for="category in categories"
-              :key="category.id"
-              :value="category.name"
-            >
-              {{ category.name }}
-            </option>
-          </select>
-        </div>
-
-        <div class="form-group">
           <label>Gender</label>
           <select v-model="form.gender" required>
             <option disabled value="">Select gender</option>
             <option value="men">Men</option>
             <option value="women">Women</option>
             <option value="unisex">Unisex</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Category</label>
+
+          <select
+            v-model="form.category"
+            required
+            :disabled="!form.gender"
+          >
+            <option value="">
+              {{ form.gender ? 'Select category' : 'Select gender first' }}
+            </option>
+
+            <optgroup
+              v-for="group in groupedCategories"
+              :key="group.parentName"
+              :label="group.parentName"
+            >
+              <option
+                v-for="category in group.children"
+                :key="category.id"
+                :value="category.name"
+              >
+                {{ category.name }}
+              </option>
+            </optgroup>
           </select>
         </div>
 
@@ -144,7 +158,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { reactive, ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUser, getToken, clearAuth } from '../services/auth'
 import { API_URL, fetchWithAuth } from '../services/api'
@@ -153,6 +167,12 @@ type Category = {
   id: number
   name: string
   slug: string
+  department?: string | null
+  parent_id?: number | null
+  parent?: {
+    id: number
+    name: string
+  } | null
 }
 
 const router = useRouter()
@@ -232,6 +252,57 @@ const addImage = (event: Event) => {
 const removeImage = (index: number) => {
   imageFiles.value.splice(index, 1)
 }
+
+const groupedCategories = computed(() => {
+  if (!form.gender) return []
+
+  const parentNameById = new Map<number, string>()
+
+  categories.value.forEach((category) => {
+    parentNameById.set(category.id, category.name)
+  })
+
+  const children = categories.value.filter((category) => {
+    return (
+      category.department === form.gender &&
+      category.parent_id !== null
+    )
+  })
+
+  const groups = new Map<string, {
+    parentName: string
+    children: Category[]
+  }>()
+
+  children.forEach((category) => {
+    const parentName =
+      category.parent?.name ||
+      parentNameById.get(Number(category.parent_id)) ||
+      'Other'
+
+    if (!groups.has(parentName)) {
+      groups.set(parentName, {
+        parentName,
+        children: [],
+      })
+    }
+
+    groups.get(parentName)?.children.push(category)
+  })
+
+  return Array.from(groups.values()).sort((a, b) =>
+    a.parentName.localeCompare(b.parentName)
+  )
+})
+
+
+
+watch(
+  () => form.gender,
+  () => {
+    form.category = ''
+  }
+)
 
 const createListing = async () => {
   message.value = ''

@@ -16,7 +16,7 @@
 
         <nav class="header-actions">
           <router-link v-if="user" to="/create-listing">ADD LISTING</router-link>
-          <router-link to="/shop">MY FEED</router-link>
+          <router-link v-if="user?.role === 'admin'" to="/admin/categories">ADMIN CATEGORIES</router-link>
 
           <div v-if="user" class="user-menu">
             <router-link to="/account" class="user-info user-link">
@@ -42,158 +42,148 @@
           </div>
         </nav>
       </div>
-          <router-link v-if="user?.role === 'admin'" to="/admin/categories">
-      ADMIN CATEGORIES
+
+      <nav class="category-nav" ref="megaMenuRef">
+        <div class="nav-item mega-item">
+          <button
+            class="nav-link-button"
+            :class="{ active: activeMegaMenu === 'designers' }"
+            @click="toggleMegaMenu('designers')"
+          >
+            DESIGNERS
+            <span class="nav-arrow">⌄</span>
+          </button>
+
+          <div v-if="activeMegaMenu === 'designers'" class="mega-menu">
+            <div class="simple-menu">
+              <router-link :to="{ path: '/shop', query: { brand: 'Nike' } }" @click="closeMegaMenu">Nike</router-link>
+              <router-link :to="{ path: '/shop', query: { brand: 'Adidas' } }" @click="closeMegaMenu">Adidas</router-link>
+              <router-link :to="{ path: '/shop', query: { brand: 'Zara' } }" @click="closeMegaMenu">Zara</router-link>
+              <router-link :to="{ path: '/shop', query: { brand: 'Balenciaga' } }" @click="closeMegaMenu">Balenciaga</router-link>
+              <router-link :to="{ path: '/shop', query: { brand: 'Rick Owens' } }" @click="closeMegaMenu">Rick Owens</router-link>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item mega-item">
+          <button
+            class="nav-link-button"
+            :class="{ active: activeMegaMenu === 'menswear' }"
+            @click="toggleMegaMenu('menswear')"
+          >
+            MENSWEAR
+            <span class="nav-arrow">⌄</span>
+          </button>
+
+          <div v-if="activeMegaMenu === 'menswear'" class="mega-menu">
+            <div class="mega-menu-inner">
+              <div
+                v-for="parent in menCategoryTree"
+                :key="parent.id"
+                class="mega-column"
+              >
+                <h5>{{ parent.name }}</h5>
+
+                <router-link
+                  v-for="child in parent.children"
+                  :key="child.id"
+                  :to="{
+                    path: '/shop',
+                    query: {
+                      gender: 'men',
+                      category: child.name,
+                    },
+                  }"
+                  @click="closeMegaMenu"
+                >
+                  {{ child.name }}
+                </router-link>
+
+                <router-link
+                  v-if="!parent.children.length"
+                  :to="{
+                    path: '/shop',
+                    query: {
+                      gender: 'men',
+                      category: parent.name,
+                    },
+                  }"
+                  @click="closeMegaMenu"
+                >
+                  View {{ parent.name }}
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item mega-item">
+          <button
+            class="nav-link-button"
+            :class="{ active: activeMegaMenu === 'womenswear' }"
+            @click="toggleMegaMenu('womenswear')"
+          >
+            WOMENSWEAR
+            <span class="nav-arrow">⌄</span>
+          </button>
+
+          <div v-if="activeMegaMenu === 'womenswear'" class="mega-menu">
+            <div class="mega-menu-inner">
+              <div
+                v-for="parent in womenCategoryTree"
+                :key="parent.id"
+                class="mega-column"
+              >
+                <h5>{{ parent.name }}</h5>
+
+                <router-link
+                  v-for="child in parent.children"
+                  :key="child.id"
+                  :to="{
+                    path: '/shop',
+                    query: {
+                      gender: 'women',
+                      category: child.name,
+                    },
+                  }"
+                  @click="closeMegaMenu"
+                >
+                  {{ child.name }}
+                </router-link>
+
+                <router-link
+                  v-if="!parent.children.length"
+                  :to="{
+                    path: '/shop',
+                    query: {
+                      gender: 'women',
+                      category: parent.name,
+                    },
+                  }"
+                  @click="closeMegaMenu"
+                >
+                  View {{ parent.name }}
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <router-link
+            :to="{ path: '/shop', query: { category: 'Sneakers' } }"
+            @click="closeMegaMenu"
+          >
+            SNEAKERS
           </router-link>
-
-<nav class="category-nav" ref="megaMenuRef">
-  <div class="nav-item mega-item">
-    <button
-      class="nav-link-button"
-      :class="{ active: activeMegaMenu === 'designers' }"
-      @click="toggleMegaMenu('designers')"
-    >
-      DESIGNERS
-      <span class="nav-arrow">⌄</span>
-    </button>
-
-    <div v-if="activeMegaMenu === 'designers'" class="mega-menu">
-      <div class="mega-menu-inner simple-menu">
-        <router-link :to="{ path: '/shop', query: { brand: 'Nike' } }" @click="closeMegaMenu">Nike</router-link>
-        <router-link :to="{ path: '/shop', query: { brand: 'Adidas' } }" @click="closeMegaMenu">Adidas</router-link>
-        <router-link :to="{ path: '/shop', query: { brand: 'Zara' } }" @click="closeMegaMenu">Zara</router-link>
-        <router-link :to="{ path: '/shop', query: { brand: 'Balenciaga' } }" @click="closeMegaMenu">Balenciaga</router-link>
-        <router-link :to="{ path: '/shop', query: { brand: 'Rick Owens' } }" @click="closeMegaMenu">Rick Owens</router-link>
-      </div>
-    </div>
-  </div>
-
-  <div class="nav-item mega-item">
-    <button
-      class="nav-link-button"
-      :class="{ active: activeMegaMenu === 'menswear' }"
-      @click="toggleMegaMenu('menswear')"
-    >
-      MENSWEAR
-      <span class="nav-arrow">⌄</span>
-    </button>
-
-    <div v-if="activeMegaMenu === 'menswear'" class="mega-menu">
-      <div class="mega-menu-inner">
-        <div class="mega-column">
-          <h4>Shop By Category</h4>
         </div>
 
-        <div class="mega-column">
-          <h5>Tops</h5>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Tshirt' } }" @click="closeMegaMenu">Long Sleeve T-Shirts</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Shirt' } }" @click="closeMegaMenu">Polos</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Shirt' } }" @click="closeMegaMenu">Shirts (Button Ups)</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Tshirt' } }" @click="closeMegaMenu">Short Sleeve T-Shirts</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Hoodie' } }" @click="closeMegaMenu">Sweaters & Knitwear</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Hoodie' } }" @click="closeMegaMenu">Sweatshirts & Hoodies</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Tshirt' } }" @click="closeMegaMenu">Tank Tops & Sleeveless</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Jersey' } }" @click="closeMegaMenu">Jerseys</router-link>
+        <div class="nav-item">
+          <router-link to="/about" @click="closeMegaMenu">
+            ABOUT US
+          </router-link>
         </div>
-
-        <div class="mega-column">
-          <h5>Bottoms</h5>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Casual Pants</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Cropped Pants</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Denim</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Leggings</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Overalls & Jumpsuits</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Shorts</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Sweatpants & Joggers</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Swimwear</router-link>
-        </div>
-
-        <div class="mega-column">
-          <h5>Outerwear</h5>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Bombers</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Cloaks & Capes</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Denim Jackets</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Heavy Coats</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Leather Jackets</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Light Jackets</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Parkas</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Raincoats</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Vests</router-link>
-        </div>
-
-        <div class="mega-column">
-          <h5>Footwear</h5>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Boots</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Casual Leather Shoes</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Formal Shoes</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Hi-Top Sneakers</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Low-Top Sneakers</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Sandals</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Sneakers' } }" @click="closeMegaMenu">Slip Ons</router-link>
-        </div>
-
-        <div class="mega-column">
-          <h5>Accessories</h5>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', color: 'Black' } }" @click="closeMegaMenu">Bags & Luggage</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Belt' } }" @click="closeMegaMenu">Belts</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Glasses' } }" @click="closeMegaMenu">Glasses</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Gloves' } }" @click="closeMegaMenu">Gloves & Scarves</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Hat' } }" @click="closeMegaMenu">Hats</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Jewelry' } }" @click="closeMegaMenu">Jewelry & Watches</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Wallet' } }" @click="closeMegaMenu">Wallets</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Socks' } }" @click="closeMegaMenu">Socks & Underwear</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', brand: 'Sunglasses' } }" @click="closeMegaMenu">Sunglasses</router-link>
-        </div>
-
-        <div class="mega-column">
-          <h5>Tailoring</h5>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Blazers</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Shirt' } }" @click="closeMegaMenu">Formal Shirting</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jeans' } }" @click="closeMegaMenu">Formal Trousers</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Suits</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Tuxedos</router-link>
-          <router-link :to="{ path: '/shop', query: { gender: 'men', category: 'Jacket' } }" @click="closeMegaMenu">Vests</router-link>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="nav-item mega-item">
-    <button
-      class="nav-link-button"
-      :class="{ active: activeMegaMenu === 'womenswear' }"
-      @click="toggleMegaMenu('womenswear')"
-    >
-      WOMENSWEAR
-      <span class="nav-arrow">⌄</span>
-    </button>
-
-    <div v-if="activeMegaMenu === 'womenswear'" class="mega-menu">
-      <div class="mega-menu-inner simple-menu">
-        <router-link :to="{ path: '/shop', query: { gender: 'women', category: 'Tshirt' } }" @click="closeMegaMenu">Tops</router-link>
-        <router-link :to="{ path: '/shop', query: { gender: 'women', category: 'Jeans' } }" @click="closeMegaMenu">Bottoms</router-link>
-        <router-link :to="{ path: '/shop', query: { gender: 'women', category: 'Jacket' } }" @click="closeMegaMenu">Outerwear</router-link>
-        <router-link :to="{ path: '/shop', query: { gender: 'women', category: 'Sneakers' } }" @click="closeMegaMenu">Shoes</router-link>
-        <router-link :to="{ path: '/shop', query: { gender: 'women', condition: 'new' } }" @click="closeMegaMenu">New Arrivals</router-link>
-      </div>
-    </div>
-  </div>
-
-<div class="nav-item">
-  <router-link
-    :to="{ path: '/shop', query: { category: 'Sneakers' } }"
-    @click="closeMegaMenu"
-  >
-    SNEAKERS
-  </router-link>
-</div>
-
-<div class="nav-item">
-  <router-link to="/about" @click="closeMegaMenu">
-    ABOUT US
-  </router-link>
-</div>
-</nav>
+      </nav>
     </header>
 
     <main class="main-content">
@@ -236,33 +226,113 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, onBeforeUnmount} from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { getCurrentUser, clearAuth, type AuthUser } from './services/auth'
 import { API_URL, fetchWithAuth } from './services/api'
 
+type CategoryNode = {
+  id: number
+  name: string
+  slug: string
+  department?: string | null
+  parent_id?: number | null
+  children: CategoryNode[]
+}
+
 const router = useRouter()
+const route = useRoute()
 
 const user = ref<AuthUser | null>(null)
 const headerSearch = ref('')
 
+const menCategoryTree = ref<CategoryNode[]>([])
+const womenCategoryTree = ref<CategoryNode[]>([])
+
+const activeMegaMenu = ref<string | null>(null)
+const megaMenuRef = ref<HTMLElement | null>(null)
+
 const userInitial = computed(() => {
   if (!user.value?.name) return '?'
-  return user.value.name.charAt(0).toUpperCase()
+  return (user.value.display_name || user.value.name).charAt(0).toUpperCase()
 })
 
 const loadUser = async () => {
   user.value = await getCurrentUser()
 }
 
+const loadCategoryTree = async (department: 'men' | 'women') => {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/categories/tree?department=${department}`,
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    )
+
+    const rawText = await response.text()
+
+    let data: any = []
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = []
+    }
+
+    if (!response.ok) {
+      console.error(`Failed to load ${department} category tree:`, data)
+      return
+    }
+
+    if (department === 'men') {
+      menCategoryTree.value = Array.isArray(data) ? data : []
+    }
+
+    if (department === 'women') {
+      womenCategoryTree.value = Array.isArray(data) ? data : []
+    }
+  } catch (error) {
+    console.error(`Failed to fetch ${department} categories:`, error)
+  }
+}
+
+const toggleMegaMenu = (menu: string) => {
+  activeMegaMenu.value = activeMegaMenu.value === menu ? null : menu
+}
+
+const closeMegaMenu = () => {
+  activeMegaMenu.value = null
+}
+
+const handleClickOutsideMegaMenu = (event: MouseEvent) => {
+  const target = event.target as Node
+
+  if (megaMenuRef.value && !megaMenuRef.value.contains(target)) {
+    activeMegaMenu.value = null
+  }
+}
+
 onMounted(() => {
   loadUser()
+  loadCategoryTree('men')
+  loadCategoryTree('women')
   document.addEventListener('click', handleClickOutsideMegaMenu)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutsideMegaMenu)
 })
+
+watch(
+  () => route.fullPath,
+  () => {
+    closeMegaMenu()
+  }
+)
+
 const logout = async () => {
   try {
     await fetchWithAuth(`${API_URL}/api/logout`, {
@@ -284,26 +354,5 @@ const submitHeaderSearch = () => {
       search: headerSearch.value || undefined,
     },
   })
-}
-
-
-const activeMegaMenu = ref<string | null>(null)
-const megaMenuRef = ref<HTMLElement | null>(null)
-
-const toggleMegaMenu = (menu: string) => {
-  activeMegaMenu.value = activeMegaMenu.value === menu ? null : menu
-}
-
-const closeMegaMenu = () => {
-  activeMegaMenu.value = null
-}
-
-
-const handleClickOutsideMegaMenu = (event: MouseEvent) => {
-  const target = event.target as Node
-
-  if (megaMenuRef.value && !megaMenuRef.value.contains(target)) {
-    activeMegaMenu.value = null
-  }
 }
 </script>
