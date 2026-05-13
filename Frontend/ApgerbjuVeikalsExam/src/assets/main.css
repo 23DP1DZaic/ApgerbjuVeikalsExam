@@ -1947,3 +1947,110 @@
 .simple-menu a:visited {
   color: #111 !important;
 }
+
+
+
+.admin-page {
+  padding: 32px 24px 60px;
+  background: #f7f7f7;
+  min-height: 100vh;
+}
+
+.admin-card {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.admin-card h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.admin-card > p {
+  margin: 0 0 24px;
+  color: #666;
+}
+
+.category-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.category-form input {
+  flex: 1;
+  border: 1px solid #d9d9d9;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.category-form button {
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  border-radius: 6px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.category-form button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.category-item p {
+  margin: 6px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.delete-btn {
+  border: 1px solid #b10000;
+  background: #b10000;
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.delete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.success {
+  color: green;
+  margin-bottom: 14px;
+}
+
+.error {
+  color: red;
+  margin-bottom: 14px;
+}
+
+.empty-text {
+  color: #666;
+}

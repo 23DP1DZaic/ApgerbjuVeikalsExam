@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Listing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -73,6 +74,14 @@ class CategoryController extends Controller
             return response()->json([
                 'message' => 'Forbidden',
             ], 403);
+        }
+
+        $hasListings = Listing::where('category', $category->name)->exists();
+
+        if ($hasListings) {
+            return response()->json([
+                'message' => 'Cannot delete category that is used by listings',
+            ], 422);
         }
 
         $category->delete();

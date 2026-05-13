@@ -42,6 +42,9 @@
           </div>
         </nav>
       </div>
+          <router-link v-if="user?.role === 'admin'" to="/admin/categories">
+      ADMIN CATEGORIES
+          </router-link>
 
 <nav class="category-nav" ref="megaMenuRef">
   <div class="nav-item mega-item">

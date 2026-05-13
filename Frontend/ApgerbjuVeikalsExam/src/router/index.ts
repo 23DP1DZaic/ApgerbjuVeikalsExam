@@ -8,8 +8,10 @@ import ListingDetailsView from '../views/ListingDetailsView.vue'
 import AboutView from '../views/AboutView.vue'
 import AccountView from '../views/AccountView.vue'
 import ProfileView from '../views/ProfileView.vue'
-import { isLoggedIn } from '../services/auth'
+import { getUser, isLoggedIn } from '../services/auth'
 import SettingsAccountView from '../views/SettingsAccountView.vue'
+import AdminCategoriesView from '../views/AdminCategoriesView.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -110,12 +112,28 @@ const router = createRouter({
         requiresAuth: true,
       },
     },
+    {
+  path: '/admin/categories',
+  name: 'admin-categories',
+  component: AdminCategoriesView,
+  meta: {
+    requiresAuth: true,
+    requiresAdmin: true,
+    },
+    },
   ],
 })
 
 router.beforeEach((to, _from, next) => {
+  const user = getUser()
+
   if (to.meta.requiresAuth && !isLoggedIn()) {
     next('/login')
+    return
+  }
+
+  if (to.meta.requiresAdmin && user?.role !== 'admin') {
+    next('/')
     return
   }
 
