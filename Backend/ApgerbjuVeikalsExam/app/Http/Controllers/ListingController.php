@@ -7,31 +7,80 @@ use Illuminate\Http\Request;
 
 class ListingController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Listing::with('images')->latest();
+public function index(Request $request)
+{
+    $query = Listing::with('images')->latest();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
+    if ($request->filled('search')) {
+        $search = $request->search;
 
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('brand', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->filled('gender')) {
-            $query->where('gender', $request->gender);
-        }
-
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
-
-        return response()->json($query->get());
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhere('brand', 'like', "%{$search}%")
+              ->orWhere('category', 'like', "%{$search}%");
+        });
     }
+
+    if ($request->filled('gender')) {
+        $query->where('gender', $request->gender);
+    }
+
+    if ($request->filled('category')) {
+        $query->where('category', $request->category);
+    }
+
+    if ($request->filled('brand')) {
+        $query->where('brand', 'like', '%' . $request->brand . '%');
+    }
+
+    if ($request->filled('size')) {
+        $query->where('size', $request->size);
+    }
+
+    if ($request->filled('color')) {
+        $query->where('color', $request->color);
+    }
+
+    if ($request->filled('condition')) {
+        $query->where('condition', $request->condition);
+    }
+
+    if ($request->filled('min_price')) {
+        $query->where('price', '>=', (float) $request->min_price);
+    }
+
+    if ($request->filled('max_price')) {
+        $query->where('price', '<=', (float) $request->max_price);
+    }
+
+    if ($request->boolean('has_images')) {
+        $query->has('images');
+    }
+
+    if ($request->filled('sort')) {
+        switch ($request->sort) {
+            case 'price_low':
+                $query->orderBy('price', 'asc');
+                break;
+
+            case 'price_high':
+                $query->orderBy('price', 'desc');
+                break;
+
+            case 'title_az':
+                $query->orderBy('title', 'asc');
+                break;
+
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+    }
+
+    return response()->json($query->get());
+}
 
     public function show(Listing $listing)
     {
