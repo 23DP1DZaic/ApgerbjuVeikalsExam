@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Listing;
 use Illuminate\Http\Request;
+use App\Models\Category;
 
 class ListingController extends Controller
 {
@@ -110,6 +111,14 @@ public function store(Request $request)
         'images' => 'required|array|min:1|max:5',
         'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
     ]);
+
+    $categoryExists = Category::where('name', $data['category'])->exists();
+
+if (!$categoryExists) {
+    return response()->json([
+        'message' => 'Selected category does not exist',
+    ], 422);
+}
 
     unset($data['images']);
 

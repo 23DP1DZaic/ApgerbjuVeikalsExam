@@ -23,11 +23,13 @@
           <label>Category</label>
           <select v-model="form.category" required>
             <option value="">Select category</option>
-            <option value="Tshirt">Tshirt</option>
-            <option value="Jeans">Jeans</option>
-            <option value="Hoodie">Hoodie</option>
-            <option value="Jacket">Jacket</option>
-            <option value="Shirt">Shirt</option>
+            <option
+              v-for="category in categories"
+              :key="category.id"
+              :value="category.name"
+            >
+              {{ category.name }}
+            </option>
           </select>
         </div>
 
@@ -144,20 +146,23 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { getUser, getToken, clearAuth } from '../services/auth'
+import { API_URL, fetchWithAuth } from '../services/api'
 
+type Category = {
+  id: number
+  name: string
+  slug: string
+}
 
 const router = useRouter()
 
 const message = ref('')
 const error = ref('')
 const imageFiles = ref<File[]>([])
-
-
-import { getUser, getToken, clearAuth } from '../services/auth'
-import { API_URL, fetchWithAuth } from '../services/api'
+const categories = ref<Category[]>([])
 
 const user = getUser()
-
 
 const form = reactive({
   title: '',
@@ -170,6 +175,35 @@ const form = reactive({
   condition: '',
   gender: '',
 })
+
+const loadCategories = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/categories`, {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+
+    const rawText = await response.text()
+
+    let data: any = null
+
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = []
+    }
+
+    if (!response.ok) {
+      console.error('Failed to load categories:', data)
+      return
+    }
+
+    categories.value = Array.isArray(data) ? data : []
+  } catch (err) {
+    console.error('Load categories error:', err)
+  }
+}
 
 const addImage = (event: Event) => {
   const input = event.target as HTMLInputElement
@@ -203,21 +237,14 @@ const createListing = async () => {
   message.value = ''
   error.value = ''
 
-  
+  const token = getToken()
 
-const token = localStorage.getItem('token')
-
-console.log('TOKEN FROM LOCALSTORAGE:', token)
-
-if (!token || token === 'undefined' || token === 'null') {
-  error.value = 'You need to login again'
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  router.push('/login')
-  return
-}
-
-
+  if (!user || !token) {
+    error.value = 'You need to login again'
+    clearAuth()
+    router.push('/login')
+    return
+  }
 
   if (
     !form.title ||
@@ -252,12 +279,8 @@ if (!token || token === 'undefined' || token === 'null') {
   })
 
   try {
-    const response = await fetch(`${API_URL}/api/listings`, {
+    const response = await fetchWithAuth(`${API_URL}/api/listings`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json',
-      },
       body: formData,
     })
 
@@ -307,7 +330,7 @@ const colors = [
 ]
 
 const selectedColor = computed(() => {
-  return colors.find(color => color.name === form.color) || null
+  return colors.find((color) => color.name === form.color) || null
 })
 
 const selectColor = (colorName: string) => {
@@ -331,6 +354,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  loadCategories()
 })
 
 onBeforeUnmount(() => {

@@ -1867,7 +1867,7 @@
 }
 
 .nav-link-button.active,
-.nav-item a.router-link-active {
+.category-nav > .nav-item > a.router-link-active {
   color: #233cff;
 }
 
@@ -1879,7 +1879,7 @@
 .mega-menu {
   position: fixed;
   left: 0;
-  top: 106px;
+  top: 110px;
   width: 100vw;
   background: #fff;
   border-top: 1px solid #eee;
@@ -1934,4 +1934,16 @@
 .mega-column a:hover,
 .simple-menu a:hover {
   text-decoration: underline;
+}
+
+.mega-column a,
+.simple-menu a {
+  color: #111 !important;
+}
+
+.mega-column a.router-link-active,
+.simple-menu a.router-link-active,
+.mega-column a:visited,
+.simple-menu a:visited {
+  color: #111 !important;
 }

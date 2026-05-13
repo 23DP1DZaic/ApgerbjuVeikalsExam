@@ -176,13 +176,20 @@
     </div>
   </div>
 
-  <div class="nav-item">
-    <router-link :to="{ path: '/shop', query: { category: 'Sneakers' } }">SNEAKERS</router-link>
-  </div>
+<div class="nav-item">
+  <router-link
+    :to="{ path: '/shop', query: { category: 'Sneakers' } }"
+    @click="closeMegaMenu"
+  >
+    SNEAKERS
+  </router-link>
+</div>
 
-  <div class="nav-item">
-    <router-link to="/about">ABOUT US</router-link>
-  </div>
+<div class="nav-item">
+  <router-link to="/about" @click="closeMegaMenu">
+    ABOUT US
+  </router-link>
+</div>
 </nav>
     </header>
 
