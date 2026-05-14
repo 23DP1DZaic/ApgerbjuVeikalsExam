@@ -3,7 +3,7 @@
     <header class="main-header">
       <div class="header-top container">
         <div class="logo">
-          <router-link to="/">Name</router-link>
+          <router-link to="/">Sunny</router-link>
         </div>
 
       <form class="header-search" @submit.prevent="submitHeaderSearch">
@@ -19,7 +19,7 @@
           {{ t.addListing }}
         </router-link>
 
-        <router-link v-if="user" to="/messages">
+        <router-link to="/messages">
           {{ t.messages }}
         </router-link>
 
@@ -44,12 +44,14 @@
               {{ user.display_name || user.name }}
             </span>
           </router-link>
+        </div>
 
-          <button class="logout-btn" @click="logout">
-            {{ t.logout }}
-          </button>
+        <div v-else class="auth-links">
+          <router-link to="/login">{{ t.login }}</router-link>
+          <router-link to="/register">{{ t.register }}</router-link>
+        </div>
 
-          <button
+        <button
           type="button"
           class="language-toggle"
           @click="toggleLanguage"
@@ -62,13 +64,6 @@
             {{ language === 'lv' ? 'LV' : 'EN' }}
           </span>
         </button>
-
-        </div>
-
-        <div v-else class="auth-links">
-          <router-link to="/login">{{ t.login }}</router-link>
-          <router-link to="/register">{{ t.register }}</router-link>
-        </div>
       </nav>
       </div>
 
@@ -244,8 +239,8 @@
     <footer class="main-footer">
       <div class="container">
         <div class="footer-section">
-          <h4>Name</h4>
-          <p>description</p>
+          <h4>Sunny</h4>
+          <p>Vienkārša platforma unikālu apģērbu pirkšanai un pārdošanai.</p>
         </div>
 
         <div class="footer-section">
@@ -279,8 +274,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getCurrentUser, clearAuth, type AuthUser } from './services/auth'
+import { getCurrentUser, clearAuth, type AuthUser, getUser } from './services/auth'
 import { API_URL, fetchWithAuth } from './services/api'
+
+
 
 type CategoryNode = {
   id: number
@@ -434,15 +431,7 @@ const handleClickOutsideMegaMenu = (event: MouseEvent) => {
   }
 }
 
-const logout = async () => {
-  try {
-    await fetchWithAuth(`${API_URL}/api/logout`, {
-      method: 'POST',
-    })
-  } catch (error) {
-    console.error('Logout request failed:', error)
-  }
-
+const logout = () => {
   clearAuth()
   user.value = null
   router.push('/login')
@@ -464,10 +453,13 @@ onMounted(() => {
   loadCategoryTree('men')
   loadCategoryTree('women')
   document.addEventListener('click', handleClickOutsideMegaMenu)
+  window.addEventListener('auth-changed', refreshUser)
 })
+
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutsideMegaMenu)
+  window.removeEventListener('auth-changed', refreshUser)
 })
 
 watch(
@@ -528,6 +520,16 @@ const t = computed(() => translations[language.value])
 const toggleLanguage = () => {
   language.value = language.value === 'en' ? 'lv' : 'en'
   localStorage.setItem('language', language.value)
+
+  window.dispatchEvent(
+    new CustomEvent('language-changed', {
+      detail: language.value,
+    })
+  )
+}
+
+const refreshUser = () => {
+  user.value = getUser()
 }
 
 </script>

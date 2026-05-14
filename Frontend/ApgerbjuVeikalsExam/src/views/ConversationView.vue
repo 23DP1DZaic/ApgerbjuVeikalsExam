@@ -8,21 +8,24 @@
           </button>
 
         <div v-if="conversation" class="chat-header-content">
-        <div class="chat-listing-preview">
-            <img
+        <div
+        class="chat-listing-preview clickable-listing-preview"
+        @click="openListing"
+        >
+        <img
             v-if="listingImage"
             :src="listingImage"
             :alt="conversation.listing?.title || 'Listing'"
-            >
+        >
 
-            <div v-else class="chat-listing-placeholder">
+        <div v-else class="chat-listing-placeholder">
             No image
-            </div>
+        </div>
 
-            <div>
+        <div>
             <h2>{{ conversation.listing?.title || 'Deleted listing' }}</h2>
             <p>Listing</p>
-            </div>
+        </div>
         </div>
 
         <div class="chat-user-preview">
@@ -97,7 +100,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
-import { getUser } from '../services/auth'
+import { getUser, getToken} from '../services/auth'
 
 type User = {
   id: number
@@ -114,6 +117,7 @@ type ListingImage = {
 type Listing = {
   id: number
   title: string
+  price?: number
   images?: ListingImage[]
 }
 
@@ -144,6 +148,14 @@ const sending = ref(false)
 const error = ref('')
 const newMessage = ref('')
 
+const openListing = () => {
+  if (!conversation.value?.listing?.id) return
+
+  router.push(`/listing/${conversation.value.listing.id}`)
+}
+
+
+
 const listingImage = computed(() => {
   const imagePath = conversation.value?.listing?.images?.[0]?.image_path
 
@@ -155,6 +167,13 @@ const listingImage = computed(() => {
 const loadConversation = async () => {
   loading.value = true
   error.value = ''
+
+  const token = getToken()
+
+    if (!token) {
+    router.push('/login')
+    return
+    }
 
   try {
     const response = await fetchWithAuth(

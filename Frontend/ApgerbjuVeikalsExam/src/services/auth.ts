@@ -70,9 +70,11 @@ export const setUser = (user: AuthUser): void => {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
-export const clearAuth = (): void => {
-  localStorage.removeItem(USER_KEY)
-  localStorage.removeItem(TOKEN_KEY)
+export const clearAuth = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+
+  window.dispatchEvent(new Event('auth-changed'))
 }
 
 export const getCurrentUser = async (): Promise<AuthUser | null> => {

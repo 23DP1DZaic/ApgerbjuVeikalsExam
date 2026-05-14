@@ -25,9 +25,31 @@
               </div>
             </div>
 
-            <router-link to="/settings/profile" class="edit-profile-btn">
-              Edit Profile
-            </router-link>
+            <!-- <button class="logout-btn" @click="logout">
+              {{ t.logout }}
+            </button> -->
+
+              <!-- <button
+              type="button"
+              class="account-logout-btn"
+              @click="logout"
+            >
+              Logout
+            </button> -->
+
+            <div class="account-actions">
+              <button
+                type="button"
+                class="account-logout-link"
+                @click="logout"
+              >
+                Logout
+              </button>
+
+              <router-link to="/settings/profile" class="edit-profile-btn">
+                Edit Profile
+              </router-link>
+            </div>
           </div>
 
           <div class="account-stats">
@@ -121,8 +143,16 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { getCurrentUser, type AuthUser, type Listing } from '../services/auth'
+import { clearAuth } from '../services/auth'
+
+
 
 const router = useRouter()
+
+const logout = () => {
+  clearAuth()
+  router.push('/login')
+}
 
 const user = ref<AuthUser | null>(null)
 

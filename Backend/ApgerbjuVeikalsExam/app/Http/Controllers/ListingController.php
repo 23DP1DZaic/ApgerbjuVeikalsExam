@@ -189,7 +189,7 @@ class ListingController extends Controller
             'color' => 'required|string',
             'size' => 'required|string',
             'condition' => 'required|string',
-            'images' => 'required|array|min:1|max:5',
+            'images' => 'required|array|min:1|max:8',
             'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 

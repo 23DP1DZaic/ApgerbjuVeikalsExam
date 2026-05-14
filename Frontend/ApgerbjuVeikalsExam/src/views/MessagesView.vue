@@ -77,6 +77,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { getUser } from '../services/auth'
+import { getToken } from '../services/auth'
 
 type User = {
   id: number
@@ -122,6 +123,13 @@ const error = ref('')
 const loadConversations = async () => {
   loading.value = true
   error.value = ''
+
+  const token = getToken()
+
+    if (!token) {
+    router.push('/login')
+    return
+    }
 
   try {
     const response = await fetchWithAuth(`${API_URL}/api/conversations`, {

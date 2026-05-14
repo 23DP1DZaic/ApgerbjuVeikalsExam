@@ -1,40 +1,28 @@
 <template>
-  <div class="auth-page">
-    <div class="auth-card">
-      <h1>Add Listing</h1>
+  <div class="auth-page create-listing-page">
+    <div class="auth-card create-listing-card">
+      <div class="create-listing-header">
+        <div>
+          <h1>Add a new listing</h1>
+          <p>Fill in the details below to create your marketplace listing.</p>
+        </div>
 
-      <form @submit.prevent="createListing">
-        <div class="form-group">
-          <label>Title</label>
-          <input v-model="form.title" required
-          placeholder="Item name">
+        <!-- <router-link to="/about" class="sell-guide-link">
+          How to sell guide →
+        </router-link> -->
+      </div>
+
+      <form class="create-listing-form" @submit.prevent="createListing">
+        <div class="form-section-title full-width">
+          Details
         </div>
 
         <div class="form-group">
-          <label>Description</label>
-          <textarea
-            v-model="form.description"
-            placeholder="Add details about condition, how the garment fits, additional measurements, etc."
-          ></textarea>
-        </div>
+          <label>Department</label>
 
-        <div class="form-group">
-          <label>Price</label>
-          <input
-            v-model="form.price"
-            type="text"
-            inputmode="numeric"
-            placeholder="Price (EUR)"
-            required
-            @input="onlyNumbers"
-          />
-        </div>
-
-        <div class="form-group">
-          <label>Department </label>
           <CustomSelect
             v-model="form.gender"
-            placeholder="Select Department"
+            placeholder="Men / Women"
             :options="genderOptions"
           />
         </div>
@@ -43,20 +31,32 @@
           <label>Category</label>
 
           <CustomSelect
-            v-model="form.category"
-            :placeholder="form.gender ? 'Select Category' : 'Select Department First'"
-            :groups="categorySelectGroups"
+            v-model="form.parentCategory"
+            :placeholder="form.gender ? 'Select category' : 'Select department first'"
+            :options="parentCategoryOptions"
             :disabled="!form.gender"
           />
         </div>
 
         <div class="form-group">
-          <label>Brand</label>
+          <label>Sub-category</label>
+
+          <CustomSelect
+            v-model="form.category"
+            :placeholder="form.parentCategory ? 'Select sub-category' : 'Select category first'"
+            :options="subcategoryOptions"
+            :disabled="!form.parentCategory"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Designer / Brand</label>
 
           <input
             v-model="form.brand"
             list="brand-list"
-            placeholder="Search brand..."
+            :placeholder="form.category ? 'Nike, Adidas, Zara, Other...' : 'Select sub-category first'"
+            :disabled="!form.category"
             required
           >
 
@@ -69,17 +69,42 @@
           </datalist>
 
           <p class="field-help">
-            Start typing and choose a brand from the list.
+            Choose a brand from the list. If you do not know it, choose 'Other'.
           </p>
         </div>
 
         <div class="form-group">
-          <label>Condition</label>
+          <label>Size</label>
+
           <CustomSelect
-            v-model="form.condition"
-            placeholder="Select condition"
-            :options="conditionOptions"
+            v-model="form.size"
+            :placeholder="isFootwearCategory ? 'Select shoe size' : 'Select clothing size'"
+            :options="sizeOptions"
+            :disabled="!form.category"
           />
+        </div>
+
+        <div class="form-group">
+          <label>Item name</label>
+
+          <input
+            v-model="form.title"
+            placeholder="Item name"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label>Price</label>
+
+          <input
+            v-model="form.price"
+            type="text"
+            inputmode="numeric"
+            placeholder="Enter price"
+            required
+            @input="onlyNumbers"
+          >
         </div>
 
         <div
@@ -93,13 +118,16 @@
             class="custom-color-select"
             @click="isColorDropdownOpen = !isColorDropdownOpen"
           >
-            <span
-              v-if="selectedColor"
-              class="color-dot"
-              :style="{ background: selectedColor.value }"
-            ></span>
+          <span
+            v-if="selectedColor"
+            class="color-dot"
+            :class="{ 'white-dot': selectedColor.name === 'White' }"
+            :style="{ background: selectedColor.value }"
+          ></span>
 
             <span>{{ selectedColor ? selectedColor.name : 'Select color' }}</span>
+
+            <span class="custom-select-arrow">⌄</span>
           </button>
 
           <div v-if="isColorDropdownOpen" class="custom-color-menu">
@@ -121,15 +149,25 @@
         </div>
 
         <div class="form-group">
-          <label>Size</label>
-                  <CustomSelect
-            v-model="form.size"
-            :placeholder="isFootwearCategory ? 'Select shoe size' : 'Select clothing size'"
-            :options="sizeOptions"
+          <label>Condition</label>
+
+          <CustomSelect
+            v-model="form.condition"
+            placeholder="Item condition"
+            :options="conditionOptions"
           />
         </div>
 
-        <div class="form-group">
+        <div class="form-group full-width">
+          <label>Description</label>
+
+          <textarea
+            v-model="form.description"
+            placeholder="Add details about condition, fit, measurements, shipping, retail price, etc. Optional."
+          ></textarea>
+        </div>
+
+        <div class="form-group full-width">
           <label>Images</label>
 
           <div class="file-upload-box">
@@ -154,16 +192,21 @@
             Add 1–5 images. JPG, PNG, WEBP. Max 2MB each.
           </p>
 
-          <div v-if="imagePreviews.length" class="image-preview-grid">
-            <div
-              v-for="(preview, index) in imagePreviews"
-              :key="preview"
-              class="image-preview-card"
+        <div v-if="imagePreviews.length" class="image-preview-grid">
+          <div
+            v-for="(preview, index) in imagePreviews"
+            :key="preview"
+            class="image-preview-card"
+          >
+            <img
+              :src="preview"
+              :alt="imageFiles[index]?.name || 'Listing image'"
             >
-              <img
-                :src="preview"
-                :alt="imageFiles[index]?.name || 'Listing image'"
-              >
+
+            <div class="image-preview-info">
+              <p class="image-preview-name">
+                {{ imageFiles[index]?.name || 'Listing image' }}
+              </p>
 
               <button
                 type="button"
@@ -175,13 +218,21 @@
             </div>
           </div>
         </div>
+        </div>
 
-        <button class="auth-button" type="submit">
-          <p>Create Listing</p>
-        </button>
+        <p v-if="message" class="success full-width">
+          {{ message }}
+        </p>
 
-        <p v-if="message" class="success">{{ message }}</p>
-        <p v-if="error" class="error">{{ error }}</p>
+        <p v-if="error" class="error full-width">
+          {{ error }}
+        </p>
+
+        <div class="submit-row">
+          <button class="auth-button" type="submit">
+            <p>Create Listing</p>
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -190,9 +241,9 @@
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import CustomSelect from '../components/CustomSelect.vue'
 import { getUser, getToken, clearAuth } from '../services/auth'
 import { API_URL, fetchWithAuth } from '../services/api'
-import CustomSelect from '../components/CustomSelect.vue'
 
 type Category = {
   id: number
@@ -210,10 +261,10 @@ const router = useRouter()
 
 const message = ref('')
 const error = ref('')
+
 const imageFiles = ref<File[]>([])
 const imagePreviews = ref<string[]>([])
 const categories = ref<Category[]>([])
-
 
 const user = getUser()
 
@@ -221,6 +272,7 @@ const form = reactive({
   title: '',
   description: '',
   price: '',
+  parentCategory: '',
   category: '',
   brand: '',
   color: '',
@@ -229,13 +281,23 @@ const form = reactive({
   gender: '',
 })
 
+const genderOptions = [
+  { label: 'Men', value: 'men' },
+  { label: 'Women', value: 'women' },
+]
+
+const conditionOptions = [
+  { label: 'New', value: 'new' },
+  { label: 'Used', value: 'used' },
+]
+
 const brands = [
+  'A-Cold-Wall',
   'Acne Studios',
   'Adidas',
-  'A-Cold-Wall',
   'Alexander McQueen',
   'Amiri',
-  'Arc\'teryx',
+  "Arc'teryx",
   'Balenciaga',
   'Bape',
   'Bottega Veneta',
@@ -258,8 +320,8 @@ const brands = [
   'Helmut Lang',
   'Issey Miyake',
   'Jacquemus',
-  'Jordan',
   'Jil Sander',
+  'Jordan',
   'Kapital',
   'Kiko Kostadinov',
   'Loewe',
@@ -287,36 +349,152 @@ const brands = [
   'Vetements',
   'Vintage',
   'Vivienne Westwood',
-  'Yohji Yamamoto',
   'Y-3',
+  'Yohji Yamamoto',
   'Zara',
-]
+  'Other',
+].sort((a, b) => a.localeCompare(b))
 
-const clothingSizes = [
-  'XXS',
-  'XS',
-  'S',
-  'M',
-  'L',
-  'XL',
-  'XXL',
-]
-
+const clothingSizes = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL']
 const shoeSizes = [
-  'EU 36',
-  'EU 37',
-  'EU 38',
-  'EU 39',
-  'EU 40',
-  'EU 41',
-  'EU 42',
-  'EU 43',
-  'EU 44',
-  'EU 45',
-  'EU 46',
+  '35',
+  '36',
+  '37',
+  '38',
+  '39',
+  '40',
+  '41',
+  '42',
+  '43',
+  '44',
+  '45',
+  '46',
+  '47',
 ]
 
+const footwearCategoryNames = [
+  'Boots',
+  'Casual Leather Shoes',
+  'Formal Shoes',
+  'Hi-Top Sneakers',
+  'Low-Top Sneakers',
+  'Sandals',
+  'Slip Ons',
+  'Sneakers',
+  'Footwear',
+]
 
+const colors = [
+  { name: 'Black', value: '#000000' },
+  { name: 'White', value: '#ffffff' },
+  { name: 'Gray', value: '#e5e5e5' },
+  { name: 'Brown', value: '#6b4a3a' },
+  { name: 'Beige', value: '#e6cf91' },
+  { name: 'Yellow', value: '#ffd91a' },
+  { name: 'Red', value: '#f10b0b' },
+  { name: 'Orange', value: '#ff6500' },
+  { name: 'Pink', value: '#ec5aaa' },
+  { name: 'Purple', value: '#5f1fd6' },
+  { name: 'Blue', value: '#1177bd' },
+  { name: 'Green', value: '#4faf0b' },
+  {
+    name: 'Multi',
+    value: 'linear-gradient(135deg, red, orange, yellow, green, blue, purple)',
+  },
+  {
+    name: 'Silver',
+    value: 'linear-gradient(135deg, #777, #eee, #aaa)',
+  },
+  {
+    name: 'Gold',
+    value: 'linear-gradient(135deg, #b99b22, #f3e37c, #c8a600)',
+  },
+]
+
+const selectedColor = computed(() => {
+  return colors.find((color) => color.name === form.color) || null
+})
+
+const isFootwearCategory = computed(() => {
+  return footwearCategoryNames.some((name) => {
+    return name.toLowerCase() === form.category.toLowerCase()
+  })
+})
+
+const availableSizes = computed(() => {
+  return isFootwearCategory.value ? shoeSizes : clothingSizes
+})
+
+const sizeOptions = computed(() => {
+  return availableSizes.value.map((size) => ({
+    label: size,
+    value: size,
+  }))
+})
+
+const parentCategories = computed(() => {
+  if (!form.gender) return []
+
+  return categories.value
+    .filter((category) => {
+      return category.department === form.gender && category.parent_id === null
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
+})
+
+const parentCategoryOptions = computed(() => {
+  return parentCategories.value.map((category) => ({
+    label: category.name,
+    value: String(category.id),
+  }))
+})
+
+const subcategories = computed(() => {
+  if (!form.parentCategory) return []
+
+  return categories.value
+    .filter((category) => {
+      return String(category.parent_id) === String(form.parentCategory)
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
+})
+
+const subcategoryOptions = computed(() => {
+  return subcategories.value.map((category) => ({
+    label: category.name,
+    value: category.name,
+  }))
+})
+
+
+
+watch(
+  () => form.gender,
+  () => {
+    form.parentCategory = ''
+    form.category = ''
+    form.size = ''
+  }
+)
+
+watch(
+  () => form.parentCategory,
+  () => {
+    form.category = ''
+    form.size = ''
+  }
+)
+
+watch(
+  () => form.category,
+  () => {
+    form.size = ''
+  }
+)
+
+const onlyNumbers = () => {
+  form.price = form.price.replace(/\D/g, '')
+}
 
 const loadCategories = async () => {
   try {
@@ -347,120 +525,13 @@ const loadCategories = async () => {
   }
 }
 
-const groupedCategories = computed(() => {
-  if (!form.gender) return []
-
-  const parentNameById = new Map<number, string>()
-
-  categories.value.forEach((category) => {
-    parentNameById.set(category.id, category.name)
-  })
-
-  const children = categories.value.filter((category) => {
-    return (
-      category.department === form.gender &&
-      category.parent_id !== null
-    )
-  })
-
-  const groups = new Map<string, {
-    parentName: string
-    children: Category[]
-  }>()
-
-  children.forEach((category) => {
-    const parentName =
-      category.parent?.name ||
-      parentNameById.get(Number(category.parent_id)) ||
-      'Other'
-
-    if (!groups.has(parentName)) {
-      groups.set(parentName, {
-        parentName,
-        children: [],
-      })
-    }
-
-    groups.get(parentName)?.children.push(category)
-  })
-
-  return Array.from(groups.values()).sort((a, b) =>
-    a.parentName.localeCompare(b.parentName)
-  )
-})
-
-const categorySelectGroups = computed(() => {
-  return groupedCategories.value.map((group) => ({
-    label: group.parentName,
-    options: group.children.map((category) => ({
-      label: category.name,
-      value: category.name,
-    })),
-  }))
-})
-
-const footwearKeywords = [
-  'footwear',
-  'shoes',
-  'sneakers',
-  'boots',
-  'sandals',
-  'heels',
-  'flats',
-  'slip ons',
-  'low-top sneakers',
-  'hi-top sneakers',
-  'casual leather shoes',
-  'formal shoes',
-]
-
-const isFootwearCategory = computed(() => {
-  if (!form.category) return false
-
-  const selectedCategory = categories.value.find(
-    (category) => category.name === form.category
-  )
-
-  if (!selectedCategory) return false
-
-  const parentCategory = categories.value.find(
-    (category) => category.id === selectedCategory.parent_id
-  )
-
-  const categoryName = selectedCategory.name.toLowerCase()
-  const parentName = parentCategory?.name.toLowerCase() || ''
-
-  return footwearKeywords.some((keyword) => {
-    return categoryName.includes(keyword) || parentName.includes(keyword)
-  })
-})
-
-const availableSizes = computed(() => {
-  return isFootwearCategory.value ? shoeSizes : clothingSizes
-})
-
-watch(
-  () => form.gender,
-  () => {
-    form.category = ''
-    form.size = ''
-  }
-)
-
-watch(
-  () => form.category,
-  () => {
-    form.size = ''
-  }
-)
-
 const addImage = (event: Event) => {
   const input = event.target as HTMLInputElement
 
   if (!input.files || !input.files[0]) return
 
-  if (imageFiles.value.length >= 5) {
-    error.value = 'You can add maximum 5 images'
+  if (imageFiles.value.length >= 8) {
+    error.value = 'You can add maximum 8 images'
     input.value = ''
     return
   }
@@ -481,6 +552,7 @@ const addImage = (event: Event) => {
   error.value = ''
   input.value = ''
 }
+
 const removeImage = (index: number) => {
   const previewUrl = imagePreviews.value[index]
 
@@ -490,6 +562,11 @@ const removeImage = (index: number) => {
 
   imageFiles.value.splice(index, 1)
   imagePreviews.value.splice(index, 1)
+}
+
+const selectColor = (colorName: string) => {
+  form.color = colorName
+  isColorDropdownOpen.value = false
 }
 
 const createListing = async () => {
@@ -507,36 +584,37 @@ const createListing = async () => {
 
   const normalizedBrand = form.brand.trim().toLowerCase()
 
-const selectedBrand = brands.find(
-  (brand) => brand.toLowerCase() === normalizedBrand
-)
+  const selectedBrand = brands.find(
+    (brand) => brand.toLowerCase() === normalizedBrand
+  )
 
-if (!selectedBrand) {
-  error.value = 'Please choose a brand from the list'
-  return
-}
+  if (!selectedBrand) {
+    error.value = 'Please choose a brand from the list'
+    return
+  }
 
-const priceNumber = Number(form.price)
+  const priceNumber = Number(form.price)
 
-if (Number.isNaN(priceNumber) || priceNumber <= 0) {
-  error.value = 'Price must be a valid number'
-  return
-}
+  if (Number.isNaN(priceNumber) || priceNumber <= 0) {
+    error.value = 'Price must be a valid number'
+    return
+  }
 
-if (
-  !form.title ||
-  !form.price ||
-  !form.category ||
-  !form.gender ||
-  !form.brand ||
-  !form.color ||
-  !form.size ||
-  !form.condition ||
-  imageFiles.value.length === 0
-) {
-  error.value = 'Fill in all required fields'
-  return
-}
+  if (
+    !form.title ||
+    !form.price ||
+    !form.parentCategory ||
+    !form.category ||
+    !form.gender ||
+    !form.brand ||
+    !form.color ||
+    !form.size ||
+    !form.condition ||
+    imageFiles.value.length === 0
+  ) {
+    error.value = 'Fill in all required fields'
+    return
+  }
 
   const formData = new FormData()
 
@@ -576,42 +654,15 @@ if (
       return
     }
 
-    message.value = 'Success'
+    message.value = 'Listing created successfully'
 
     setTimeout(() => {
       router.push('/shop')
-    }, 1200)
+    }, 1000)
   } catch (err) {
     console.error('Create listing fetch error:', err)
     error.value = 'Server connection error'
   }
-}
-
-const colors = [
-  { name: 'Black', value: '#000000' },
-  { name: 'White', value: '#ffffff' },
-  { name: 'Gray', value: '#e5e5e5' },
-  { name: 'Brown', value: '#6b4a3a' },
-  { name: 'Beige', value: '#e6cf91' },
-  { name: 'Yellow', value: '#ffd91a' },
-  { name: 'Red', value: '#f10b0b' },
-  { name: 'Orange', value: '#ff6500' },
-  { name: 'Pink', value: '#ec5aaa' },
-  { name: 'Purple', value: '#5f1fd6' },
-  { name: 'Blue', value: '#1177bd' },
-  { name: 'Green', value: '#4faf0b' },
-  { name: 'Multi', value: 'linear-gradient(135deg, red, orange, yellow, green, blue, purple)' },
-  { name: 'Silver', value: 'linear-gradient(135deg, #777, #eee, #aaa)' },
-  { name: 'Gold', value: 'linear-gradient(135deg, #b99b22, #f3e37c, #c8a600)' },
-]
-
-const selectedColor = computed(() => {
-  return colors.find((color) => color.name === form.color) || null
-})
-
-const selectColor = (colorName: string) => {
-  form.color = colorName
-  isColorDropdownOpen.value = false
 }
 
 const isColorDropdownOpen = ref(false)
@@ -626,27 +677,6 @@ const handleClickOutside = (event: MouseEvent) => {
   ) {
     isColorDropdownOpen.value = false
   }
-}
-
-const genderOptions = [
-  { label: 'Men', value: 'men' },
-  { label: 'Women', value: 'women' },
-]
-
-const conditionOptions = [
-  { label: 'New', value: 'new' },
-  { label: 'Used', value: 'used' },
-]
-
-const sizeOptions = computed(() => {
-  return availableSizes.value.map((size) => ({
-    label: size,
-    value: size,
-  }))
-})
-
-const onlyNumbers = () => {
-  form.price = form.price.replace(/\D/g, '')
 }
 
 onMounted(() => {

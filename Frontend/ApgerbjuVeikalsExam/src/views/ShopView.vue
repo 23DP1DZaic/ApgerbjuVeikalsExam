@@ -1,183 +1,205 @@
 <template>
   <div class="shop">
-    <div class="container"></div>
-
     <div class="container shop-container">
-<aside class="shop-sidebar">
-  <div class="filter-section">
-    <h3>Brand</h3>
-    <input
-      v-model="brandFilter"
-      type="text"
-      class="filter-input"
-      placeholder="Nike, Adidas..."
-    >
-  </div>
+      <aside class="shop-sidebar">
+        <div class="filter-section">
+          <h3>Brand</h3>
+          <input
+            v-model="brandFilter"
+            type="text"
+            class="filter-input"
+            placeholder="Nike, Adidas..."
+          >
+        </div>
 
-  <div class="filter-section">
-    <h3>Size</h3>
-    <select v-model="sizeFilter" class="sort-select">
-      <option value="">All sizes</option>
-      <option value="XS">XS</option>
-      <option value="S">S</option>
-      <option value="M">M</option>
-      <option value="L">L</option>
-      <option value="XL">XL</option>
-    </select>
-  </div>
+        <div class="filter-section">
+          <h3>Size</h3>
+          <select v-model="sizeFilter" class="sort-select">
+            <option value="">All sizes</option>
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+          </select>
+        </div>
 
-  <div class="filter-section">
-    <h3>Color</h3>
-    <select v-model="colorFilter" class="sort-select">
-      <option value="">All colors</option>
-      <option value="Black">Black</option>
-      <option value="White">White</option>
-      <option value="Gray">Gray</option>
-      <option value="Brown">Brown</option>
-      <option value="Beige">Beige</option>
-      <option value="Yellow">Yellow</option>
-      <option value="Red">Red</option>
-      <option value="Orange">Orange</option>
-      <option value="Pink">Pink</option>
-      <option value="Purple">Purple</option>
-      <option value="Blue">Blue</option>
-      <option value="Green">Green</option>
-      <option value="Multi">Multi</option>
-      <option value="Silver">Silver</option>
-      <option value="Gold">Gold</option>
-    </select>
-  </div>
+        <div class="filter-section">
+          <h3>Color</h3>
+          <select v-model="colorFilter" class="sort-select">
+            <option value="">All colors</option>
+            <option value="Black">Black</option>
+            <option value="White">White</option>
+            <option value="Gray">Gray</option>
+            <option value="Brown">Brown</option>
+            <option value="Beige">Beige</option>
+            <option value="Yellow">Yellow</option>
+            <option value="Red">Red</option>
+            <option value="Orange">Orange</option>
+            <option value="Pink">Pink</option>
+            <option value="Purple">Purple</option>
+            <option value="Blue">Blue</option>
+            <option value="Green">Green</option>
+            <option value="Multi">Multi</option>
+            <option value="Silver">Silver</option>
+            <option value="Gold">Gold</option>
+          </select>
+        </div>
 
-  <div class="filter-section">
-    <h3>Condition</h3>
-    <select v-model="conditionFilter" class="sort-select">
-      <option value="">All conditions</option>
-      <option value="new">New</option>
-      <option value="used">Used</option>
-    </select>
-  </div>
+        <div class="filter-section">
+          <h3>Condition</h3>
+          <select v-model="conditionFilter" class="sort-select">
+            <option value="">All conditions</option>
+            <option value="new">New</option>
+            <option value="used">Used</option>
+          </select>
+        </div>
 
-  <div class="filter-section">
-    <h3>Price</h3>
+        <div class="filter-section">
+          <h3>Price</h3>
 
-    <div class="price-inputs">
-      <input
-        v-model="minPrice"
-        type="number"
-        min="0"
-        class="filter-input"
-        placeholder="Min"
-      >
-      <input
-        v-model="maxPrice"
-        type="number"
-        min="0"
-        class="filter-input"
-        placeholder="Max"
-      >
-    </div>
-  </div>
-
-
-  <div class="filter-section">
-    <h3>Sort by</h3>
-    <select v-model="sortOption" class="sort-select">
-      <option value="newest">New arrivals</option>
-      <option value="price-low">Price (Low)</option>
-      <option value="price-high">Price (High)</option>
-      <option value="title-az">Title A-Z</option>
-    </select>
-  </div>
-
-<div class="filter-actions">
-  <button class="apply-filters" @click="applyFilters">
-    Apply filters
-  </button>
-
-  <button class="reset-filters" @click="resetFilters">
-    Reset filters
-  </button>
-</div>
-</aside>
-    <main class="shop-main">
-      <div class="products-header">
-        <p v-if="loading">Loading...</p>
-        <p v-else>{{ products.length }} items</p>
-      </div>
-
-      <p v-if="error" class="error">{{ error }}</p>
-
-      <div v-if="!loading" class="products-grid">
-        <div
-          v-for="product in products"
-          :key="product.id"
-          class="product-card"
-          @click="viewProduct(product)"
-        >
-          <div class="product-image">
-            <img
-              v-if="product.images && product.images.length"
-              :src="`${API_URL}/storage/${product.images?.[0]?.image_path || ''}`"
-              :alt="product.title"
+          <div class="price-inputs">
+            <input
+              v-model="minPrice"
+              type="number"
+              min="0"
+              class="filter-input"
+              placeholder="Min"
             >
 
-            <div v-else class="no-image">
-              No image
-            </div>
+            <input
+              v-model="maxPrice"
+              type="number"
+              min="0"
+              class="filter-input"
+              placeholder="Max"
+            >
           </div>
+        </div>
 
-          <div class="product-info">
-            <h3>{{ product.title }}</h3>
+        <div class="filter-section">
+          <h3>Sort by</h3>
+          <select v-model="sortOption" class="sort-select">
+            <option value="newest">New arrivals</option>
+            <option value="price-low">Price (Low)</option>
+            <option value="price-high">Price (High)</option>
+            <option value="title-az">Title A-Z</option>
+          </select>
+        </div>
 
-            <p>
-              {{ product.category }}
-              <span v-if="product.size"> · {{ product.size }}</span>
-              <span v-if="product.condition"> · {{ formatText(product.condition) }}</span>
-            </p>
+        <div class="filter-actions">
+          <button class="apply-filters" @click="applyFilters">
+            Apply filters
+          </button>
 
-            <span class="price">{{ product.price }} €</span>
-
-            <div class="listing-actions">
-              <button
-                class="interaction-btn"
-                :class="{ active: product.liked_by_me }"
-                @click.stop="toggleLike(product)"
-              >
-                ♥ {{ product.likes_count || 0 }}
-              </button>
-
-              <button
-                class="interaction-btn"
-                :class="{ active: product.favorited_by_me }"
-                @click.stop="toggleFavorite(product)"
-              >
-                ★ {{ product.favorites_count || 0 }}
-              </button>
-            </div>
-          </div>
-
-          <button
-            v-if="canDelete(product)"
-            class="delete-btn"
-            @click.stop="deleteListing(product.id)"
-          >
-            Delete
+          <button class="reset-filters" @click="resetFilters">
+            Reset filters
           </button>
         </div>
-      </div>
-    </main>
+      </aside>
+
+      <main class="shop-main">
+        <div class="products-header">
+          <p v-if="loading">
+            Loading...
+          </p>
+
+          <p v-else-if="products.length > 0">
+            {{ products.length }} {{ products.length === 1 ? st.item : st.items }}
+          </p>
+
+          <div v-else class="empty-shop-message">
+            <p>
+              {{ st.noItems }}
+            </p>
+
+            <button
+              type="button"
+              class="empty-shop-btn"
+              @click="resetFilters"
+            >
+              {{ st.resetFilters }}
+            </button>
+          </div>
+        </div>
+
+        <p v-if="error" class="error">
+          {{ error }}
+        </p>
+
+        <div v-if="!loading" class="products-grid">
+          <div
+            v-for="product in products"
+            :key="product.id"
+            class="product-card"
+            @click="viewProduct(product)"
+          >
+            <div class="product-image">
+              <img
+                v-if="product.images && product.images.length"
+                :src="`${API_URL}/storage/${product.images?.[0]?.image_path || ''}`"
+                :alt="product.title"
+              >
+
+              <div v-else class="no-image">
+                No image
+              </div>
+            </div>
+
+            <div class="product-info">
+              <h3>{{ product.title }}</h3>
+
+              <p>
+                {{ product.category }}
+                <span v-if="product.size"> · {{ product.size }}</span>
+                <span v-if="product.condition"> · {{ formatText(product.condition) }}</span>
+              </p>
+
+              <span class="price">{{ product.price }} €</span>
+
+              <div class="listing-actions">
+                <button
+                  class="interaction-btn"
+                  :class="{ active: product.liked_by_me }"
+                  @click.stop="toggleLike(product)"
+                >
+                  ♥ {{ product.likes_count || 0 }}
+                </button>
+
+                <button
+                  class="interaction-btn"
+                  :class="{ active: product.favorited_by_me }"
+                  @click.stop="toggleFavorite(product)"
+                >
+                  ★ {{ product.favorites_count || 0 }}
+                </button>
+              </div>
+            </div>
+
+            <button
+              v-if="canDelete(product)"
+              class="delete-btn"
+              @click.stop="deleteListing(product.id)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { getUser, getToken, clearAuth, type AuthUser } from '../services/auth'
 
 const router = useRouter()
 const route = useRoute()
+
+type Language = 'en' | 'lv'
 
 type ListingImage = {
   id: number
@@ -211,7 +233,47 @@ type Category = {
   parent_id?: number | null
 }
 
+const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
+
+const loading = ref(true)
+const error = ref<string | null>(null)
+
+const brandFilter = ref('')
+const sizeFilter = ref('')
+const colorFilter = ref('')
+const conditionFilter = ref('')
+const minPrice = ref('')
+const maxPrice = ref('')
+const onlyWithImage = ref(false)
+const sortOption = ref('newest')
+const categoryFilter = ref('')
+
+const language = ref<Language>(
+  (localStorage.getItem('language') as Language) || 'en'
+)
+
+const shopTranslations = {
+  en: {
+    item: 'item',
+    items: 'items',
+    noItems: 'No items found. Try another category.',
+    resetFilters: 'Reset filters',
+  },
+
+  lv: {
+    item: 'prece',
+    items: 'preces',
+    noItems: 'Netika atrasta neviena prece. Izmēģini citu kategoriju.',
+    resetFilters: 'Atiestatīt filtrus',
+  },
+}
+
+const st = computed(() => shopTranslations[language.value])
+
+const updateLanguage = () => {
+  language.value = (localStorage.getItem('language') as Language) || 'en'
+}
 
 const loadCategories = async () => {
   try {
@@ -246,28 +308,11 @@ const availableCategoryFilters = computed(() => {
   return categories.value.filter((category) => category.parent_id !== null)
 })
 
-const categoryFilter = ref('')
-
-const products = ref<Product[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
-
-const brandFilter = ref('')
-const sizeFilter = ref('')
-const colorFilter = ref('')
-const conditionFilter = ref('')
-const genderFilter = ref('')
-const minPrice = ref('')
-const maxPrice = ref('')
-const onlyWithImage = ref(false)
-const sortOption = ref('newest')
-
 const syncFiltersFromRoute = () => {
   brandFilter.value = String(route.query.brand || '')
   sizeFilter.value = String(route.query.size || '')
   colorFilter.value = String(route.query.color || '')
   conditionFilter.value = String(route.query.condition || '')
-  genderFilter.value = String(route.query.gender || '')
   minPrice.value = String(route.query.min_price || '')
   maxPrice.value = String(route.query.max_price || '')
   sortOption.value = String(route.query.sort || 'newest')
@@ -287,7 +332,6 @@ const updateRouteWithFilters = () => {
       size: sizeFilter.value || undefined,
       color: colorFilter.value || undefined,
       condition: conditionFilter.value || undefined,
-      gender: genderFilter.value || undefined,
       min_price: minPrice.value || undefined,
       max_price: maxPrice.value || undefined,
       has_images: onlyWithImage.value ? '1' : undefined,
@@ -309,10 +353,6 @@ const fetchProducts = async () => {
 
     if (route.query.search) {
       params.append('search', String(route.query.search))
-    }
-
-    if (route.query.gender) {
-      params.append('gender', String(route.query.gender))
     }
 
     if (route.query.category) {
@@ -356,6 +396,7 @@ const fetchProducts = async () => {
     }
 
     const queryString = params.toString()
+
     const url = queryString
       ? `${API_URL}/api/listings?${queryString}`
       : `${API_URL}/api/listings`
@@ -380,7 +421,7 @@ const fetchProducts = async () => {
       return
     }
 
-    products.value = data
+    products.value = Array.isArray(data) ? data : []
   } catch (err) {
     console.error('Fetch listings error:', err)
     error.value = 'Could not connect to backend'
@@ -389,22 +430,6 @@ const fetchProducts = async () => {
     loading.value = false
   }
 }
-
-watch(
-  () => route.query,
-  () => {
-    syncFiltersFromRoute()
-    fetchProducts()
-  }
-)
-
-
-
-onMounted(() => {
-  syncFiltersFromRoute()
-  loadCategories()
-  fetchProducts()
-})
 
 const resetFilters = () => {
   brandFilter.value = ''
@@ -421,7 +446,6 @@ const resetFilters = () => {
     path: '/shop',
     query: {
       search: route.query.search || undefined,
-      category: route.query.category || undefined,
       section: route.query.section || undefined,
     },
   })
@@ -541,5 +565,23 @@ const formatText = (value?: string | null) => {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
+watch(
+  () => route.query,
+  () => {
+    syncFiltersFromRoute()
+    fetchProducts()
+  }
+)
 
+onMounted(() => {
+  syncFiltersFromRoute()
+  loadCategories()
+  fetchProducts()
+
+  window.addEventListener('language-changed', updateLanguage)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('language-changed', updateLanguage)
+})
 </script>

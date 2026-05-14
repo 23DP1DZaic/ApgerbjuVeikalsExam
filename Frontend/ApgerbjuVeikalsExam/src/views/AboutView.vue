@@ -2,52 +2,75 @@
   <div class="about-page">
     <section class="about-hero">
       <div class="container">
-        <h1>About Us</h1>
-        <p>
-          A marketplace for buying, selling and discovering unique clothing.
-        </p>
+        <h1>Par mums</h1>
+        <p>Apģērbu tirdzniecības platforma cilvēkiem, kuri vēlas pirkt, pārdot un atrast unikālas lietas.</p>
       </div>
     </section>
 
     <section class="about-content container">
       <div class="about-block">
-        <h2>What is this platform?</h2>
+        <h2>Kas ir šī platforma?</h2>
+
         <p>
-          Our platform is a clothing marketplace where users can publish their own
-          listings, browse items from other sellers and discover unique fashion pieces.
-          The project is inspired by modern marketplaces such as Grailed and Depop.
+          Šī tīmekļa vietne ir izveidota kā mācību projekts, kura galvenā ideja ir radīt
+          ērtu apģērbu tirdzniecības platformu. Lietotāji šeit var pievienot savus
+          sludinājumus, apskatīt citu pārdevēju piedāvājumus un atrast apģērbu, kas
+          atšķiras no parastos veikalos pieejamā.
+        </p>
+
+        <p>
+          Projekta ideja radās no vēlmes izveidot vietni, kas būtu līdzīga moderniem
+          marketplace risinājumiem, bet vienlaikus vienkārša, saprotama un piemērota
+          lietotājiem Latvijā.
         </p>
       </div>
 
       <div class="about-block">
-        <h2>What can users do?</h2>
+        <h2>Ko lietotāji var darīt?</h2>
+
         <p>
-          Users can create an account, add clothing listings with photos, choose
-          category, size, color, condition and price. Other users can browse the shop,
-          filter items and open product pages to see more details.
+          Lietotāji var reģistrēties, izveidot savu profilu, pievienot apģērbu sludinājumus
+          ar attēliem, norādīt cenu, izmēru, krāsu, stāvokli, zīmolu un kategoriju.
+          Pircēji var pārlūkot sludinājumus, izmantot filtrus, meklēšanu un atvērt
+          katra produkta lapu, lai uzzinātu vairāk.
+        </p>
+
+        <p>
+          Platformā ir pievienota arī ziņu sistēma, lai lietotāji varētu sazināties par
+          konkrētu sludinājumu, uzdot jautājumus vai piedāvāt savu cenu.
         </p>
       </div>
 
       <div class="about-block">
-        <h2>Our goal</h2>
+        <h2>Mūsu stāsts</h2>
+
         <p>
-          123
-          abc
+          Daudziem cilvēkiem skapī ir apģērbi, kurus viņi vairs nevalkā, bet kuri joprojām
+          ir labā stāvoklī. Tajā pašā laikā citi meklē tieši šādas lietas — kvalitatīvus
+          džinsus, džemperus, jakas, apavus vai dizaineru apģērbu par pieejamāku cenu.
+        </p>
+
+        <p>
+          Tāpēc šī platforma tika veidota ar domu dot apģērbam otro dzīvi. Tā palīdz
+          pārdot lietas, kas vairs nav vajadzīgas, un atrast kaut ko īpašu bez lieka
+          patēriņa. Projekts apvieno programmēšanu, datubāzes, lietotāju autentifikāciju,
+          sludinājumu pārvaldību un praktisku marketplace funkcionalitāti.
         </p>
       </div>
 
-      <div class="about-block contact-box">
-        <h2>Contact</h2>
+      <div class="about-block">
+        <h2>Mūsu mērķis</h2>
+
         <p>
-          If you have questions about the platform, listings or cooperation, you can
-          contact us using the information below.
+          Mērķis ir izveidot vienkāršu, modernu un saprotamu platformu, kurā lietotāji
+          var droši publicēt sludinājumus, atrast sev interesējošus apģērbus un sazināties
+          ar citiem lietotājiem.
         </p>
 
-        <div class="contact-info">
-          <p><strong>Email:</strong> email.com</p>
-          <p><strong>Phone:</strong> +371 123</p>
-          <p><strong>Location:</strong> Riga, Latvia</p>
-        </div>
+        <p>
+          Nākotnē platformu varētu papildināt ar pasūtījumu sistēmu, lietotāju atsauksmēm,
+          drošāku maksājumu procesu un plašāku valodu atbalstu.
+        </p>
       </div>
     </section>
   </div>
