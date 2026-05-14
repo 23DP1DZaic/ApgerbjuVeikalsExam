@@ -11,6 +11,8 @@ import ProfileView from '../views/ProfileView.vue'
 import { getUser, isLoggedIn } from '../services/auth'
 import SettingsAccountView from '../views/SettingsAccountView.vue'
 import AdminCategoriesView from '../views/AdminCategoriesView.vue'
+import MessagesView from '../views/MessagesView.vue'
+import ConversationView from '../views/ConversationView.vue'
 
 
 const router = createRouter({
@@ -121,7 +123,18 @@ const router = createRouter({
     requiresAdmin: true,
     },
     },
+    {
+    path: '/messages',
+    name: 'messages',
+    component: MessagesView,
+    },
+    {
+    path: '/messages/:id',
+    name: 'conversation',
+    component: ConversationView,
+    },
   ],
+  
 })
 
 router.beforeEach((to, _from, next) => {

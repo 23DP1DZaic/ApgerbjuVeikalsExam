@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\ListingImage;
 use App\Models\ListingLike;
 use App\Models\ListingFavorite;
+use App\Models\Conversation;
 
 class Listing extends Model
 {
@@ -56,5 +57,10 @@ class Listing extends Model
     public function getFavoritesCountAttribute()
     {
         return $this->favorites()->count();
+    }
+
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
     }
 }

@@ -6,57 +6,48 @@
       <form @submit.prevent="createListing">
         <div class="form-group">
           <label>Title</label>
-          <input v-model="form.title" required>
+          <input v-model="form.title" required
+          placeholder="Item name">
         </div>
 
         <div class="form-group">
           <label>Description</label>
           <textarea
             v-model="form.description"
-            placeholder="Optional"
+            placeholder="Add details about condition, how the garment fits, additional measurements, etc."
           ></textarea>
         </div>
 
         <div class="form-group">
           <label>Price</label>
-          <input v-model="form.price" type="number" min="1" required>
+          <input
+            v-model="form.price"
+            type="text"
+            inputmode="numeric"
+            placeholder="Price (EUR)"
+            required
+            @input="onlyNumbers"
+          />
         </div>
 
         <div class="form-group">
-          <label>Gender</label>
-          <select v-model="form.gender" required>
-            <option disabled value="">Select gender</option>
-            <option value="men">Men</option>
-            <option value="women">Women</option>
-          </select>
+          <label>Department </label>
+          <CustomSelect
+            v-model="form.gender"
+            placeholder="Select Department"
+            :options="genderOptions"
+          />
         </div>
 
         <div class="form-group">
           <label>Category</label>
 
-          <select
+          <CustomSelect
             v-model="form.category"
-            required
+            :placeholder="form.gender ? 'Select Category' : 'Select Department First'"
+            :groups="categorySelectGroups"
             :disabled="!form.gender"
-          >
-            <option value="">
-              {{ form.gender ? 'Select category' : 'Select gender first' }}
-            </option>
-
-            <optgroup
-              v-for="group in groupedCategories"
-              :key="group.parentName"
-              :label="group.parentName"
-            >
-              <option
-                v-for="category in group.children"
-                :key="category.id"
-                :value="category.name"
-              >
-                {{ category.name }}
-              </option>
-            </optgroup>
-          </select>
+          />
         </div>
 
         <div class="form-group">
@@ -84,11 +75,11 @@
 
         <div class="form-group">
           <label>Condition</label>
-          <select v-model="form.condition" required>
-            <option value="">Select condition</option>
-            <option value="new">New</option>
-            <option value="used">Used</option>
-          </select>
+          <CustomSelect
+            v-model="form.condition"
+            placeholder="Select condition"
+            :options="conditionOptions"
+          />
         </div>
 
         <div
@@ -131,43 +122,56 @@
 
         <div class="form-group">
           <label>Size</label>
-
-          <select v-model="form.size" required>
-            <option value="">
-              {{ isFootwearCategory ? 'Select shoe size' : 'Select clothing size' }}
-            </option>
-
-            <option
-              v-for="size in availableSizes"
-              :key="size"
-              :value="size"
-            >
-              {{ size }}
-            </option>
-          </select>
+                  <CustomSelect
+            v-model="form.size"
+            :placeholder="isFootwearCategory ? 'Select shoe size' : 'Select clothing size'"
+            :options="sizeOptions"
+          />
         </div>
 
         <div class="form-group">
           <label>Images</label>
 
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            @change="addImage"
-          >
+          <div class="file-upload-box">
+            <input
+              id="listing-images"
+              class="file-input-hidden"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              @change="addImage"
+            >
+
+            <label for="listing-images" class="file-upload-btn">
+              Browse
+            </label>
+
+            <span class="file-upload-text">
+              {{ imageFiles.length ? `${imageFiles.length} image(s) selected` : 'No file selected' }}
+            </span>
+          </div>
 
           <p class="image-help">
             Add 1–5 images. JPG, PNG, WEBP. Max 2MB each.
           </p>
 
-          <div v-if="imageFiles.length" class="selected-images">
+          <div v-if="imagePreviews.length" class="image-preview-grid">
             <div
-              v-for="(file, index) in imageFiles"
-              :key="index"
-              class="selected-image"
+              v-for="(preview, index) in imagePreviews"
+              :key="preview"
+              class="image-preview-card"
             >
-              <span>{{ file.name }}</span>
-              <button type="button" @click="removeImage(index)">Remove</button>
+              <img
+                :src="preview"
+                :alt="imageFiles[index]?.name || 'Listing image'"
+              >
+
+              <button
+                type="button"
+                class="image-remove-btn"
+                @click="removeImage(index)"
+              >
+                Remove
+              </button>
             </div>
           </div>
         </div>
@@ -188,6 +192,7 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUser, getToken, clearAuth } from '../services/auth'
 import { API_URL, fetchWithAuth } from '../services/api'
+import CustomSelect from '../components/CustomSelect.vue'
 
 type Category = {
   id: number
@@ -206,7 +211,9 @@ const router = useRouter()
 const message = ref('')
 const error = ref('')
 const imageFiles = ref<File[]>([])
+const imagePreviews = ref<string[]>([])
 const categories = ref<Category[]>([])
+
 
 const user = getUser()
 
@@ -309,6 +316,8 @@ const shoeSizes = [
   'EU 46',
 ]
 
+
+
 const loadCategories = async () => {
   try {
     const response = await fetch(`${API_URL}/api/categories`, {
@@ -378,6 +387,16 @@ const groupedCategories = computed(() => {
   return Array.from(groups.values()).sort((a, b) =>
     a.parentName.localeCompare(b.parentName)
   )
+})
+
+const categorySelectGroups = computed(() => {
+  return groupedCategories.value.map((group) => ({
+    label: group.parentName,
+    options: group.children.map((category) => ({
+      label: category.name,
+      value: category.name,
+    })),
+  }))
 })
 
 const footwearKeywords = [
@@ -454,13 +473,23 @@ const addImage = (event: Event) => {
     return
   }
 
+  const previewUrl = URL.createObjectURL(file)
+
   imageFiles.value.push(file)
+  imagePreviews.value.push(previewUrl)
+
   error.value = ''
   input.value = ''
 }
-
 const removeImage = (index: number) => {
+  const previewUrl = imagePreviews.value[index]
+
+  if (previewUrl) {
+    URL.revokeObjectURL(previewUrl)
+  }
+
   imageFiles.value.splice(index, 1)
+  imagePreviews.value.splice(index, 1)
 }
 
 const createListing = async () => {
@@ -478,35 +507,42 @@ const createListing = async () => {
 
   const normalizedBrand = form.brand.trim().toLowerCase()
 
-  const selectedBrand = brands.find(
-    (brand) => brand.toLowerCase() === normalizedBrand
-  )
+const selectedBrand = brands.find(
+  (brand) => brand.toLowerCase() === normalizedBrand
+)
 
-  if (!selectedBrand) {
-    error.value = 'Please choose a brand from the list'
-    return
-  }
+if (!selectedBrand) {
+  error.value = 'Please choose a brand from the list'
+  return
+}
 
-  if (
-    !form.title ||
-    !form.price ||
-    !form.category ||
-    !form.gender ||
-    !form.brand ||
-    !form.color ||
-    !form.size ||
-    !form.condition ||
-    imageFiles.value.length === 0
-  ) {
-    error.value = 'Fill in all required fields'
-    return
-  }
+const priceNumber = Number(form.price)
+
+if (Number.isNaN(priceNumber) || priceNumber <= 0) {
+  error.value = 'Price must be a valid number'
+  return
+}
+
+if (
+  !form.title ||
+  !form.price ||
+  !form.category ||
+  !form.gender ||
+  !form.brand ||
+  !form.color ||
+  !form.size ||
+  !form.condition ||
+  imageFiles.value.length === 0
+) {
+  error.value = 'Fill in all required fields'
+  return
+}
 
   const formData = new FormData()
 
   formData.append('title', form.title)
   formData.append('description', form.description || '')
-  formData.append('price', form.price)
+  formData.append('price', String(priceNumber))
   formData.append('category', form.category)
   formData.append('gender', form.gender)
   formData.append('brand', selectedBrand)
@@ -592,6 +628,27 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
+const genderOptions = [
+  { label: 'Men', value: 'men' },
+  { label: 'Women', value: 'women' },
+]
+
+const conditionOptions = [
+  { label: 'New', value: 'new' },
+  { label: 'Used', value: 'used' },
+]
+
+const sizeOptions = computed(() => {
+  return availableSizes.value.map((size) => ({
+    label: size,
+    value: size,
+  }))
+})
+
+const onlyNumbers = () => {
+  form.price = form.price.replace(/\D/g, '')
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   loadCategories()
@@ -599,5 +656,9 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+
+  imagePreviews.value.forEach((previewUrl) => {
+    URL.revokeObjectURL(previewUrl)
+  })
 })
 </script>

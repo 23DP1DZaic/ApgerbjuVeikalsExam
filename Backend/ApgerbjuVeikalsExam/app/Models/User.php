@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Conversation;
+use App\Models\Message;
 
 class User extends Authenticatable
 {
@@ -70,5 +72,20 @@ class User extends Authenticatable
         }
 
         return asset('storage/' . $this->avatar);
+    }
+
+    public function boughtConversations()
+    {
+        return $this->hasMany(Conversation::class, 'buyer_id');
+    }
+
+    public function soldConversations()
+    {
+        return $this->hasMany(Conversation::class, 'seller_id');
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
     }
 }

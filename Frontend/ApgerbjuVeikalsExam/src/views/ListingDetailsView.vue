@@ -81,9 +81,21 @@
           </button>
         </div>
 
-        <button class="purchase-btn">Purchase</button>
-        <button class="secondary-btn">Offer</button>
-        <button class="secondary-btn">Message</button>
+          <button class="purchase-btn">Purchase</button>
+
+          <button
+            class="secondary-btn"
+            @click="openOfferModal"
+          >
+            Offer
+          </button>
+
+          <button
+            class="secondary-btn"
+            @click="openMessageModal"
+          >
+            Message
+          </button>
 
         <div class="details-section">
           <h3>Seller Description</h3>
@@ -100,6 +112,117 @@
       </aside>
     </div>
   </div>
+
+<div
+  v-if="isMessageModalOpen"
+  class="modal-overlay"
+  @click.self="closeModals"
+>
+  <div class="message-modal">
+    <button
+      type="button"
+      class="modal-close"
+      @click="closeModals"
+    >
+      ×
+    </button>
+
+    <h2>Ask A Question</h2>
+
+    <div class="modal-listing-preview" v-if="listing">
+      <img
+        v-if="imageUrls.length"
+        :src="imageUrls[0]"
+        :alt="listing.title"
+      >
+
+      <div class="modal-listing-info">
+        <strong>{{ listing.brand || 'Unknown brand' }}</strong>
+        <p>{{ listing.title }}</p>
+        <span>{{ listing.price }} €</span>
+      </div>
+    </div>
+
+    <label class="modal-label">Send a message</label>
+
+    <textarea
+      v-model="messageText"
+      class="modal-textarea"
+      placeholder="Send a message to request more details or discuss price."
+    ></textarea>
+
+    <p v-if="modalError" class="error">{{ modalError }}</p>
+
+    <button
+      class="modal-submit-btn"
+      :disabled="isSendingMessage || !messageText.trim()"
+      @click="sendMessage"
+    >
+      {{ isSendingMessage ? 'Sending...' : 'Send Message' }}
+    </button>
+  </div>
+</div>
+
+<div
+  v-if="isOfferModalOpen"
+  class="modal-overlay"
+  @click.self="closeModals"
+>
+  <div class="message-modal offer-modal">
+    <button
+      type="button"
+      class="modal-close"
+      @click="closeModals"
+    >
+      ×
+    </button>
+
+    <h2>Make an Offer</h2>
+
+    <div class="modal-listing-preview" v-if="listing">
+      <img
+        v-if="imageUrls.length"
+        :src="imageUrls[0]"
+        :alt="listing.title"
+      >
+
+      <div class="modal-listing-info">
+        <strong>{{ listing.brand || 'Unknown brand' }}</strong>
+        <p>{{ listing.title }}</p>
+        <span>{{ listing.price }} €</span>
+      </div>
+    </div>
+
+    <label class="modal-label">Offer Price</label>
+
+    <div class="offer-input-wrapper">
+      <span>€</span>
+
+      <input
+        v-model="offerPrice"
+        type="text"
+        inputmode="numeric"
+        placeholder="0"
+        @input="onlyOfferNumbers"
+      >
+    </div>
+
+    <p class="modal-help">
+      The seller can accept or decline your offer.
+    </p>
+
+    <p v-if="modalError" class="error">{{ modalError }}</p>
+
+    <button
+      class="modal-submit-btn"
+      :disabled="isSendingMessage || !offerPrice"
+      @click="sendOffer"
+    >
+      {{ isSendingMessage ? 'Sending...' : 'Send Offer' }}
+    </button>
+  </div>
+</div>
+
 </template>
 
 <script setup lang="ts">
@@ -107,6 +230,165 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { getToken } from '../services/auth'
+
+const isMessageModalOpen = ref(false)
+const isOfferModalOpen = ref(false)
+const isSendingMessage = ref(false)
+
+const messageText = ref('')
+const offerPrice = ref('')
+const modalError = ref('')
+
+const openMessageModal = () => {
+  modalError.value = ''
+  messageText.value = ''
+  isMessageModalOpen.value = true
+}
+
+const openOfferModal = () => {
+  modalError.value = ''
+  offerPrice.value = ''
+  isOfferModalOpen.value = true
+}
+
+const closeModals = () => {
+  isMessageModalOpen.value = false
+  isOfferModalOpen.value = false
+  modalError.value = ''
+}
+
+const onlyOfferNumbers = () => {
+  offerPrice.value = offerPrice.value.replace(/\D/g, '')
+}
+
+const startConversation = async () => {
+  if (!listing.value) {
+    throw new Error('Listing not found')
+  }
+
+  const token = getToken()
+
+  if (!token) {
+    router.push('/login')
+    throw new Error('You need to login first')
+  }
+
+  const response = await fetchWithAuth(
+    `${API_URL}/api/listings/${listing.value.id}/conversation`,
+    {
+      method: 'POST',
+    }
+  )
+
+  const rawText = await response.text()
+
+  let data: any = null
+
+  try {
+    data = JSON.parse(rawText)
+  } catch {
+    data = { message: rawText }
+  }
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to start conversation')
+  }
+
+  return data
+}
+
+const sendMessage = async () => {
+  modalError.value = ''
+
+  if (!messageText.value.trim()) {
+    modalError.value = 'Message cannot be empty'
+    return
+  }
+
+  isSendingMessage.value = true
+
+  try {
+    const conversation = await startConversation()
+
+    const response = await fetchWithAuth(
+      `${API_URL}/api/conversations/${conversation.id}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          body: messageText.value.trim(),
+        }),
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      modalError.value = data.message || 'Failed to send message'
+      return
+    }
+
+    closeModals()
+    router.push(`/messages/${conversation.id}`)
+  } catch (error: any) {
+    modalError.value = error.message || 'Failed to send message'
+  } finally {
+    isSendingMessage.value = false
+  }
+}
+
+const sendOffer = async () => {
+  modalError.value = ''
+
+  const price = Number(offerPrice.value)
+
+  if (!price || price <= 0) {
+    modalError.value = 'Offer price must be valid'
+    return
+  }
+
+  if (listing.value && price >= Number(listing.value.price)) {
+    modalError.value = 'Offer must be lower than listing price'
+    return
+  }
+
+  isSendingMessage.value = true
+
+  try {
+    const conversation = await startConversation()
+
+    const response = await fetchWithAuth(
+      `${API_URL}/api/conversations/${conversation.id}/messages`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          body: `Offer: ${price} €`,
+        }),
+      }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      modalError.value = data.message || 'Failed to send offer'
+      return
+    }
+
+    closeModals()
+    router.push(`/messages/${conversation.id}`)
+  } catch (error: any) {
+    modalError.value = error.message || 'Failed to send offer'
+  } finally {
+    isSendingMessage.value = false
+  }
+}
 
 type ListingImage = {
   id: number

@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ListingInteractionController;
+use App\Http\Controllers\MessageController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -40,4 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::put('/categories/{category}', [CategoryController::class, 'update']);
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
+    Route::get('/conversations', [MessageController::class, 'index']);
+    Route::get('/conversations/{conversation}', [MessageController::class, 'show']);
+    Route::post('/listings/{listing}/conversation', [MessageController::class, 'start']);
+    Route::post('/conversations/{conversation}/messages', [MessageController::class, 'send']);
 });

@@ -16,6 +16,7 @@
 
         <nav class="header-actions">
           <router-link v-if="user" to="/create-listing">ADD LISTING</router-link>
+          <router-link v-if="user" to="/messages">MESSAGES</router-link>
           <router-link v-if="user?.role === 'admin'" to="/admin/categories">
             ADMIN CATEGORIES
           </router-link>
