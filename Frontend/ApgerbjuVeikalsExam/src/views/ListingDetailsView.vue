@@ -58,7 +58,7 @@
         <h1>{{ listing.title }}</h1>
 
         <p class="meta">
-          {{ listing.category }} · {{ listing.size }} · {{ listing.condition }}
+        <p><strong>Condition:</strong> {{ formatText(listing.condition) }}</p>
         </p>
 
         <p class="price">{{ listing.price }} €</p>
@@ -94,9 +94,8 @@
           <h3>Details</h3>
           <p><strong>Color:</strong> {{ listing.color || 'Not specified' }}</p>
           <p><strong>Size:</strong> {{ listing.size || 'Not specified' }}</p>
-          <p><strong>Condition:</strong> {{ listing.condition }}</p>
+          <p><strong>Condition:</strong> {{ formatText(listing.condition) }}</p>
           <p><strong>Category:</strong> {{ listing.category }}</p>
-          <p><strong>Gender:</strong> {{ listing.gender || 'Not specified' }}</p>
         </div>
       </aside>
     </div>
@@ -147,6 +146,13 @@ const imageUrls = computed(() => {
     return `${API_URL}/storage/${image.image_path}`
   })
 })
+
+const formatText = (value?: string | null) => {
+  if (!value) return 'Not specified'
+
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 
 const fetchListing = async () => {
   loading.value = true
@@ -263,4 +269,5 @@ const previousImage = () => {
 onMounted(() => {
   fetchListing()
 })
+
 </script>

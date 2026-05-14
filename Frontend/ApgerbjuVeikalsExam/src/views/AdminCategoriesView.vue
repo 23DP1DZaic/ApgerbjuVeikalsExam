@@ -21,7 +21,6 @@
             <option value="">Select department</option>
             <option value="men">Men</option>
             <option value="women">Women</option>
-            <option value="unisex">Unisex</option>
           </select>
         </div>
 
@@ -66,7 +65,6 @@
                   <option value="">Select department</option>
                   <option value="men">Men</option>
                   <option value="women">Women</option>
-                  <option value="unisex">Unisex</option>
                 </select>
               </div>
 

@@ -58,16 +58,6 @@
   </div>
 
   <div class="filter-section">
-    <h3>Gender</h3>
-    <select v-model="genderFilter" class="sort-select">
-      <option value="">All</option>
-      <option value="men">Men</option>
-      <option value="women">Women</option>
-      <option value="unisex">Unisex</option>
-    </select>
-  </div>
-
-  <div class="filter-section">
     <h3>Price</h3>
 
     <div class="price-inputs">
@@ -109,39 +99,45 @@
   </button>
 </div>
 </aside>
+    <main class="shop-main">
+      <div class="products-header">
+        <p v-if="loading">Loading...</p>
+        <p v-else>{{ products.length }} items</p>
+      </div>
 
-      <main class="shop-main">
-        <div class="products-header">
-          <p v-if="loading">Loading...</p>
-          <p v-else>{{ products.length }} items</p>
-        </div>
+      <p v-if="error" class="error">{{ error }}</p>
 
-        <p v-if="error" class="error">{{ error }}</p>
+      <div v-if="!loading" class="products-grid">
+        <div
+          v-for="product in products"
+          :key="product.id"
+          class="product-card"
+          @click="viewProduct(product)"
+        >
+          <div class="product-image">
+            <img
+              v-if="product.images && product.images.length"
+              :src="`${API_URL}/storage/${product.images?.[0]?.image_path || ''}`"
+              :alt="product.title"
+            >
 
-        <div v-if="!loading" class="products-grid">
-          <div
-            v-for="product in products"
-            :key="product.id"
-            class="product-card"
-            @click="viewProduct(product)"
-          >
-            <div class="product-image">
-              <img
-                v-if="product.images && product.images.length"
-                :src="`${API_URL}/storage/${product.images?.[0]?.image_path || ''}`"
-                :alt="product.title"
-              >
-
-              <div v-else class="no-image">
-                No image
-              </div>
+            <div v-else class="no-image">
+              No image
             </div>
+          </div>
 
-            <div class="product-info">
-              <h3>{{ product.title }}</h3>
-              <p>{{ product.category }}</p>
-              <span class="price">{{ product.price }} €</span>
-              <div class="listing-actions">
+          <div class="product-info">
+            <h3>{{ product.title }}</h3>
+
+            <p>
+              {{ product.category }}
+              <span v-if="product.size"> · {{ product.size }}</span>
+              <span v-if="product.condition"> · {{ formatText(product.condition) }}</span>
+            </p>
+
+            <span class="price">{{ product.price }} €</span>
+
+            <div class="listing-actions">
               <button
                 class="interaction-btn"
                 :class="{ active: product.liked_by_me }"
@@ -157,19 +153,19 @@
               >
                 ★ {{ product.favorites_count || 0 }}
               </button>
-              </div>
             </div>
-
-            <button
-              v-if="canDelete(product)"
-              class="delete-btn"
-              @click.stop="deleteListing(product.id)"
-            >
-              Delete
-            </button>
           </div>
+
+          <button
+            v-if="canDelete(product)"
+            class="delete-btn"
+            @click.stop="deleteListing(product.id)"
+          >
+            Delete
+          </button>
         </div>
-      </main>
+      </div>
+    </main>
     </div>
   </div>
 </template>
@@ -415,7 +411,6 @@ const resetFilters = () => {
   sizeFilter.value = ''
   colorFilter.value = ''
   conditionFilter.value = ''
-  genderFilter.value = ''
   minPrice.value = ''
   maxPrice.value = ''
   onlyWithImage.value = false
@@ -539,4 +534,12 @@ const toggleFavorite = async (product: Product) => {
     alert('Server connection error')
   }
 }
+
+const formatText = (value?: string | null) => {
+  if (!value) return ''
+
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+
 </script>

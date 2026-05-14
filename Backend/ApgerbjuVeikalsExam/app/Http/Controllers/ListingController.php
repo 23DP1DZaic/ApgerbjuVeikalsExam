@@ -181,10 +181,10 @@ class ListingController extends Controller
 
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'category' => 'required|string',
-            'gender' => 'required|string',
+            'gender' => 'required|string|in:men,women',
             'brand' => 'required|string',
             'color' => 'required|string',
             'size' => 'required|string',

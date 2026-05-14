@@ -11,7 +11,10 @@
 
         <div class="form-group">
           <label>Description</label>
-          <textarea v-model="form.description" required></textarea>
+          <textarea
+            v-model="form.description"
+            placeholder="Optional"
+          ></textarea>
         </div>
 
         <div class="form-group">
@@ -25,7 +28,6 @@
             <option disabled value="">Select gender</option>
             <option value="men">Men</option>
             <option value="women">Women</option>
-            <option value="unisex">Unisex</option>
           </select>
         </div>
 
@@ -59,7 +61,25 @@
 
         <div class="form-group">
           <label>Brand</label>
-          <input v-model="form.brand" placeholder="Nike, Adidas, Zara..." required>
+
+          <input
+            v-model="form.brand"
+            list="brand-list"
+            placeholder="Search brand..."
+            required
+          >
+
+          <datalist id="brand-list">
+            <option
+              v-for="brand in brands"
+              :key="brand"
+              :value="brand"
+            />
+          </datalist>
+
+          <p class="field-help">
+            Start typing and choose a brand from the list.
+          </p>
         </div>
 
         <div class="form-group">
@@ -111,13 +131,19 @@
 
         <div class="form-group">
           <label>Size</label>
+
           <select v-model="form.size" required>
-            <option value="">Select size</option>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
+            <option value="">
+              {{ isFootwearCategory ? 'Select shoe size' : 'Select clothing size' }}
+            </option>
+
+            <option
+              v-for="size in availableSizes"
+              :key="size"
+              :value="size"
+            >
+              {{ size }}
+            </option>
           </select>
         </div>
 
@@ -196,6 +222,93 @@ const form = reactive({
   gender: '',
 })
 
+const brands = [
+  'Acne Studios',
+  'Adidas',
+  'A-Cold-Wall',
+  'Alexander McQueen',
+  'Amiri',
+  'Arc\'teryx',
+  'Balenciaga',
+  'Bape',
+  'Bottega Veneta',
+  'Burberry',
+  'Carhartt',
+  'Celine',
+  'Chanel',
+  'Chrome Hearts',
+  'Comme des Garcons',
+  'CP Company',
+  'Diesel',
+  'Dior',
+  'Dries Van Noten',
+  'Enfants Riches Déprimés',
+  'Fear of God',
+  'Fendi',
+  'Ganni',
+  'Givenchy',
+  'Gucci',
+  'Helmut Lang',
+  'Issey Miyake',
+  'Jacquemus',
+  'Jordan',
+  'Jil Sander',
+  'Kapital',
+  'Kiko Kostadinov',
+  'Loewe',
+  'Louis Vuitton',
+  'Maison Margiela',
+  'Miu Miu',
+  'Moncler',
+  'New Balance',
+  'Nike',
+  'Off-White',
+  'Our Legacy',
+  'Palace',
+  'Polo Ralph Lauren',
+  'Prada',
+  'Raf Simons',
+  'Rick Owens',
+  'Saint Laurent Paris',
+  'Salomon',
+  'Stone Island',
+  'Stussy',
+  'Supreme',
+  'The North Face',
+  'Undercover',
+  'Valentino',
+  'Vetements',
+  'Vintage',
+  'Vivienne Westwood',
+  'Yohji Yamamoto',
+  'Y-3',
+  'Zara',
+]
+
+const clothingSizes = [
+  'XXS',
+  'XS',
+  'S',
+  'M',
+  'L',
+  'XL',
+  'XXL',
+]
+
+const shoeSizes = [
+  'EU 36',
+  'EU 37',
+  'EU 38',
+  'EU 39',
+  'EU 40',
+  'EU 41',
+  'EU 42',
+  'EU 43',
+  'EU 44',
+  'EU 45',
+  'EU 46',
+]
+
 const loadCategories = async () => {
   try {
     const response = await fetch(`${API_URL}/api/categories`, {
@@ -223,34 +336,6 @@ const loadCategories = async () => {
   } catch (err) {
     console.error('Load categories error:', err)
   }
-}
-
-const addImage = (event: Event) => {
-  const input = event.target as HTMLInputElement
-
-  if (!input.files || !input.files[0]) return
-
-  if (imageFiles.value.length >= 5) {
-    error.value = 'You can add maximum 5 images'
-    input.value = ''
-    return
-  }
-
-  const file = input.files[0]
-
-  if (file.size > 2 * 1024 * 1024) {
-    error.value = 'Image must be less than 2MB'
-    input.value = ''
-    return
-  }
-
-  imageFiles.value.push(file)
-  error.value = ''
-  input.value = ''
-}
-
-const removeImage = (index: number) => {
-  imageFiles.value.splice(index, 1)
 }
 
 const groupedCategories = computed(() => {
@@ -295,14 +380,88 @@ const groupedCategories = computed(() => {
   )
 })
 
+const footwearKeywords = [
+  'footwear',
+  'shoes',
+  'sneakers',
+  'boots',
+  'sandals',
+  'heels',
+  'flats',
+  'slip ons',
+  'low-top sneakers',
+  'hi-top sneakers',
+  'casual leather shoes',
+  'formal shoes',
+]
 
+const isFootwearCategory = computed(() => {
+  if (!form.category) return false
+
+  const selectedCategory = categories.value.find(
+    (category) => category.name === form.category
+  )
+
+  if (!selectedCategory) return false
+
+  const parentCategory = categories.value.find(
+    (category) => category.id === selectedCategory.parent_id
+  )
+
+  const categoryName = selectedCategory.name.toLowerCase()
+  const parentName = parentCategory?.name.toLowerCase() || ''
+
+  return footwearKeywords.some((keyword) => {
+    return categoryName.includes(keyword) || parentName.includes(keyword)
+  })
+})
+
+const availableSizes = computed(() => {
+  return isFootwearCategory.value ? shoeSizes : clothingSizes
+})
 
 watch(
   () => form.gender,
   () => {
     form.category = ''
+    form.size = ''
   }
 )
+
+watch(
+  () => form.category,
+  () => {
+    form.size = ''
+  }
+)
+
+const addImage = (event: Event) => {
+  const input = event.target as HTMLInputElement
+
+  if (!input.files || !input.files[0]) return
+
+  if (imageFiles.value.length >= 5) {
+    error.value = 'You can add maximum 5 images'
+    input.value = ''
+    return
+  }
+
+  const file = input.files[0]
+
+  if (file.size > 2 * 1024 * 1024) {
+    error.value = 'Image must be less than 2MB'
+    input.value = ''
+    return
+  }
+
+  imageFiles.value.push(file)
+  error.value = ''
+  input.value = ''
+}
+
+const removeImage = (index: number) => {
+  imageFiles.value.splice(index, 1)
+}
 
 const createListing = async () => {
   message.value = ''
@@ -317,9 +476,19 @@ const createListing = async () => {
     return
   }
 
+  const normalizedBrand = form.brand.trim().toLowerCase()
+
+  const selectedBrand = brands.find(
+    (brand) => brand.toLowerCase() === normalizedBrand
+  )
+
+  if (!selectedBrand) {
+    error.value = 'Please choose a brand from the list'
+    return
+  }
+
   if (
     !form.title ||
-    !form.description ||
     !form.price ||
     !form.category ||
     !form.gender ||
@@ -329,18 +498,18 @@ const createListing = async () => {
     !form.condition ||
     imageFiles.value.length === 0
   ) {
-    error.value = 'Fill in all fields'
+    error.value = 'Fill in all required fields'
     return
   }
 
   const formData = new FormData()
 
   formData.append('title', form.title)
-  formData.append('description', form.description)
+  formData.append('description', form.description || '')
   formData.append('price', form.price)
   formData.append('category', form.category)
   formData.append('gender', form.gender)
-  formData.append('brand', form.brand)
+  formData.append('brand', selectedBrand)
   formData.append('color', form.color)
   formData.append('size', form.size)
   formData.append('condition', form.condition)

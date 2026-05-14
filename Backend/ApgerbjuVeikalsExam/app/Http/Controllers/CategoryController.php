@@ -44,7 +44,7 @@ class CategoryController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'department' => ['required', Rule::in(['men', 'women', 'unisex'])],
+            'department' => ['required', Rule::in(['men', 'women',])],
             'parent_id' => 'nullable|exists:categories,id',
         ]);
 
@@ -82,7 +82,7 @@ class CategoryController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'department' => ['required', Rule::in(['men', 'women', 'unisex'])],
+            'department' => ['required', Rule::in(['men', 'women',])],
             'parent_id' => 'nullable|exists:categories,id',
         ]);
 

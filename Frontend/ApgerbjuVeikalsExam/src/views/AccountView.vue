@@ -1,18 +1,6 @@
 <template>
   <div class="account-page">
     <div class="account-layout">
-      <aside class="account-sidebar">
-        <h3>Settings</h3>
-
-        <router-link to="/settings/profile" class="settings-link">
-          Profile
-        </router-link>
-
-        <router-link to="/settings/account" class="settings-link">
-          Account
-        </router-link>
-      </aside>
-
       <main class="account-main">
         <div class="account-header-card">
           <div class="account-top">
@@ -23,6 +11,7 @@
                 alt="Avatar"
                 class="account-avatar-image"
               >
+
               <div v-else class="account-avatar">
                 {{ userInitial }}
               </div>
@@ -43,18 +32,18 @@
 
           <div class="account-stats">
             <div class="stat-box">
-              <strong>{{ user?.listings?.length || 0 }}</strong>
+              <strong>{{ sellingListings.length }}</strong>
               <span>Listings</span>
             </div>
 
             <div class="stat-box">
-              <strong>0</strong>
+              <strong>{{ favoriteListings.length }}</strong>
               <span>Favorites</span>
             </div>
 
             <div class="stat-box">
-              <strong>0</strong>
-              <span>Saved</span>
+              <strong>{{ likedListings.length }}</strong>
+              <span>Liked</span>
             </div>
 
             <div class="stat-box">
@@ -74,48 +63,53 @@
               :key="tab"
               class="account-tab"
               :class="{ active: activeTab === tab }"
-              @click="activeTab = tab"
+              @click="setActiveTab(tab)"
             >
-              {{ tab }}
+            {{ getTabLabel(tab) }}
             </button>
           </div>
         </div>
 
         <section class="account-content-card">
-          <template v-if="activeTab === 'Selling'">
-            <h2>My Listings</h2>
+          <div class="account-section-header">
+            <h2>{{ activeTabTitle }}</h2>
 
-            <div v-if="user?.listings?.length" class="listing-grid">
-              <div
-                v-for="listing in user.listings"
-                :key="listing.id"
-                class="listing-card"
-              >
+            <p v-if="loadingTab" class="loading-text">
+              Loading...
+            </p>
+          </div>
+
+          <div v-if="activeListings.length" class="listing-grid">
+            <div
+              v-for="listing in activeListings"
+              :key="listing.id"
+              class="listing-card"
+              @click="goToListing(listing.id)"
+            >
+              <div class="listing-image-wrap">
                 <img
                   v-if="listing.images?.length"
                   :src="`${API_URL}/storage/${listing.images?.[0]?.image_path || ''}`"
                   :alt="listing.title"
                   class="listing-card-image"
                 >
-                <div v-else class="no-image">No image</div>
 
-                <div class="listing-card-info">
-                  <h3>{{ listing.title }}</h3>
-                  <p>{{ listing.category }}</p>
-                  <span>{{ listing.price }} €</span>
+                <div v-else class="no-image">
+                  No image
                 </div>
               </div>
+
+              <div class="listing-card-info">
+                <h3>{{ listing.title }}</h3>
+                <p>{{ listing.category }}</p>
+                <span>{{ listing.price }} €</span>
+              </div>
             </div>
+          </div>
 
-            <p v-else class="empty-text">No listings yet.</p>
-          </template>
-
-          <template v-else>
-            <h2>{{ activeTab }}</h2>
-            <p class="empty-text">
-              123
-            </p>
-          </template>
+          <p v-else-if="!loadingTab" class="empty-text">
+            {{ emptyMessage }}
+          </p>
         </section>
       </main>
     </div>
@@ -124,22 +118,138 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { API_URL } from '../services/api'
-import { getCurrentUser, type AuthUser } from '../services/auth'
+import { useRouter } from 'vue-router'
+import { API_URL, fetchWithAuth } from '../services/api'
+import { getCurrentUser, type AuthUser, type Listing } from '../services/auth'
+
+const router = useRouter()
 
 const user = ref<AuthUser | null>(null)
 
-const tabs = ['Selling', 'Favorites', 'Saved', 'Purchases', 'Reviews']
-const activeTab = ref('Selling')
+const sellingListings = ref<Listing[]>([])
+const favoriteListings = ref<Listing[]>([])
+const likedListings = ref<Listing[]>([])
+
+const loadingTab = ref(false)
+
+const tabs = ['Selling', 'Favorites', 'Liked', 'Purchases', 'Reviews'] as const
+type AccountTab = typeof tabs[number]
+
+const getTabLabel = (tab: AccountTab) => {
+  if (tab === 'Selling') {
+    return sellingListings.value.length === 1 ? 'Your Listing' : 'Your Listings'
+  }
+
+  return tab
+}
+
+const activeTab = ref<AccountTab>('Selling')
 
 const userInitial = computed(() => {
   const value = user.value?.display_name || user.value?.name || '?'
   return value.charAt(0).toUpperCase()
 })
 
+const activeTabTitle = computed(() => {
+  if (activeTab.value === 'Selling') {
+    return sellingListings.value.length === 1 ? 'Your Listing' : 'Your Listings'
+  }
+
+  if (activeTab.value === 'Favorites') return 'Favorite Listings'
+  if (activeTab.value === 'Liked') return 'Liked Listings'
+  if (activeTab.value === 'Purchases') return 'Purchases'
+
+  return 'Reviews'
+})
+
+const activeListings = computed(() => {
+  if (activeTab.value === 'Selling') return sellingListings.value
+  if (activeTab.value === 'Favorites') return favoriteListings.value
+  if (activeTab.value === 'Liked') return likedListings.value
+
+  return []
+})
+
+const emptyMessage = computed(() => {
+  if (activeTab.value === 'Selling') return 'No listings yet.'
+  if (activeTab.value === 'Favorites') return 'No favorite listings yet.'
+  if (activeTab.value === 'Liked') return 'No liked listings yet.'
+  if (activeTab.value === 'Purchases') return 'No purchases yet.'
+  return 'No reviews yet.'
+})
+
 const loadAccount = async () => {
-  user.value = await getCurrentUser()
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser) {
+    router.push('/login')
+    return
+  }
+
+  user.value = currentUser
+  sellingListings.value = currentUser.listings || []
+
+  await loadFavorites()
+  await loadLikes()
 }
 
-onMounted(loadAccount)
+const loadFavorites = async () => {
+  loadingTab.value = true
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/me/favorites`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      favoriteListings.value = Array.isArray(data) ? data : []
+    }
+  } catch (err) {
+    console.error('Load favorites error:', err)
+  } finally {
+    loadingTab.value = false
+  }
+}
+
+const loadLikes = async () => {
+  loadingTab.value = true
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/me/likes`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      likedListings.value = Array.isArray(data) ? data : []
+    }
+  } catch (err) {
+    console.error('Load likes error:', err)
+  } finally {
+    loadingTab.value = false
+  }
+}
+
+const setActiveTab = async (tab: AccountTab) => {
+  activeTab.value = tab
+
+  if (tab === 'Favorites') {
+    await loadFavorites()
+  }
+
+  if (tab === 'Liked') {
+    await loadLikes()
+  }
+}
+
+const goToListing = (id: number) => {
+  router.push(`/listing/${id}`)
+}
+
+onMounted(() => {
+  loadAccount()
+})
 </script>
