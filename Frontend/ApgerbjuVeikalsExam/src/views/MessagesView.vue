@@ -12,44 +12,60 @@
         </div>
 
         <div v-if="!loading && conversations.length" class="conversation-list">
-          <div
-            v-for="conversation in conversations"
-            :key="conversation.id"
-            class="conversation-item"
-            @click="openConversation(conversation.id)"
-          >
-            <div class="conversation-image">
-              <img
-                v-if="getListingImage(conversation)"
-                :src="getListingImage(conversation)"
-                :alt="conversation.listing?.title || 'Listing'"
-              >
+        <div
+        v-for="conversation in conversations"
+        :key="conversation.id"
+        class="conversation-item"
+        @click="openConversation(conversation.id)"
+        >
+        <div class="conversation-image">
+            <img
+            v-if="getListingImage(conversation)"
+            :src="getListingImage(conversation)"
+            :alt="conversation.listing?.title || 'Listing'"
+            >
 
-              <div v-else class="no-image">
-                No image
-              </div>
+            <div v-else class="no-image">
+            No image
             </div>
+        </div>
 
-            <div class="conversation-info">
-              <div class="conversation-top">
-                <h3>
-                  {{ getOtherUserName(conversation) }}
-                </h3>
-
-                <span>
-                  {{ formatDate(conversation.updated_at) }}
-                </span>
-              </div>
-
-              <p class="conversation-listing">
+        <div class="conversation-info">
+            <div class="conversation-top">
+            <h3 class="conversation-listing-title">
                 {{ conversation.listing?.title || 'Deleted listing' }}
-              </p>
+            </h3>
 
-              <p class="conversation-last-message">
-                {{ conversation.latest_message?.body || 'No messages yet' }}
-              </p>
+            <span>
+                {{ formatDate(conversation.updated_at) }}
+            </span>
             </div>
-          </div>
+
+            <div class="conversation-user-row">
+            <div class="conversation-avatar">
+            <img
+                v-if="getOtherUserAvatar(conversation)"
+                :src="getOtherUserAvatar(conversation)"
+                :alt="getOtherUserName(conversation)"
+            >
+
+            <span v-else>
+                {{ getOtherUserInitial(conversation) }}
+            </span>
+            </div>
+
+            <div class="conversation-message-content">
+                <p class="conversation-user-name">
+                {{ getOtherUserName(conversation) }}:
+                </p>
+
+                <p class="conversation-last-message">
+                {{ conversation.latest_message?.body || 'No messages yet' }}
+                </p>
+            </div>
+            </div>
+        </div>
+        </div>
         </div>
       </div>
     </div>
@@ -66,6 +82,7 @@ type User = {
   id: number
   name: string
   display_name?: string | null
+  avatar_url?: string | null
 }
 
 type ListingImage = {
@@ -149,15 +166,30 @@ const getListingImage = (conversation: Conversation) => {
   return `${API_URL}/storage/${imagePath}`
 }
 
-const getOtherUserName = (conversation: Conversation) => {
-  if (!currentUser) return 'User'
+const getOtherUser = (conversation: Conversation) => {
+  if (!currentUser) return null
 
-  const otherUser =
-    conversation.buyer?.id === currentUser.id
-      ? conversation.seller
-      : conversation.buyer
+  return conversation.buyer?.id === currentUser.id
+    ? conversation.seller
+    : conversation.buyer
+}
+
+const getOtherUserName = (conversation: Conversation) => {
+  const otherUser = getOtherUser(conversation)
 
   return otherUser?.display_name || otherUser?.name || 'User'
+}
+
+const getOtherUserAvatar = (conversation: Conversation) => {
+  const otherUser = getOtherUser(conversation)
+
+  return otherUser?.avatar_url || ''
+}
+
+const getOtherUserInitial = (conversation: Conversation) => {
+  const name = getOtherUserName(conversation)
+
+  return name.charAt(0).toUpperCase()
 }
 
 const formatDate = (value: string) => {

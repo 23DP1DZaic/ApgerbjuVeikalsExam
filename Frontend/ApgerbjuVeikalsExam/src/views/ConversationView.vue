@@ -7,22 +7,43 @@
             ← Back
           </button>
 
-          <div v-if="conversation" class="chat-listing-preview">
+        <div v-if="conversation" class="chat-header-content">
+        <div class="chat-listing-preview">
             <img
-              v-if="listingImage"
-              :src="listingImage"
-              :alt="conversation.listing?.title || 'Listing'"
+            v-if="listingImage"
+            :src="listingImage"
+            :alt="conversation.listing?.title || 'Listing'"
             >
 
             <div v-else class="chat-listing-placeholder">
-              No image
+            No image
             </div>
 
             <div>
-              <h2>{{ getOtherUserName() }}</h2>
-              <p>{{ conversation.listing?.title || 'Deleted listing' }}</p>
+            <h2>{{ conversation.listing?.title || 'Deleted listing' }}</h2>
+            <p>Listing</p>
             </div>
-          </div>
+        </div>
+
+        <div class="chat-user-preview">
+            <div class="chat-user-text">
+            <h3>{{ getOtherUserName() }}</h3>
+            <!-- <p>User</p> -->
+            </div>
+
+            <div class="chat-user-avatar">
+            <img
+                v-if="getOtherUserAvatar()"
+                :src="getOtherUserAvatar()"
+                :alt="getOtherUserName()"
+            >
+
+            <span v-else>
+                {{ getOtherUserInitial() }}
+            </span>
+            </div>
+        </div>
+        </div>
         </div>
 
         <p v-if="loading" class="loading-text">Loading...</p>
@@ -82,6 +103,7 @@ type User = {
   id: number
   name: string
   display_name?: string | null
+  avatar_url?: string | null
 }
 
 type ListingImage = {
@@ -206,15 +228,28 @@ const sendMessage = async () => {
   }
 }
 
-const getOtherUserName = () => {
-  if (!conversation.value || !currentUser) return 'User'
+const getOtherUser = () => {
+  if (!conversation.value || !currentUser) return null
 
-  const otherUser =
-    conversation.value.buyer?.id === currentUser.id
-      ? conversation.value.seller
-      : conversation.value.buyer
+  return conversation.value.buyer?.id === currentUser.id
+    ? conversation.value.seller
+    : conversation.value.buyer
+}
+
+const getOtherUserName = () => {
+  const otherUser = getOtherUser()
 
   return otherUser?.display_name || otherUser?.name || 'User'
+}
+
+const getOtherUserAvatar = () => {
+  const otherUser = getOtherUser()
+
+  return otherUser?.avatar_url || ''
+}
+
+const getOtherUserInitial = () => {
+  return getOtherUserName().charAt(0).toUpperCase()
 }
 
 const isOfferMessage = (body: string) => {
@@ -224,7 +259,14 @@ const isOfferMessage = (body: string) => {
 const formatTime = (value: string) => {
   if (!value) return ''
 
-  return new Date(value).toLocaleString()
+  return new Intl.DateTimeFormat('lv-LV', {
+    timeZone: 'Europe/Riga',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
 }
 
 onMounted(loadConversation)
