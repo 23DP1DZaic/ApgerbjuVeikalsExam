@@ -6,49 +6,70 @@
           <router-link to="/">Name</router-link>
         </div>
 
-        <form class="header-search" @submit.prevent="submitHeaderSearch">
-          <input
-            v-model="headerSearch"
-            placeholder="Search for anything"
-          >
-          <button type="submit">SEARCH</button>
-        </form>
+      <form class="header-search" @submit.prevent="submitHeaderSearch">
+        <input
+          v-model="headerSearch"
+          :placeholder="t.searchPlaceholder"
+        >
+        <button type="submit">{{ t.search }}</button>
+      </form>
 
-        <nav class="header-actions">
-          <router-link v-if="user" to="/create-listing">ADD LISTING</router-link>
-          <router-link v-if="user" to="/messages">MESSAGES</router-link>
-          <router-link v-if="user?.role === 'admin'" to="/admin/categories">
-            ADMIN CATEGORIES
+      <nav class="header-actions">
+        <router-link v-if="user" to="/create-listing">
+          {{ t.addListing }}
+        </router-link>
+
+        <router-link v-if="user" to="/messages">
+          {{ t.messages }}
+        </router-link>
+
+        <router-link v-if="user?.role === 'admin'" to="/admin/categories">
+          {{ t.adminCategories }}
+        </router-link>
+
+        <div v-if="user" class="user-menu">
+          <router-link to="/account" class="user-info user-link">
+            <img
+              v-if="user.avatar_url"
+              :src="user.avatar_url"
+              alt="Avatar"
+              class="header-avatar-image"
+            >
+
+            <div v-else class="avatar-circle">
+              {{ userInitial }}
+            </div>
+
+            <span class="user-name">
+              {{ user.display_name || user.name }}
+            </span>
           </router-link>
 
-          <div v-if="user" class="user-menu">
-            <router-link to="/account" class="user-info user-link">
-              <img
-                v-if="user.avatar_url"
-                :src="user.avatar_url"
-                alt="Avatar"
-                class="header-avatar-image"
-              >
+          <button class="logout-btn" @click="logout">
+            {{ t.logout }}
+          </button>
 
-              <div v-else class="avatar-circle">
-                {{ userInitial }}
-              </div>
+          <button
+          type="button"
+          class="language-toggle"
+          @click="toggleLanguage"
+        >
+          <span class="language-flag">
+            {{ language === 'lv' ? '🇱🇻' : '🇬🇧' }}
+          </span>
 
-              <span class="user-name">
-                {{ user.display_name || user.name }}
-              </span>
-            </router-link>
+          <span>
+            {{ language === 'lv' ? 'LV' : 'EN' }}
+          </span>
+        </button>
 
-            <button class="logout-btn" @click="logout">
-              LOGOUT
-            </button>
-          </div>
+        </div>
 
-          <div v-else class="auth-links">
-            <router-link to="/login">LOGIN</router-link>
-            <router-link to="/register">REGISTER</router-link>
-          </div>
-        </nav>
+        <div v-else class="auth-links">
+          <router-link to="/login">{{ t.login }}</router-link>
+          <router-link to="/register">{{ t.register }}</router-link>
+        </div>
+      </nav>
       </div>
 
       <nav class="category-nav" ref="megaMenuRef">
@@ -58,7 +79,7 @@
             :class="{ active: activeMegaMenu === 'designers' }"
             @click="toggleMegaMenu('designers')"
           >
-            DESIGNERS
+          {{ t.designers }}
             <span class="nav-arrow">⌄</span>
           </button>
         </div>
@@ -69,7 +90,7 @@
             :class="{ active: activeMegaMenu === 'menswear' }"
             @click="toggleMegaMenu('menswear')"
           >
-            MENSWEAR
+            {{ t.menswear }}
             <span class="nav-arrow">⌄</span>
           </button>
         </div>
@@ -80,7 +101,7 @@
                 :class="{ active: activeMegaMenu === 'womenswear' }"
                 @click="toggleMegaMenu('womenswear')"
               >
-                WOMENSWEAR
+            {{ t.womenswear }}
                 <span class="nav-arrow">⌄</span>
               </button>
             </div>
@@ -90,13 +111,13 @@
                 :to="{ path: '/shop', query: { category: 'Low-Top Sneakers' } }"
                 @click="closeMegaMenu"
               >
-                SNEAKERS
+              {{ t.sneakers }}
               </router-link>
             </div>
 
             <div class="nav-item">
               <router-link to="/about" @click="closeMegaMenu">
-                ABOUT US
+              {{ t.aboutUs }}
               </router-link>
             </div>
           </nav>
@@ -107,7 +128,7 @@
           >
     <div v-if="activeMegaMenu === 'designers'" class="mega-menu-inner designers-mega">
       <div class="mega-title-column">
-        <h4>Shop Popular Designers</h4>
+        <h4>{{ t.popularDesigners }}</h4>
       </div>
 
       <div
@@ -127,7 +148,7 @@
 
       <div class="designers-footer">
         <button type="button" class="see-all-designers-btn" @click="showDesignersSoon">
-          SEE ALL DESIGNERS
+          {{ t.seeAllDesigners }}
         </button>
 
         <p v-if="designerSoonMessage" class="designers-soon-message">
@@ -339,7 +360,7 @@ const popularBrandColumns = computed(() => {
 })
 
 const showDesignersSoon = () => {
-  designerSoonMessage.value = 'All designers page with alphabet navigation and search will be added soon.'
+  designerSoonMessage.value = t.value.designersSoon
 }
 
 const userInitial = computed(() => {
@@ -455,4 +476,58 @@ watch(
     closeMegaMenu()
   }
 )
+
+type Language = 'en' | 'lv'
+
+const language = ref<Language>(
+  (localStorage.getItem('language') as Language) || 'en'
+)
+
+const translations = {
+  en: {
+    addListing: 'ADD LISTING',
+    messages: 'MESSAGES',
+    adminCategories: 'ADMIN CATEGORIES',
+    logout: 'LOGOUT',
+    login: 'LOGIN',
+    register: 'REGISTER',
+    search: 'SEARCH',
+    searchPlaceholder: 'Search for anything',
+    designers: 'DESIGNERS',
+    menswear: 'MENSWEAR',
+    womenswear: 'WOMENSWEAR',
+    sneakers: 'SNEAKERS',
+    aboutUs: 'ABOUT US',
+    popularDesigners: 'Shop Popular Designers',
+    seeAllDesigners: 'SEE ALL DESIGNERS',
+    designersSoon: 'All designers page with alphabet navigation and search will be added soon.',
+  },
+
+  lv: {
+    addListing: 'PIEVIENOT SLUDINĀJUMU',
+    messages: 'ZIŅAS',
+    adminCategories: 'ADMIN KATEGORIJAS',
+    logout: 'IZIET',
+    login: 'PIESLĒGTIES',
+    register: 'REĢISTRĒTIES',
+    search: 'MEKLĒT',
+    searchPlaceholder: 'Meklēt jebko',
+    designers: 'ZĪMOLI',
+    menswear: 'VĪRIEŠIEM',
+    womenswear: 'SIEVIETĒM',
+    sneakers: 'APAVI',
+    aboutUs: 'PAR MUMS',
+    popularDesigners: 'Populāri zīmoli',
+    seeAllDesigners: 'SKATĪT VISUS ZĪMOLUS',
+    designersSoon: 'Visu zīmolu lapa ar alfabēta navigāciju un meklēšanu tiks pievienota vēlāk.',
+  },
+}
+
+const t = computed(() => translations[language.value])
+
+const toggleLanguage = () => {
+  language.value = language.value === 'en' ? 'lv' : 'en'
+  localStorage.setItem('language', language.value)
+}
+
 </script>

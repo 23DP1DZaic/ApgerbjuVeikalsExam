@@ -2602,6 +2602,39 @@ select {
 
 
 
+/* LANGUAGE VALODA */
+
+.language-toggle {
+  height: 34px;
+  min-width: 66px;
+  padding: 0 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.language-toggle:hover {
+  border-color: #111;
+  background: #f7f7f7;
+}
+
+.language-flag {
+  font-size: 16px;
+  line-height: 1;
+}
+
+
+
+
 /* ================================
    Responsive
 ================================ */
