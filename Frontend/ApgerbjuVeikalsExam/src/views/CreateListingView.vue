@@ -131,20 +131,21 @@
           </button>
 
           <div v-if="isColorDropdownOpen" class="custom-color-menu">
-            <button
-              v-for="color in colors"
-              :key="color.name"
-              type="button"
-              class="custom-color-option"
-              @click="selectColor(color.name)"
-            >
-              <span
-                class="color-dot"
-                :style="{ background: color.value }"
-              ></span>
+          <button
+            v-for="color in colors"
+            :key="color.name"
+            type="button"
+            class="custom-color-option"
+            @click="selectColor(color.name)"
+          >
+            <span
+              class="color-dot"
+              :class="{ 'white-dot': color.name === 'White' }"
+              :style="{ background: color.value }"
+            ></span>
 
-              <span>{{ color.name }}</span>
-            </button>
+            <span>{{ color.name }}</span>
+          </button>
           </div>
         </div>
 

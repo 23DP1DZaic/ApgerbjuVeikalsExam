@@ -1648,11 +1648,12 @@ input[type='number']::-webkit-inner-spin-button {
 
 .file-upload-box {
   width: 100%;
-  min-height: 76px;
+  min-height: 72px;
   padding: 12px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: #fff;
+
   display: flex;
   align-items: center;
   gap: 14px;
@@ -1663,21 +1664,31 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .file-upload-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 44px;
+
+  height: 42px;
   min-width: 110px;
   padding: 0 18px;
+
   border: 1px solid var(--color-border-dark);
   border-radius: var(--radius-md);
   background: #fff;
   color: #111;
+
   font-size: 14px;
   font-weight: 800;
+  line-height: 3;
+  text-align: center;
+
   cursor: pointer;
-  line-height: 1;
   box-shadow: none;
+}
+
+.file-upload-btn:hover {
+  background: #f5f5f5;
+  border-color: #111;
 }
 
 .file-upload-btn:hover {
@@ -2987,12 +2998,10 @@ input[type='number']::-webkit-inner-spin-button {
   height: 20px;
   min-width: 20px;
   min-height: 20px;
-
   border-radius: 50%;
-  border: none;
-
   display: inline-block;
   flex-shrink: 0;
+  border: none;
 }
 
 .color-dot.white-dot {
@@ -3188,6 +3197,65 @@ input[type='number']::-webkit-inner-spin-button {
 .clickable-listing-preview:hover h2 {
   text-decoration: underline;
 }
+
+
+/* ================================
+   Shop Color Filter
+================================ */
+
+.shop-color-select {
+  height: 46px;
+  min-height: 46px;
+  border-radius: var(--radius-md);
+}
+
+.shop-color-menu {
+  z-index: 7000;
+}
+
+.empty-color-dot {
+  background: transparent;
+  border: 1px dashed #bdbdbd;
+}
+
+.color-dot.white-dot {
+  border: 1px solid #cfcfcf;
+}
+
+
+/* ================================
+   Add Listing Inputs Hover / Focus
+================================ */
+
+.create-listing-form .form-group input,
+.create-listing-form .form-group textarea,
+.create-listing-form .custom-select-button,
+.create-listing-form .custom-color-select,
+.create-listing-form .file-upload-box {
+  border: 1px solid var(--color-border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.create-listing-form .form-group input:hover,
+.create-listing-form .form-group textarea:hover,
+.create-listing-form .custom-select-button:hover,
+.create-listing-form .custom-color-select:hover,
+.create-listing-form .file-upload-box:hover {
+  border-color: #111;
+}
+
+.create-listing-form .form-group input:focus,
+.create-listing-form .form-group textarea:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+  outline: none;
+}
+
+.create-listing-form .file-upload-box:focus-within {
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
 
 
 /* ================================

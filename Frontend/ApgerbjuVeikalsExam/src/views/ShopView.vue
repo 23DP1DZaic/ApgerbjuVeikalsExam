@@ -24,26 +24,57 @@
           </select>
         </div>
 
-        <div class="filter-section">
+        <div
+          class="filter-section color-dropdown-wrapper"
+          ref="colorFilterDropdownRef"
+        >
           <h3>Color</h3>
-          <select v-model="colorFilter" class="sort-select">
-            <option value="">All colors</option>
-            <option value="Black">Black</option>
-            <option value="White">White</option>
-            <option value="Gray">Gray</option>
-            <option value="Brown">Brown</option>
-            <option value="Beige">Beige</option>
-            <option value="Yellow">Yellow</option>
-            <option value="Red">Red</option>
-            <option value="Orange">Orange</option>
-            <option value="Pink">Pink</option>
-            <option value="Purple">Purple</option>
-            <option value="Blue">Blue</option>
-            <option value="Green">Green</option>
-            <option value="Multi">Multi</option>
-            <option value="Silver">Silver</option>
-            <option value="Gold">Gold</option>
-          </select>
+
+          <button
+            type="button"
+            class="custom-color-select shop-color-select"
+            @click="isColorFilterOpen = !isColorFilterOpen"
+          >
+            <span
+              v-if="selectedFilterColor"
+              class="color-dot"
+              :class="{ 'white-dot': selectedFilterColor.name === 'White' }"
+              :style="{ background: selectedFilterColor.value }"
+            ></span>
+
+            <span>
+              {{ selectedFilterColor ? selectedFilterColor.name : 'All colors' }}
+            </span>
+
+            <span class="custom-select-arrow">⌄</span>
+          </button>
+
+          <div v-if="isColorFilterOpen" class="custom-color-menu shop-color-menu">
+            <button
+              type="button"
+              class="custom-color-option"
+              @click="selectFilterColor('')"
+            >
+              <span class="color-dot empty-color-dot"></span>
+              <span>All colors</span>
+            </button>
+
+            <button
+              v-for="color in colors"
+              :key="color.name"
+              type="button"
+              class="custom-color-option"
+              @click="selectFilterColor(color.name)"
+            >
+              <span
+                class="color-dot"
+                :class="{ 'white-dot': color.name === 'White' }"
+                :style="{ background: color.value }"
+              ></span>
+
+              <span>{{ color.name }}</span>
+            </button>
+          </div>
         </div>
 
         <div class="filter-section">
@@ -573,15 +604,69 @@ watch(
   }
 )
 
+const handleColorFilterClickOutside = (event: MouseEvent) => {
+  const target = event.target as Node
+
+  if (
+    colorFilterDropdownRef.value &&
+    !colorFilterDropdownRef.value.contains(target)
+  ) {
+    isColorFilterOpen.value = false
+  }
+}
+
 onMounted(() => {
   syncFiltersFromRoute()
   loadCategories()
   fetchProducts()
 
   window.addEventListener('language-changed', updateLanguage)
+  document.addEventListener('click', handleColorFilterClickOutside)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('language-changed', updateLanguage)
+  document.removeEventListener('click', handleColorFilterClickOutside)
 })
+
+const isColorFilterOpen = ref(false)
+const colorFilterDropdownRef = ref<HTMLElement | null>(null)
+
+const colors = [
+  { name: 'Black', value: '#000000' },
+  { name: 'White', value: '#ffffff' },
+  { name: 'Gray', value: '#e5e5e5' },
+  { name: 'Brown', value: '#6b4a3a' },
+  { name: 'Beige', value: '#e6cf91' },
+  { name: 'Yellow', value: '#ffd91a' },
+  { name: 'Red', value: '#f10b0b' },
+  { name: 'Orange', value: '#ff6500' },
+  { name: 'Pink', value: '#ec5aaa' },
+  { name: 'Purple', value: '#5f1fd6' },
+  { name: 'Blue', value: '#1177bd' },
+  { name: 'Green', value: '#4faf0b' },
+  {
+    name: 'Multi',
+    value: 'linear-gradient(135deg, red, orange, yellow, green, blue, purple)',
+  },
+  {
+    name: 'Silver',
+    value: 'linear-gradient(135deg, #777, #eee, #aaa)',
+  },
+  {
+    name: 'Gold',
+    value: 'linear-gradient(135deg, #b99b22, #f3e37c, #c8a600)',
+  },
+]
+
+const selectedFilterColor = computed(() => {
+  return colors.find((color) => color.name === colorFilter.value) || null
+})
+
+const selectFilterColor = (colorName: string) => {
+  colorFilter.value = colorName
+  isColorFilterOpen.value = false
+}
+
+
 </script>
