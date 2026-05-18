@@ -18,24 +18,16 @@
 
               <div class="account-user-info">
                 <h1>{{ user?.display_name || user?.name || 'User' }}</h1>
+
                 <p class="account-subtext">
                   {{ user?.bio || 'No description yet' }}
                 </p>
-                <p class="account-joined">Joined in 2025</p>
+
+                <p class="account-joined">
+                  Joined in 2025
+                </p>
               </div>
             </div>
-
-            <!-- <button class="logout-btn" @click="logout">
-              {{ t.logout }}
-            </button> -->
-
-              <!-- <button
-              type="button"
-              class="account-logout-btn"
-              @click="logout"
-            >
-              Logout
-            </button> -->
 
             <div class="account-actions">
               <button
@@ -87,7 +79,7 @@
               :class="{ active: activeTab === tab }"
               @click="setActiveTab(tab)"
             >
-            {{ getTabLabel(tab) }}
+              {{ getTabLabel(tab) }}
             </button>
           </div>
         </div>
@@ -139,20 +131,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
-import { getCurrentUser, type AuthUser, type Listing } from '../services/auth'
-import { clearAuth } from '../services/auth'
-
-
+import { clearAuth, getCurrentUser, type AuthUser, type Listing } from '../services/auth'
 
 const router = useRouter()
-
-const logout = () => {
-  clearAuth()
-  router.push('/login')
-}
+const route = useRoute()
 
 const user = ref<AuthUser | null>(null)
 
@@ -162,66 +147,74 @@ const likedListings = ref<Listing[]>([])
 
 const loadingTab = ref(false)
 
-const tabs = ['Selling', 'Favorites', 'Liked', 'Purchases', 'Reviews'] as const
+const tabs = ['listings', 'favorites', 'liked', 'purchases', 'reviews'] as const
 type AccountTab = typeof tabs[number]
 
-const getTabLabel = (tab: AccountTab) => {
-  if (tab === 'Selling') {
-    return sellingListings.value.length === 1 ? 'Your Listing' : 'Your Listings'
+const activeTab = ref<AccountTab>('listings')
+
+const normalizeTab = (tab: unknown): AccountTab => {
+  const value = String(tab || 'listings').toLowerCase()
+
+  if (value === 'selling') return 'listings'
+  if (value === 'favorite') return 'favorites'
+
+  if (tabs.includes(value as AccountTab)) {
+    return value as AccountTab
   }
 
-  return tab
+  return 'listings'
 }
 
-const activeTab = ref<AccountTab>('Selling')
+const logout = () => {
+  clearAuth()
+  router.push('/login')
+}
 
 const userInitial = computed(() => {
   const value = user.value?.display_name || user.value?.name || '?'
   return value.charAt(0).toUpperCase()
 })
 
-const activeTabTitle = computed(() => {
-  if (activeTab.value === 'Selling') {
+const getTabLabel = (tab: AccountTab) => {
+  if (tab === 'listings') {
     return sellingListings.value.length === 1 ? 'Your Listing' : 'Your Listings'
   }
 
-  if (activeTab.value === 'Favorites') return 'Favorite Listings'
-  if (activeTab.value === 'Liked') return 'Liked Listings'
-  if (activeTab.value === 'Purchases') return 'Purchases'
+  if (tab === 'favorites') return 'Favorites'
+  if (tab === 'liked') return 'Liked'
+  if (tab === 'purchases') return 'Purchases'
+
+  return 'Reviews'
+}
+
+const activeTabTitle = computed(() => {
+  if (activeTab.value === 'listings') {
+    return sellingListings.value.length === 1 ? 'Your Listing' : 'Your Listings'
+  }
+
+  if (activeTab.value === 'favorites') return 'Favorite Listings'
+  if (activeTab.value === 'liked') return 'Liked Listings'
+  if (activeTab.value === 'purchases') return 'Purchases'
 
   return 'Reviews'
 })
 
 const activeListings = computed(() => {
-  if (activeTab.value === 'Selling') return sellingListings.value
-  if (activeTab.value === 'Favorites') return favoriteListings.value
-  if (activeTab.value === 'Liked') return likedListings.value
+  if (activeTab.value === 'listings') return sellingListings.value
+  if (activeTab.value === 'favorites') return favoriteListings.value
+  if (activeTab.value === 'liked') return likedListings.value
 
   return []
 })
 
 const emptyMessage = computed(() => {
-  if (activeTab.value === 'Selling') return 'No listings yet.'
-  if (activeTab.value === 'Favorites') return 'No favorite listings yet.'
-  if (activeTab.value === 'Liked') return 'No liked listings yet.'
-  if (activeTab.value === 'Purchases') return 'No purchases yet.'
+  if (activeTab.value === 'listings') return 'No listings yet.'
+  if (activeTab.value === 'favorites') return 'No favorite listings yet.'
+  if (activeTab.value === 'liked') return 'No liked listings yet.'
+  if (activeTab.value === 'purchases') return 'No purchases yet.'
+
   return 'No reviews yet.'
 })
-
-const loadAccount = async () => {
-  const currentUser = await getCurrentUser()
-
-  if (!currentUser) {
-    router.push('/login')
-    return
-  }
-
-  user.value = currentUser
-  sellingListings.value = currentUser.listings || []
-
-  await loadFavorites()
-  await loadLikes()
-}
 
 const loadFavorites = async () => {
   loadingTab.value = true
@@ -263,14 +256,36 @@ const loadLikes = async () => {
   }
 }
 
+const loadAccount = async () => {
+  const currentUser = await getCurrentUser()
+
+  if (!currentUser) {
+    router.push('/login')
+    return
+  }
+
+  user.value = currentUser
+  sellingListings.value = currentUser.listings || []
+
+  await loadFavorites()
+  await loadLikes()
+}
+
 const setActiveTab = async (tab: AccountTab) => {
   activeTab.value = tab
 
-  if (tab === 'Favorites') {
+  await router.replace({
+    path: '/account',
+    query: {
+      tab,
+    },
+  })
+
+  if (tab === 'favorites') {
     await loadFavorites()
   }
 
-  if (tab === 'Liked') {
+  if (tab === 'liked') {
     await loadLikes()
   }
 }
@@ -279,7 +294,23 @@ const goToListing = (id: number) => {
   router.push(`/listing/${id}`)
 }
 
+watch(
+  () => route.query.tab,
+  async (tab) => {
+    activeTab.value = normalizeTab(tab)
+
+    if (activeTab.value === 'favorites') {
+      await loadFavorites()
+    }
+
+    if (activeTab.value === 'liked') {
+      await loadLikes()
+    }
+  }
+)
+
 onMounted(() => {
+  activeTab.value = normalizeTab(route.query.tab)
   loadAccount()
 })
 </script>

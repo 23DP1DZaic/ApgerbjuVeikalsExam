@@ -13,6 +13,8 @@ import SettingsAccountView from '../views/SettingsAccountView.vue'
 import AdminCategoriesView from '../views/AdminCategoriesView.vue'
 import MessagesView from '../views/MessagesView.vue'
 import ConversationView from '../views/ConversationView.vue'
+import DeliveryView from '../views/DeliveryView.vue'
+import RefundsView from '../views/RefundsView.vue'
 
 
 const router = createRouter({
@@ -115,26 +117,42 @@ const router = createRouter({
       },
     },
     {
-  path: '/admin/categories',
-  name: 'admin-categories',
-  component: AdminCategoriesView,
-  meta: {
-    requiresAuth: true,
-    requiresAdmin: true,
+      path: '/admin/categories',
+      name: 'admin-categories',
+      component: AdminCategoriesView,
+      meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
     },
     },
     {
-    path: '/messages',
-    name: 'messages',
-    component: MessagesView,
+      path: '/messages',
+      name: 'messages',
+      component: MessagesView,
     },
     {
-    path: '/messages/:id',
-    name: 'conversation',
-    component: ConversationView,
+      path: '/messages/:id',
+      name: 'conversation',
+      component: ConversationView,
+    },
+    {
+      path: '/delivery',
+      name: 'delivery',
+      component: DeliveryView,
+    },
+    {
+      path: '/refunds',
+      name: 'refunds',
+      component: RefundsView,
     },
   ],
-  
+  scrollBehavior() {
+    return {
+      top: 0,
+      left: 0,
+      behavior: 'smooth',
+    }
+  },
 })
 
 router.beforeEach((to, _from, next) => {

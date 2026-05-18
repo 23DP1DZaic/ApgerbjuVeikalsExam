@@ -14,21 +14,29 @@
         <button type="submit">{{ t.search }}</button>
       </form>
 
-      <nav class="header-actions">
-        <router-link v-if="user" to="/create-listing">
-          {{ t.addListing }}
-        </router-link>
+        <nav class="header-actions">
+          <router-link v-if="user" to="/create-listing">
+            {{ t.addListing }}
+          </router-link>
 
-        <router-link to="/messages">
-          {{ t.messages }}
-        </router-link>
+          <router-link to="/messages">
+            {{ t.messages }}
+          </router-link>
 
-        <router-link v-if="user?.role === 'admin'" to="/admin/categories">
-          {{ t.adminCategories }}
-        </router-link>
+          <router-link v-if="user?.role === 'admin'" to="/admin/categories">
+            {{ t.adminCategories }}
+          </router-link>
 
-        <div v-if="user" class="user-menu">
-          <router-link to="/account" class="user-info user-link">
+        <div
+          v-if="user"
+          ref="profileMenuRef"
+          class="user-menu profile-menu-wrapper"
+        >
+          <button
+            type="button"
+            class="user-info user-link profile-menu-button"
+            @click="isProfileMenuOpen = !isProfileMenuOpen"
+          >
             <img
               v-if="user.avatar_url"
               :src="user.avatar_url"
@@ -43,28 +51,89 @@
             <span class="user-name">
               {{ user.display_name || user.name }}
             </span>
-          </router-link>
+
+            <span class="profile-menu-arrow">›</span>
+          </button>
+
+          <div
+            v-if="isProfileMenuOpen"
+            class="profile-dropdown"
+          >
+            <div class="profile-dropdown-header">
+              <strong>{{ user.display_name || user.name }}</strong>
+            </div>
+
+            <router-link
+              to="/account?tab=reviews"
+              class="profile-dropdown-link"
+              @click="closeProfileMenu"
+            >
+              Reviews
+            </router-link>
+
+            <router-link
+              to="/account?tab=liked"
+              class="profile-dropdown-link"
+              @click="closeProfileMenu"
+            >
+              Liked
+            </router-link>
+
+            <router-link
+              to="/account?tab=favorites"
+              class="profile-dropdown-link"
+              @click="closeProfileMenu"
+            >
+              Favorite
+            </router-link>
+
+            <router-link
+              to="/account?tab=listings"
+              class="profile-dropdown-link"
+              @click="closeProfileMenu"
+            >
+              Your Listings
+            </router-link>
+
+            <div class="profile-dropdown-divider"></div>
+
+            <router-link
+              to="/settings/profile"
+              class="profile-dropdown-link"
+              @click="closeProfileMenu"
+            >
+              Settings
+            </router-link>
+
+            <button
+              type="button"
+              class="profile-dropdown-link profile-dropdown-logout"
+              @click="logout"
+            >
+              Log out
+            </button>
+          </div>
         </div>
 
-        <div v-else class="auth-links">
-          <router-link to="/login">{{ t.login }}</router-link>
-          <router-link to="/register">{{ t.register }}</router-link>
-        </div>
+          <div v-else class="auth-links">
+            <router-link to="/login">{{ t.login }}</router-link>
+            <router-link to="/register">{{ t.register }}</router-link>
+          </div>
 
-        <button
-          type="button"
-          class="language-toggle"
-          @click="toggleLanguage"
-        >
-          <span class="language-flag">
-            {{ language === 'lv' ? '🇱🇻' : '🇬🇧' }}
-          </span>
+          <button
+            type="button"
+            class="language-toggle"
+            @click="toggleLanguage"
+          >
+            <span class="language-flag">
+              {{ language === 'lv' ? '🇱🇻' : '🇬🇧' }}
+            </span>
 
-          <span>
-            {{ language === 'lv' ? 'LV' : 'EN' }}
-          </span>
-        </button>
-      </nav>
+            <span>
+              {{ language === 'lv' ? 'LV' : 'EN' }}
+            </span>
+          </button>
+        </nav>
       </div>
 
       <nav class="category-nav" ref="megaMenuRef">
@@ -243,12 +312,21 @@
           <p>Vienkārša platforma unikālu apģērbu pirkšanai un pārdošanai.</p>
         </div>
 
-        <div class="footer-section">
-          <h4>Information</h4>
-          <a href="#">Delivery</a>
-          <a href="#">Refunds</a>
-          <router-link to="/about">About us</router-link>
-        </div>
+      <div class="footer-section">
+        <h4>Information</h4>
+
+        <router-link to="/delivery">
+          Delivery
+        </router-link>
+
+        <router-link to="/refunds">
+          Refunds
+        </router-link>
+
+        <router-link to="/about">
+          About us
+        </router-link>
+      </div>
 
         <div class="footer-section">
           <h4>Contact Us</h4>
@@ -432,6 +510,7 @@ const handleClickOutsideMegaMenu = (event: MouseEvent) => {
 }
 
 const logout = () => {
+  closeProfileMenu()
   clearAuth()
   user.value = null
   router.push('/login')
@@ -454,12 +533,14 @@ onMounted(() => {
   loadCategoryTree('women')
   document.addEventListener('click', handleClickOutsideMegaMenu)
   window.addEventListener('auth-changed', refreshUser)
+  document.addEventListener('click', handleProfileMenuClickOutside)
 })
 
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutsideMegaMenu)
   window.removeEventListener('auth-changed', refreshUser)
+  document.removeEventListener('click', handleProfileMenuClickOutside)
 })
 
 watch(
@@ -530,6 +611,24 @@ const toggleLanguage = () => {
 
 const refreshUser = () => {
   user.value = getUser()
+}
+
+const isProfileMenuOpen = ref(false)
+const profileMenuRef = ref<HTMLElement | null>(null)
+
+const closeProfileMenu = () => {
+  isProfileMenuOpen.value = false
+}
+
+const handleProfileMenuClickOutside = (event: MouseEvent) => {
+  const target = event.target as Node
+
+  if (
+    profileMenuRef.value &&
+    !profileMenuRef.value.contains(target)
+  ) {
+    isProfileMenuOpen.value = false
+  }
 }
 
 </script>
