@@ -81,7 +81,9 @@
           </button>
         </div>
 
-          <button class="purchase-btn">Purchase</button>
+        <button class="purchase-btn" @click="goToPurchase">
+          Purchase
+        </button>
 
           <button
             class="secondary-btn"
@@ -551,5 +553,12 @@ const previousImage = () => {
 onMounted(() => {
   fetchListing()
 })
+
+
+const goToPurchase = () => {
+  if (!listing.value?.id) return
+
+  router.push(`/listing/${listing.value.id}/purchase`)
+}
 
 </script>

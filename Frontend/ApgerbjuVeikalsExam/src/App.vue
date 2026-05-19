@@ -334,10 +334,28 @@
         </div>
 
         <div class="footer-section">
-          <h4>Subscribe to our newsletter</h4>
-          <div class="newsletter">
-            <input type="email" placeholder="Your email">
-            <button>→</button>
+          <h4>{{ t.newsletterTitle }}</h4>
+
+          <div class="newsletter-block">
+            <form class="newsletter" @submit.prevent="subscribeNewsletter">
+              <input
+                v-model.trim="newsletterEmail"
+                type="email"
+                :placeholder="t.newsletterPlaceholder"
+              >
+
+              <button type="submit">
+                →
+              </button>
+            </form>
+
+            <p
+              v-if="newsletterMessage"
+              class="newsletter-message"
+              :class="{ success: newsletterSuccess, error: !newsletterSuccess }"
+            >
+              {{ newsletterMessage }}
+            </p>
           </div>
         </div>
       </div>
@@ -574,6 +592,11 @@ const translations = {
     popularDesigners: 'Shop Popular Designers',
     seeAllDesigners: 'SEE ALL DESIGNERS',
     designersSoon: 'All designers page with alphabet navigation and search will be added soon.',
+    newsletterTitle: 'Subscribe to our newsletter',
+    newsletterPlaceholder: 'Your email',
+    newsletterEmpty: 'Please enter your email address.',
+    newsletterInvalid: 'Please enter a valid email address.',
+    newsletterSuccess: 'You have successfully subscribed to the newsletter!',
   },
 
   lv: {
@@ -593,6 +616,11 @@ const translations = {
     popularDesigners: 'Populāri zīmoli',
     seeAllDesigners: 'SKATĪT VISUS ZĪMOLUS',
     designersSoon: 'Visu zīmolu lapa ar alfabēta navigāciju un meklēšanu tiks pievienota vēlāk.',
+    newsletterTitle: 'Pieraksties jaunumiem',
+    newsletterPlaceholder: 'Tavs e-pasts',
+    newsletterEmpty: 'Lūdzu, ievadi e-pasta adresi.',
+    newsletterInvalid: 'Lūdzu, ievadi derīgu e-pasta adresi.',
+    newsletterSuccess: 'Tu veiksmīgi pierakstījies jaunumiem!',
   },
 }
 
@@ -629,6 +657,40 @@ const handleProfileMenuClickOutside = (event: MouseEvent) => {
   ) {
     isProfileMenuOpen.value = false
   }
+}
+
+const newsletterEmail = ref('')
+const newsletterMessageType = ref<'empty' | 'invalid' | 'success' | ''>('')
+
+const newsletterSuccess = computed(() => {
+  return newsletterMessageType.value === 'success'
+})
+
+const newsletterMessage = computed(() => {
+  if (newsletterMessageType.value === 'empty') return t.value.newsletterEmpty
+  if (newsletterMessageType.value === 'invalid') return t.value.newsletterInvalid
+  if (newsletterMessageType.value === 'success') return t.value.newsletterSuccess
+
+  return ''
+})
+
+const subscribeNewsletter = () => {
+  newsletterMessageType.value = ''
+
+  if (!newsletterEmail.value) {
+    newsletterMessageType.value = 'empty'
+    return
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  if (!emailRegex.test(newsletterEmail.value)) {
+    newsletterMessageType.value = 'invalid'
+    return
+  }
+
+  newsletterMessageType.value = 'success'
+  newsletterEmail.value = ''
 }
 
 </script>

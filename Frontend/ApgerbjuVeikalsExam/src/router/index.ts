@@ -15,6 +15,7 @@ import MessagesView from '../views/MessagesView.vue'
 import ConversationView from '../views/ConversationView.vue'
 import DeliveryView from '../views/DeliveryView.vue'
 import RefundsView from '../views/RefundsView.vue'
+import PurchaseView from '../views/PurchaseView.vue'
 
 
 const router = createRouter({
@@ -144,6 +145,11 @@ const router = createRouter({
       path: '/refunds',
       name: 'refunds',
       component: RefundsView,
+    },
+    {
+      path: '/listing/:id/purchase',
+      name: 'purchase',
+      component: PurchaseView,
     },
   ],
   scrollBehavior() {

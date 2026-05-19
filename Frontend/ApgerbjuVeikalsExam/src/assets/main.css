@@ -3321,6 +3321,26 @@ input[type='number']::-webkit-inner-spin-button {
 
 
 /* ================================
+   Form Error Inputs
+================================ */
+
+.form-group input.input-error,
+.form-group textarea.input-error,
+.checkout-form input.input-error,
+.checkout-form textarea.input-error {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(196, 0, 0, 0.08) !important;
+}
+
+.form-group input.input-error:focus,
+.form-group textarea.input-error:focus,
+.checkout-form input.input-error:focus,
+.checkout-form textarea.input-error:focus {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(196, 0, 0, 0.12) !important;
+}
+
+/* ================================
    Stable Header Layout
 ================================ */
 
@@ -3589,6 +3609,210 @@ input[type='number']::-webkit-inner-spin-button {
 .profile-dropdown-logout:hover {
   color: #111;
 }
+
+/* ================================
+   Purchase Page
+================================ */
+
+.purchase-page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: 42px 24px 80px;
+}
+
+.purchase-layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: start;
+}
+
+.checkout-card,
+.purchase-summary {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.checkout-card {
+  padding: 32px;
+}
+
+.checkout-card h1 {
+  margin: 18px 0 8px;
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.checkout-subtitle {
+  margin: 0 0 12px;
+  color: var(--color-text-soft);
+}
+
+.checkout-warning {
+  margin: 0 0 26px;
+  padding: 12px 14px;
+  border: 1px solid #dedede;
+  border-radius: var(--radius-md);
+  background: #f7f7f7;
+  color: #555;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.checkout-form h2 {
+  margin: 28px 0 16px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.field-error {
+  margin: 7px 0 0;
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.purchase-submit-btn {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 26px;
+  border: 1px solid #111;
+  border-radius: var(--radius-md);
+  background: #111;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.purchase-submit-btn:hover {
+  background: #333;
+  border-color: #333;
+}
+
+.purchase-success {
+  margin: 18px 0 0;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: #f1f1f1;
+  color: #111;
+  font-weight: 800;
+  text-align: center;
+}
+
+.purchase-summary {
+  padding: 24px;
+  position: sticky;
+  top: 150px;
+}
+
+.purchase-summary h2 {
+  margin: 0 0 18px;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.summary-loading {
+  color: var(--color-text-soft);
+}
+
+.summary-image-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #f3f4f6;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.summary-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.summary-info h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.summary-info p {
+  margin: 0 0 8px;
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+.summary-line,
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.summary-line span,
+.summary-total span {
+  color: var(--color-text-soft);
+  font-weight: 700;
+}
+
+.summary-total strong {
+  font-size: 22px;
+}
+
+@media (max-width: 900px) {
+  .purchase-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .purchase-summary {
+    position: static;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* ================================
+   Newsletter Message
+================================ */
+
+.newsletter-block {
+  width: 100%;
+}
+
+.newsletter-message {
+  margin: 10px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.newsletter-message.success {
+  color: #ffffff;
+}
+
+.newsletter-message.error {
+  color: #ff6b6b;
+}
+
 
 
 /* ================================
