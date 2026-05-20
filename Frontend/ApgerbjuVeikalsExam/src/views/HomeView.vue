@@ -32,7 +32,18 @@
           </div>
 
           <h3>{{ listing.title }}</h3>
-          <p>{{ formatPrice(listing.price) }} </p>
+          <div class="featured-price-row">
+            <span
+              v-if="listing.original_price && Number(listing.original_price) > Number(listing.price)"
+              class="old-price"
+            >
+              {{ formatPrice(listing.original_price) }}
+            </span>
+
+            <span class="current-price">
+              {{ formatPrice(listing.price) }}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -67,6 +78,7 @@ type Listing = {
   images: ListingImage[]
   user_id: number
   status?: 'available' | 'sold' | string
+  original_price?: number | string | null
 }
 
 const router = useRouter()
@@ -124,4 +136,6 @@ onMounted(() => {
 const formatPrice = (price: number | string) => {
   return `${Math.round(Number(price))} €`
 }
+
+
 </script>

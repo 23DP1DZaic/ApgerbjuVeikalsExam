@@ -228,10 +228,22 @@
               </div>
 
               <div class="listing-card-info">
-                <h3>{{ listing.title }}</h3>
-                <p>{{ listing.category }}</p>
-                <span>{{ formatPrice(listing.price) }}</span>
+              <h3>{{ listing.title }}</h3>
+              <p>{{ listing.category }}</p>
+
+              <div class="product-price-row">
+                <span
+                  v-if="listing.original_price && Number(listing.original_price) > Number(listing.price)"
+                  class="old-price"
+                >
+                  {{ formatPrice(listing.original_price) }}
+                </span>
+
+                <span class="current-price">
+                  {{ formatPrice(listing.price) }}
+                </span>
               </div>
+            </div>
             </div>
           </div>
 
