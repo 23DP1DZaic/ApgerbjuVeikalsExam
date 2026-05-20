@@ -22,6 +22,7 @@ class Listing extends Model
         'color',
         'size',
         'condition',
+        'status',
     ];
 
     protected $appends = [

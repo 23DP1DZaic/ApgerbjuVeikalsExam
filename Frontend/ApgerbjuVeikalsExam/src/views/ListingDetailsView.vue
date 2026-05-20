@@ -24,33 +24,37 @@
           </div>
         </div>
 
-        <div class="main-image">
-          <button
-            v-if="imageUrls.length > 1"
-            class="image-arrow left"
-            @click="previousImage"
-          >
-            ‹
-          </button>
+<div class="main-image">
+  <button
+    v-if="imageUrls.length > 1"
+    class="image-arrow left"
+    @click="previousImage"
+  >
+    ‹
+  </button>
 
-          <img
-            v-if="selectedImage"
-            :src="selectedImage"
-            :alt="listing.title"
-          >
+  <img
+    v-if="selectedImage"
+    :src="selectedImage"
+    :alt="listing.title"
+  >
 
-          <div v-else class="details-no-image">
-            No image
-          </div>
+  <div v-else class="details-no-image">
+    No image
+  </div>
 
-          <button
-            v-if="imageUrls.length > 1"
-            class="image-arrow right"
-            @click="nextImage"
-          >
-            ›
-          </button>
-        </div>
+  <div v-if="listing.status === 'sold'" class="sold-badge detail-sold-badge">
+    SOLD
+  </div>
+
+  <button
+    v-if="imageUrls.length > 1"
+    class="image-arrow right"
+    @click="nextImage"
+  >
+    ›
+  </button>
+</div>
       </div>
 
       <aside class="listing-info">
@@ -81,23 +85,23 @@
           </button>
         </div>
 
-        <button class="purchase-btn" @click="goToPurchase">
-          Purchase
-        </button>
+        <div v-if="listing.status === 'sold'" class="sold-info-box">
+          SOLD
+        </div>
 
-          <button
-            class="secondary-btn"
-            @click="openOfferModal"
-          >
+        <template v-else>
+          <button class="purchase-btn" @click="goToPurchase">
+            Purchase
+          </button>
+
+          <button class="secondary-btn" @click="openOfferModal">
             Offer
           </button>
 
-          <button
-            class="secondary-btn"
-            @click="openMessageModal"
-          >
+          <button class="secondary-btn" @click="openMessageModal">
             Message
           </button>
+        </template>
 
         <div class="details-section">
           <h3>Seller Description</h3>
@@ -413,6 +417,7 @@ type Listing = {
   favorites_count?: number
   liked_by_me?: boolean
   favorited_by_me?: boolean
+  status?: 'available' | 'sold' | string
 }
 
 const route = useRoute()

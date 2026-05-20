@@ -23,9 +23,7 @@
             {{ t.messages }}
           </router-link>
 
-          <router-link v-if="user?.role === 'admin'" to="/admin/categories">
-            {{ t.adminCategories }}
-          </router-link>
+
 
         <div
           v-if="user"
@@ -55,64 +53,81 @@
             <span class="profile-menu-arrow">›</span>
           </button>
 
-          <div
-            v-if="isProfileMenuOpen"
-            class="profile-dropdown"
-          >
-            <div class="profile-dropdown-header">
-              <strong>{{ user.display_name || user.name }}</strong>
-            </div>
-
-            <router-link
-              to="/account?tab=reviews"
-              class="profile-dropdown-link"
-              @click="closeProfileMenu"
-            >
-              Reviews
-            </router-link>
-
-            <router-link
-              to="/account?tab=liked"
-              class="profile-dropdown-link"
-              @click="closeProfileMenu"
-            >
-              Liked
-            </router-link>
-
-            <router-link
-              to="/account?tab=favorites"
-              class="profile-dropdown-link"
-              @click="closeProfileMenu"
-            >
-              Favorite
-            </router-link>
-
-            <router-link
-              to="/account?tab=listings"
-              class="profile-dropdown-link"
-              @click="closeProfileMenu"
-            >
-              Your Listings
-            </router-link>
-
-            <div class="profile-dropdown-divider"></div>
-
-            <router-link
-              to="/settings/profile"
-              class="profile-dropdown-link"
-              @click="closeProfileMenu"
-            >
-              Settings
-            </router-link>
-
-            <button
-              type="button"
-              class="profile-dropdown-link profile-dropdown-logout"
-              @click="logout"
-            >
-              Log out
-            </button>
+        <div
+          v-if="isProfileMenuOpen"
+          class="profile-dropdown"
+        >
+          <div class="profile-dropdown-header">
+            <strong>{{ user.display_name || user.name }}</strong>
           </div>
+
+          <router-link
+            to="/account?tab=listings"
+            class="profile-dropdown-link"
+            @click="closeProfileMenu"
+          >
+            Your Listings
+          </router-link>
+
+          <router-link
+            to="/account?tab=favorites"
+            class="profile-dropdown-link"
+            @click="closeProfileMenu"
+          >
+            Favorites
+          </router-link>
+
+          <router-link
+            to="/account?tab=liked"
+            class="profile-dropdown-link"
+            @click="closeProfileMenu"
+          >
+            Liked
+          </router-link>
+
+          <router-link
+            to="/account?tab=purchases"
+            class="profile-dropdown-link"
+            @click="closeProfileMenu"
+          >
+            Purchases
+          </router-link>
+
+          <router-link
+            to="/account?tab=reviews"
+            class="profile-dropdown-link"
+            @click="closeProfileMenu"
+          >
+            Reviews
+          </router-link>
+
+          <div class="profile-dropdown-divider"></div>
+
+          <router-link
+            to="/settings/profile"
+            class="profile-dropdown-link"
+            @click="closeProfileMenu"
+          >
+            Settings
+          </router-link>
+
+          <button
+            type="button"
+            class="profile-dropdown-link profile-dropdown-logout"
+            @click="logout"
+          >
+            Log out
+          </button>
+
+          <router-link
+          v-if="user?.role === 'admin'"
+          to="/admin/categories"
+          class="profile-dropdown-link profile-dropdown-admin"
+          @click="closeProfileMenu"
+        >
+          {{ t.adminCategories }}
+        </router-link>
+        </div>
         </div>
 
           <div v-else class="auth-links">
@@ -328,10 +343,17 @@
         </router-link>
       </div>
 
-        <div class="footer-section">
-          <h4>Contact Us</h4>
-          <p>email.com<br>+371 123</p>
-        </div>
+      <div class="footer-section">
+        <h4>Contact Us</h4>
+
+        <p class="footer-contact-row">
+          sunny@marketplace.com
+        </p>
+
+        <p class="footer-contact-row">
+          +371 00000000
+        </p>
+      </div>
 
         <div class="footer-section">
           <h4>{{ t.newsletterTitle }}</h4>
@@ -361,7 +383,7 @@
       </div>
 
       <div class="footer-bottom">
-        <p>© 2026 Name</p>
+        <p>© 2026 Sunny</p>
       </div>
     </footer>
   </div>
@@ -398,9 +420,7 @@ const megaMenuRef = ref<HTMLElement | null>(null)
 
 const popularBrands = [
   'Acne Studios',
-  'Adidas',
-  'Amiri',
-  'Arc\'teryx',
+  "Arc'teryx",
   'Balenciaga',
   'Bape',
   'Bottega Veneta',
@@ -429,27 +449,21 @@ const popularBrands = [
   'Vivienne Westwood',
   'Yohji Yamamoto',
   'Zara',
-]
+].sort((a, b) => a.localeCompare(b))
 
 const designerSoonMessage = ref('')
 
-const sortedPopularBrands = computed(() => {
-  return [...popularBrands].sort((a, b) => a.localeCompare(b))
-})
 
 const popularBrandColumns = computed(() => {
-  const columns: string[][] = [[], [], []]
+  const columnsCount = 3
+  const itemsPerColumn = Math.ceil(popularBrands.length / columnsCount)
 
-  sortedPopularBrands.value.forEach((brand, index) => {
-    const columnIndex = index % columns.length
-    const column = columns[columnIndex]
+  return Array.from({ length: columnsCount }, (_, index) => {
+    const start = index * itemsPerColumn
+    const end = start + itemsPerColumn
 
-    if (column) {
-      column.push(brand)
-    }
+    return popularBrands.slice(start, end)
   })
-
-  return columns
 })
 
 const showDesignersSoon = () => {
@@ -589,7 +603,7 @@ const translations = {
     womenswear: 'WOMENSWEAR',
     sneakers: 'SNEAKERS',
     aboutUs: 'ABOUT US',
-    popularDesigners: 'Shop Popular Designers',
+    popularDesigners: 'Popular Designers',
     seeAllDesigners: 'SEE ALL DESIGNERS',
     designersSoon: 'All designers page with alphabet navigation and search will be added soon.',
     newsletterTitle: 'Subscribe to our newsletter',

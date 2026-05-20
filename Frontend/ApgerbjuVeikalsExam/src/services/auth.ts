@@ -18,6 +18,7 @@ export type Listing = {
   condition: string
   images: ListingImage[]
   user_id: number
+  status?: string
 }
 
 export type AuthUser = {

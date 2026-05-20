@@ -252,4 +252,28 @@ class ListingController extends Controller
             $user->listings()->with('images')->latest()->get()
         );
     }
+
+    public function purchase(Listing $listing)
+{
+    if ($listing->status === 'sold') {
+        return response()->json([
+            'message' => 'This listing is already sold.',
+        ], 422);
+    }
+
+    if ($listing->user_id === auth()->id()) {
+        return response()->json([
+            'message' => 'You cannot buy your own listing.',
+        ], 422);
+    }
+
+    $listing->update([
+        'status' => 'sold',
+    ]);
+
+    return response()->json([
+        'message' => 'Listing purchased successfully.',
+        'listing' => $listing->load(['images', 'user']),
+    ]);
+}
 }

@@ -111,6 +111,10 @@
                 <div v-else class="no-image">
                   No image
                 </div>
+
+                <div v-if="listing.status === 'sold'" class="sold-badge">
+                  SOLD
+                </div>
               </div>
 
               <div class="listing-card-info">

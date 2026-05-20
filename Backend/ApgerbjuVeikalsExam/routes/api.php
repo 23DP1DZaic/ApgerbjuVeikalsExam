@@ -46,4 +46,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/conversations/{conversation}', [MessageController::class, 'show']);
     Route::post('/listings/{listing}/conversation', [MessageController::class, 'start']);
     Route::post('/conversations/{conversation}/messages', [MessageController::class, 'send']);
+
+    Route::middleware('auth:sanctum')->post('/listings/{listing}/purchase', [ListingController::class, 'purchase']);
 });

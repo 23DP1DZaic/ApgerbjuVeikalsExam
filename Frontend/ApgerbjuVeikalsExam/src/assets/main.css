@@ -403,7 +403,7 @@ input[type='number']::-webkit-inner-spin-button {
 .mega-menu {
   position: fixed;
   left: 0;
-  top: 124px;
+  top: 140px;
   width: 100vw;
   max-height: calc(100vh - 124px);
   overflow-y: auto;
@@ -3539,15 +3539,15 @@ input[type='number']::-webkit-inner-spin-button {
 
 .profile-dropdown {
   position: absolute;
-  top: calc(100% + 14px);
+  top: calc(100% + 10px);
   right: 0;
-  width: 210px;
+  min-width: 220px;
   background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 12px 0;
-  z-index: 5000;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  padding: 10px 0;
+  z-index: 2000;
 }
 
 .profile-dropdown::before {
@@ -3564,46 +3564,46 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .profile-dropdown-header {
-  padding: 10px 18px 12px;
-  font-size: 14px;
-  color: #111;
+  padding: 10px 16px 14px;
+  border-bottom: 1px solid #ececec;
+  margin-bottom: 4px;
 }
+
 
 .profile-dropdown-header strong {
   display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+  line-height: 1.2;
 }
 
 .profile-dropdown-link {
   width: 100%;
-  min-height: 38px;
-  padding: 10px 18px;
-  border: none;
-  background: transparent;
-  color: #111;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
+  display: block;
+  padding: 12px 16px;
   text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  color: #111;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  display: flex;
-  align-items: center;
 }
 
 .profile-dropdown-link:hover {
-  background: #f3f4f6;
+  background: #f5f5f5;
 }
 
 .profile-dropdown-divider {
   height: 1px;
-  background: var(--color-border);
-  margin: 8px 0;
+  background: #ececec;
+  margin: 6px 0;
 }
 
 .profile-dropdown-logout {
-  color: #777;
+  color: #666;
 }
 
 .profile-dropdown-logout:hover {
@@ -3813,6 +3813,63 @@ input[type='number']::-webkit-inner-spin-button {
   color: #ff6b6b;
 }
 
+
+
+.profile-dropdown-admin {
+  color: #111;
+  font-weight: 800;
+}
+
+.profile-dropdown-admin:hover {
+  background: #f3f4f6;
+}
+
+
+/* ================================
+   Sold Listing
+================================ */
+
+.product-image,
+.listing-image-wrap,
+.main-image,
+.summary-image-wrap {
+  position: relative;
+}
+
+.sold-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  padding: 8px 14px;
+  background: rgba(17, 17, 17, 0.92);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.detail-sold-badge {
+  top: 22px;
+  left: 22px;
+  font-size: 16px;
+  padding: 10px 18px;
+}
+
+.sold-info-box {
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid #111;
+  border-radius: var(--radius-md);
+  background: #111;
+  color: #fff;
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
 
 
 /* ================================

@@ -144,13 +144,13 @@
               {{ st.noItems }}
             </p>
 
-            <button
+            <!-- <button
               type="button"
               class="empty-shop-btn"
               @click="resetFilters"
             >
               {{ st.resetFilters }}
-            </button>
+            </button> -->
           </div>
         </div>
 
@@ -174,6 +174,10 @@
 
               <div v-else class="no-image">
                 No image
+              </div>
+
+              <div v-if="product.status === 'sold'" class="sold-badge">
+                SOLD
               </div>
             </div>
 
@@ -254,6 +258,7 @@ type Product = {
   favorites_count?: number
   liked_by_me?: boolean
   favorited_by_me?: boolean
+  status?: 'available' | 'sold' | string
 }
 
 type Category = {
