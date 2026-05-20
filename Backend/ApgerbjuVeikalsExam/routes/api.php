@@ -6,6 +6,7 @@ use App\Http\Controllers\ListingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\UserController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -48,4 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/conversations/{conversation}/messages', [MessageController::class, 'send']);
 
     Route::middleware('auth:sanctum')->post('/listings/{listing}/purchase', [ListingController::class, 'purchase']);
+
+    Route::get('/users/{user}/profile', [UserController::class, 'profile']);
 });

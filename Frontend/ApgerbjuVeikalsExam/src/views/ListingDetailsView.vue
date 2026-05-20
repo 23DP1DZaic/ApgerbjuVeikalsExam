@@ -58,8 +58,30 @@
       </div>
 
       <aside class="listing-info">
+        <button
+          v-if="listing.user"
+          type="button"
+          class="seller-profile-card"
+          @click="openSellerProfile"
+        >
+          <img
+            v-if="listing.user.avatar_url"
+            :src="listing.user.avatar_url"
+            alt="Seller avatar"
+            class="seller-profile-avatar"
+          >
+
+          <div v-else class="seller-profile-avatar seller-profile-placeholder">
+            {{ sellerInitial }}
+          </div>
+
+          <div class="seller-profile-info">
+            <span>Seller</span>
+            <strong>{{ listing.user.display_name || listing.user.name }}</strong>
+          </div>
+        </button>
+
         <h2>{{ listing.brand || 'Unknown brand' }}</h2>
-        <h1>{{ listing.title }}</h1>
 
         <p class="meta">
         <p><strong>Condition:</strong> {{ formatText(listing.condition) }}</p>
@@ -401,6 +423,13 @@ type ListingImage = {
   image_path: string
 }
 
+type ListingUser = {
+  id: number
+  name: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
 type Listing = {
   id: number
   title: string
@@ -412,12 +441,13 @@ type Listing = {
   color: string | null
   size: string | null
   condition: string
+  status?: 'available' | 'sold' | string
+  user?: ListingUser | null
   images: ListingImage[]
   likes_count?: number
   favorites_count?: number
   liked_by_me?: boolean
   favorited_by_me?: boolean
-  status?: 'available' | 'sold' | string
 }
 
 const route = useRoute()
@@ -566,4 +596,14 @@ const goToPurchase = () => {
   router.push(`/listing/${listing.value.id}/purchase`)
 }
 
+const sellerInitial = computed(() => {
+  const value = listing.value?.user?.display_name || listing.value?.user?.name || '?'
+  return value.charAt(0).toUpperCase()
+})
+
+const openSellerProfile = () => {
+  if (!listing.value?.user?.id) return
+
+  router.push(`/users/${listing.value.user.id}`)
+}
 </script>

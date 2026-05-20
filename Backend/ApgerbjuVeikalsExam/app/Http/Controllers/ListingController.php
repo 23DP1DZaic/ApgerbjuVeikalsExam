@@ -149,7 +149,7 @@ class ListingController extends Controller
 
     public function show(Request $request, Listing $listing)
     {
-        $listing->load('images');
+        $listing->load(['images', 'user']);
 
         $userId = $this->getUserIdFromBearerToken($request);
 
