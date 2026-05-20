@@ -1,3 +1,6 @@
+Исправил: в `Reviews` у тебя был неправильный `listing.title` вместо `purchase.listing.title`, из-за этого ломался блок. Также убрал двойной `€` и сделал цены через `formatPrice`. 
+
+```vue
 <template>
   <div class="account-page">
     <div class="account-layout">
@@ -61,12 +64,12 @@
             </div>
 
             <div class="stat-box">
-              <strong>0</strong>
+              <strong>{{ purchasedItems.length }}</strong>
               <span>Purchases</span>
             </div>
 
             <div class="stat-box">
-              <strong>0</strong>
+              <strong>{{ reviewedCount }}</strong>
               <span>Reviews</span>
             </div>
           </div>
@@ -93,7 +96,114 @@
             </p>
           </div>
 
-          <div v-if="activeListings.length" class="listing-grid">
+          <div v-if="activeTab === 'reviews'" class="review-section">
+            <div v-if="purchasedItems.length" class="listing-grid">
+              <div
+                v-for="purchase in purchasedItems"
+                :key="purchase.id"
+                class="review-listing-item"
+              >
+                <div
+                  class="listing-card"
+                  :class="{ disabled: purchase.already_reviewed }"
+                  @click="!purchase.already_reviewed && openReviewModal(purchase)"
+                >
+                  <div class="listing-image-wrap">
+                    <img
+                      v-if="purchase.listing.images?.length"
+                      :src="`${API_URL}/storage/${purchase.listing.images?.[0]?.image_path || ''}`"
+                      :alt="purchase.listing.title"
+                      class="listing-card-image"
+                    >
+
+                    <div v-else class="no-image">
+                      No image
+                    </div>
+
+                    <div v-if="purchase.listing.status === 'sold'" class="sold-badge">
+                      SOLD
+                    </div>
+                  </div>
+
+                  <div class="listing-card-info">
+                    <h3>{{ purchase.listing.title }}</h3>
+                    <p>{{ purchase.listing.category }}</p>
+                    <span>{{ formatPrice(purchase.listing.price) }}</span>
+
+                    <small v-if="purchase.already_reviewed" class="review-card-note">
+                      Already reviewed
+                    </small>
+
+                    <small v-else class="review-card-note">
+                      Click to write review
+                    </small>
+                  </div>
+                </div>
+
+                <div
+                  v-if="purchase.already_reviewed && purchase.review"
+                  class="written-review-box"
+                >
+                  <div class="written-review-stars">
+                    {{ '★'.repeat(purchase.review.rating) }}{{ '☆'.repeat(5 - purchase.review.rating) }}
+                  </div>
+
+                  <p>
+                    {{ purchase.review.text }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <p v-else-if="!loadingTab" class="empty-text">
+              You have no purchased listings to review.
+            </p>
+          </div>
+
+          <div
+            v-else-if="activeTab === 'purchases'"
+            class="listing-grid"
+          >
+            <div
+              v-for="purchase in purchasedItems"
+              :key="purchase.id"
+              class="listing-card"
+              @click="goToListing(purchase.listing.id)"
+            >
+              <div class="listing-image-wrap">
+                <img
+                  v-if="purchase.listing.images?.length"
+                  :src="`${API_URL}/storage/${purchase.listing.images?.[0]?.image_path || ''}`"
+                  :alt="purchase.listing.title"
+                  class="listing-card-image"
+                >
+
+                <div v-else class="no-image">
+                  No image
+                </div>
+
+                <div v-if="purchase.listing.status === 'sold'" class="sold-badge">
+                  SOLD
+                </div>
+              </div>
+
+              <div class="listing-card-info">
+                <h3>{{ purchase.listing.title }}</h3>
+                <p>{{ purchase.listing.category }}</p>
+                <span>{{ formatPrice(purchase.listing.price) }}</span>
+                <small class="review-card-note">Purchased item</small>
+              </div>
+            </div>
+
+            <p v-if="!purchasedItems.length && !loadingTab" class="empty-text">
+              No purchases yet.
+            </p>
+          </div>
+
+          <div
+            v-else-if="activeListings.length"
+            class="listing-grid"
+          >
             <div
               v-for="listing in activeListings"
               :key="listing.id"
@@ -120,7 +230,7 @@
               <div class="listing-card-info">
                 <h3>{{ listing.title }}</h3>
                 <p>{{ listing.category }}</p>
-                <span>{{ listing.price }} €</span>
+                <span>{{ formatPrice(listing.price) }}</span>
               </div>
             </div>
           </div>
@@ -131,6 +241,84 @@
         </section>
       </main>
     </div>
+
+    <div
+      v-if="isReviewModalOpen && selectedPurchase"
+      class="modal-overlay"
+    >
+      <div class="review-modal">
+        <button
+          type="button"
+          class="modal-close"
+          @click="closeReviewModal"
+        >
+          ×
+        </button>
+
+        <div class="review-modal-layout">
+          <div class="review-form-side">
+            <h2>Write review</h2>
+
+            <label class="modal-label">Rating</label>
+
+            <div class="star-rating">
+              <button
+                v-for="star in 5"
+                :key="star"
+                type="button"
+                class="star-btn"
+                :class="{ active: star <= reviewRating }"
+                @click.stop="reviewRating = star"
+              >
+                ★
+              </button>
+            </div>
+
+            <label class="modal-label">Review</label>
+
+            <textarea
+              v-model="reviewText"
+              class="modal-textarea"
+              placeholder="Write your review about the seller..."
+            ></textarea>
+
+            <p v-if="reviewError" class="field-error">
+              {{ reviewError }}
+            </p>
+
+            <p v-if="reviewSuccess" class="purchase-success">
+              {{ reviewSuccess }}
+            </p>
+
+            <button
+              type="button"
+              class="modal-submit-btn"
+              @click="submitReview"
+            >
+              Submit review
+            </button>
+          </div>
+
+          <aside class="review-listing-side">
+            <h3>Purchased listing</h3>
+
+            <img
+              v-if="selectedPurchase.listing.images?.length"
+              :src="`${API_URL}/storage/${selectedPurchase.listing.images?.[0]?.image_path || ''}`"
+              :alt="selectedPurchase.listing.title"
+            >
+
+            <div v-else class="no-image">
+              No image
+            </div>
+
+            <h4>{{ selectedPurchase.listing.title }}</h4>
+            <p>{{ selectedPurchase.listing.category }}</p>
+            <strong>{{ formatPrice(selectedPurchase.listing.price) }}</strong>
+          </aside>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -140,6 +328,25 @@ import { useRoute, useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { clearAuth, getCurrentUser, type AuthUser, type Listing } from '../services/auth'
 
+type PurchaseReview = {
+  id: number
+  rating: number
+  text: string
+  created_at: string
+}
+
+type PurchaseItem = {
+  id: number
+  listing: Listing
+  seller: {
+    id: number
+    name: string
+    display_name: string | null
+  }
+  already_reviewed: boolean
+  review?: PurchaseReview | null
+}
+
 const router = useRouter()
 const route = useRoute()
 
@@ -148,6 +355,14 @@ const user = ref<AuthUser | null>(null)
 const sellingListings = ref<Listing[]>([])
 const favoriteListings = ref<Listing[]>([])
 const likedListings = ref<Listing[]>([])
+const purchasedItems = ref<PurchaseItem[]>([])
+
+const selectedPurchase = ref<PurchaseItem | null>(null)
+const isReviewModalOpen = ref(false)
+const reviewText = ref('')
+const reviewRating = ref(5)
+const reviewError = ref('')
+const reviewSuccess = ref('')
 
 const loadingTab = ref(false)
 
@@ -168,6 +383,10 @@ const normalizeTab = (tab: unknown): AccountTab => {
 
   return 'listings'
 }
+
+const reviewedCount = computed(() => {
+  return purchasedItems.value.filter((purchase) => purchase.already_reviewed).length
+})
 
 const logout = () => {
   clearAuth()
@@ -260,6 +479,26 @@ const loadLikes = async () => {
   }
 }
 
+const loadPurchases = async () => {
+  loadingTab.value = true
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/me/purchases`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      purchasedItems.value = Array.isArray(data) ? data : []
+    }
+  } catch (err) {
+    console.error('Load purchases error:', err)
+  } finally {
+    loadingTab.value = false
+  }
+}
+
 const loadAccount = async () => {
   const currentUser = await getCurrentUser()
 
@@ -273,6 +512,7 @@ const loadAccount = async () => {
 
   await loadFavorites()
   await loadLikes()
+  await loadPurchases()
 }
 
 const setActiveTab = async (tab: AccountTab) => {
@@ -292,6 +532,75 @@ const setActiveTab = async (tab: AccountTab) => {
   if (tab === 'liked') {
     await loadLikes()
   }
+
+  if (tab === 'purchases' || tab === 'reviews') {
+    await loadPurchases()
+  }
+}
+
+const openReviewModal = (purchase: PurchaseItem) => {
+  selectedPurchase.value = purchase
+  reviewText.value = ''
+  reviewRating.value = 5
+  reviewError.value = ''
+  reviewSuccess.value = ''
+  isReviewModalOpen.value = true
+}
+
+const closeReviewModal = () => {
+  isReviewModalOpen.value = false
+  selectedPurchase.value = null
+}
+
+const submitReview = async () => {
+  reviewError.value = ''
+  reviewSuccess.value = ''
+
+  if (!selectedPurchase.value) return
+
+  if (!selectedPurchase.value.listing?.id) {
+    reviewError.value = 'Listing was not found for this purchase.'
+    return
+  }
+
+  if (!reviewText.value.trim() || reviewText.value.trim().length < 5) {
+    reviewError.value = 'Review must be at least 5 characters.'
+    return
+  }
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/reviews`, {
+      method: 'POST',
+      body: JSON.stringify({
+        listing_id: selectedPurchase.value.listing.id,
+        rating: reviewRating.value,
+        text: reviewText.value.trim(),
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      reviewError.value = data.message || 'Failed to submit review'
+      return
+    }
+
+    reviewSuccess.value = 'Review submitted successfully.'
+    selectedPurchase.value.already_reviewed = true
+    selectedPurchase.value.review = {
+      id: data.id,
+      rating: data.rating,
+      text: data.text,
+      created_at: data.created_at,
+    }
+
+    setTimeout(() => {
+      closeReviewModal()
+    }, 800)
+  } catch (err) {
+    console.error('Review submit error:', err)
+    reviewError.value = 'Server connection error'
+  }
 }
 
 const goToListing = (id: number) => {
@@ -310,6 +619,10 @@ watch(
     if (activeTab.value === 'liked') {
       await loadLikes()
     }
+
+    if (activeTab.value === 'purchases' || activeTab.value === 'reviews') {
+      await loadPurchases()
+    }
   }
 )
 
@@ -317,4 +630,8 @@ onMounted(() => {
   activeTab.value = normalizeTab(route.query.tab)
   loadAccount()
 })
+
+const formatPrice = (price: number | string) => {
+  return `${Math.round(Number(price))} €`
+}
 </script>

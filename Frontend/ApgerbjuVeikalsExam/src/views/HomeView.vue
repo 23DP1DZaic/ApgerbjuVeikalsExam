@@ -32,7 +32,7 @@
           </div>
 
           <h3>{{ listing.title }}</h3>
-          <p>{{ listing.price }} €</p>
+          <p>{{ formatPrice(listing.price) }} </p>
         </div>
       </div>
 
@@ -66,6 +66,7 @@ type Listing = {
   condition: string
   images: ListingImage[]
   user_id: number
+  status?: 'available' | 'sold' | string
 }
 
 const router = useRouter()
@@ -101,7 +102,9 @@ const loadFeaturedListings = async () => {
       return
     }
 
-    featuredListings.value = Array.isArray(data) ? data : []
+    featuredListings.value = Array.isArray(data)
+  ? data.filter((listing) => listing.status !== 'sold').slice(0, 3)
+  : []
   } catch (err) {
     console.error('Load featured listings error:', err)
     error.value = 'Server connection error'
@@ -117,4 +120,8 @@ const goToListing = (id: number) => {
 onMounted(() => {
   loadFeaturedListings()
 })
+
+const formatPrice = (price: number | string) => {
+  return `${Math.round(Number(price))} €`
+}
 </script>

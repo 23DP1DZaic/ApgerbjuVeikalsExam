@@ -8,6 +8,8 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\Purchase;
+use App\Models\Review;
 
 class User extends Authenticatable
 {
@@ -88,5 +90,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Message::class, 'sender_id');
     }
-    
+ 
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'buyer_id');
+    }
+
+    public function receivedReviews()
+    {
+        return $this->hasMany(Review::class, 'seller_id');
+    }
+
+    public function writtenReviews()
+    {
+        return $this->hasMany(Review::class, 'buyer_id');
+    }
 }

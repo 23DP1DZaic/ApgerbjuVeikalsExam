@@ -12,6 +12,8 @@ class UserController extends Controller
             'listings.images',
             'favoriteListings.images',
             'likedListings.images',
+            'receivedReviews.listing.images',
+            'receivedReviews.buyer',
         ]);
 
         return response()->json([
@@ -25,12 +27,14 @@ class UserController extends Controller
             'favorites' => $user->favoriteListings,
             'liked' => $user->likedListings,
 
+            'reviews' => $user->receivedReviews,
+
             'counts' => [
                 'listings' => $user->listings->count(),
                 'favorites' => $user->favoriteListings->count(),
                 'liked' => $user->likedListings->count(),
                 'purchases' => 0,
-                'reviews' => 0,
+                'reviews' => $user->receivedReviews->count(),
             ],
         ]);
     }

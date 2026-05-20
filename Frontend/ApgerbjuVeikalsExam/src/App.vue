@@ -242,7 +242,19 @@
             :key="parent.id"
             class="mega-column"
           >
-            <h5>{{ parent.name }}</h5>
+            <router-link
+            class="mega-parent-link"
+            :to="{
+              path: '/shop',
+              query: {
+                gender: 'men',
+                parent_category: parent.name,
+              },
+            }"
+            @click="closeMegaMenu"
+          >
+            {{ parent.name }}
+          </router-link>
 
             <router-link
               v-for="child in parent.children"
@@ -281,7 +293,19 @@
             :key="parent.id"
             class="mega-column"
           >
-            <h5>{{ parent.name }}</h5>
+            <router-link
+              class="mega-parent-link"
+              :to="{
+                path: '/shop',
+                query: {
+                  gender: 'women',
+                  parent_category: parent.name,
+                },
+              }"
+              @click="closeMegaMenu"
+            >
+              {{ parent.name }}
+            </router-link>
 
             <router-link
               v-for="child in parent.children"

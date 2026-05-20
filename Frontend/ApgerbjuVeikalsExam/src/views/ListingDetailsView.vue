@@ -87,7 +87,18 @@
         <p><strong>Condition:</strong> {{ formatText(listing.condition) }}</p>
         </p>
 
-        <p class="price">{{ listing.price }} €</p>
+        <div class="price-row">
+          <span
+            v-if="listing.original_price && Number(listing.original_price) > Number(listing.price)"
+            class="old-price"
+          >
+            {{ formatPrice(listing.original_price) }}
+          </span>
+
+          <span class="current-price">
+            {{ formatPrice(listing.price) }}
+          </span>
+        </div>
 
         <div class="listing-actions detail-actions">
           <button
@@ -112,17 +123,63 @@
         </div>
 
         <template v-else>
-          <button class="purchase-btn" @click="goToPurchase">
-            Purchase
-          </button>
+                <div v-if="isSold" class="sold-info-box">
+                  SOLD
+                </div>
 
-          <button class="secondary-btn" @click="openOfferModal">
-            Offer
-          </button>
+                <div v-else-if="isOwnListing" class="owner-listing-actions">
+                  <button
+                    type="button"
+                    class="delete-listing-detail-btn"
+                    @click="deleteListing"
+                  >
+                    Delete listing
+                  </button>
 
-          <button class="secondary-btn" @click="openMessageModal">
-            Message
+      <div class="change-price-box">
+        <label>Change price</label>
+
+        <div class="change-price-row">
+          <input
+            v-model="newPrice"
+            type="text"
+            inputmode="numeric"
+            placeholder="New price"
+            :class="{ 'input-error': priceUpdateError }"
+            @input="newPrice = newPrice.replace(/\D/g, '')"
+          >
+
+          <button
+            type="button"
+            @click="updatePrice"
+          >
+            Save
           </button>
+        </div>
+
+        <p v-if="priceUpdateError" class="change-price-message error">
+          {{ priceUpdateError }}
+        </p>
+
+        <p v-if="priceUpdateSuccess" class="change-price-message success">
+          {{ priceUpdateSuccess }}
+        </p>
+      </div>
+          </div>
+
+          <template v-else>
+            <button class="purchase-btn" @click="goToPurchase">
+              Purchase
+            </button>
+
+            <button class="secondary-btn" @click="openOfferModal">
+              Offer
+            </button>
+
+            <button class="secondary-btn" @click="openMessageModal">
+              Message
+            </button>
+          </template>
         </template>
 
         <div class="details-section">
@@ -167,7 +224,7 @@
       <div class="modal-listing-info">
         <strong>{{ listing.brand || 'Unknown brand' }}</strong>
         <p>{{ listing.title }}</p>
-        <span>{{ listing.price }} €</span>
+        <span>{{ formatPrice(listing.price) }} €</span>
       </div>
     </div>
 
@@ -258,6 +315,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { API_URL, fetchWithAuth } from '../services/api'
 import { getToken } from '../services/auth'
+import { getUser } from '../services/auth'
 
 const isMessageModalOpen = ref(false)
 const isOfferModalOpen = ref(false)
@@ -266,6 +324,9 @@ const isSendingMessage = ref(false)
 const messageText = ref('')
 const offerPrice = ref('')
 const modalError = ref('')
+const newPrice = ref('')
+const priceUpdateError = ref('')
+const priceUpdateSuccess = ref('')
 
 const openMessageModal = () => {
   modalError.value = ''
@@ -448,6 +509,8 @@ type Listing = {
   favorites_count?: number
   liked_by_me?: boolean
   favorited_by_me?: boolean
+  user_id: number
+  original_price?: number | string | null
 }
 
 const route = useRoute()
@@ -605,5 +668,85 @@ const openSellerProfile = () => {
   if (!listing.value?.user?.id) return
 
   router.push(`/users/${listing.value.user.id}`)
+}
+
+const currentUser = computed(() => {
+  return getUser()
+})
+
+const isOwnListing = computed(() => {
+  if (!listing.value || !currentUser.value) return false
+
+  return listing.value.user_id === currentUser.value.id
+})
+
+const isSold = computed(() => {
+  return listing.value?.status === 'sold'
+})
+
+const deleteListing = async () => {
+  if (!listing.value) return
+
+  if (!confirm('Delete this listing?')) return
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${listing.value.id}`, {
+      method: 'DELETE',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to delete listing')
+      return
+    }
+
+    router.push('/account?tab=listings')
+  } catch (err) {
+    console.error('Delete listing error:', err)
+    alert('Server connection error')
+  }
+}
+
+const updatePrice = async () => {
+  priceUpdateError.value = ''
+  priceUpdateSuccess.value = ''
+
+  if (!listing.value) return
+
+  const price = Number(newPrice.value)
+
+  if (!newPrice.value || Number.isNaN(price) || price <= 0) {
+    priceUpdateError.value = 'Enter a valid price.'
+    return
+  }
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/listings/${listing.value.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        price,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      priceUpdateError.value = data.message || 'Failed to update price.'
+      return
+    }
+
+    listing.value.price = data.price
+    listing.value.original_price = data.original_price
+    newPrice.value = ''
+    priceUpdateSuccess.value = 'Price updated successfully.'
+  } catch (err) {
+    console.error('Update price error:', err)
+    priceUpdateError.value = 'Server connection error.'
+  }
+}
+
+const formatPrice = (price: number | string) => {
+  return `${Math.round(Number(price))} €`
 }
 </script>

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Listing;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
+use App\Models\Purchase;
 
 class ListingController extends Controller
 {
@@ -48,16 +49,21 @@ class ListingController extends Controller
 
     public function index(Request $request)
     {
-        $query = Listing::with('images')->latest();
+        $query = Listing::with('images')
+            ->where(function ($q) {
+                $q->where('status', 'available')
+                    ->orWhereNull('status');
+            })
+            ->latest();
 
         if ($request->filled('search')) {
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('brand', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('brand', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%");
             });
         }
 
@@ -68,6 +74,25 @@ class ListingController extends Controller
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
+
+        if ($request->filled('parent_category')) {
+    $parentCategoryQuery = Category::where('name', $request->parent_category)
+        ->whereNull('parent_id');
+
+    if ($request->filled('gender')) {
+        $parentCategoryQuery->where('department', $request->gender);
+    }
+
+    $parentCategory = $parentCategoryQuery->first();
+
+    if ($parentCategory) {
+        $childCategoryNames = Category::where('parent_id', $parentCategory->id)
+            ->pluck('name')
+            ->toArray();
+
+        $query->whereIn('category', $childCategoryNames);
+    }
+}
 
         if ($request->filled('brand')) {
             $query->where('brand', 'like', '%' . $request->brand . '%');
@@ -99,14 +124,17 @@ class ListingController extends Controller
 
         if ($request->filled('sort')) {
             switch ($request->sort) {
+                case 'price-low':
                 case 'price_low':
                     $query->orderBy('price', 'asc');
                     break;
 
+                case 'price-high':
                 case 'price_high':
                     $query->orderBy('price', 'desc');
                     break;
 
+                case 'title-az':
                 case 'title_az':
                     $query->orderBy('title', 'asc');
                     break;
@@ -140,6 +168,10 @@ class ListingController extends Controller
         }
 
         $listings = Listing::with('images')
+            ->where(function ($query) {
+                $query->where('status', 'available')
+                    ->orWhereNull('status');
+            })
             ->inRandomOrder()
             ->limit($limit)
             ->get();
@@ -203,6 +235,8 @@ class ListingController extends Controller
 
         unset($data['images']);
 
+        $data['status'] = 'available';
+
         $listing = $user->listings()->create($data);
 
         foreach ($request->file('images') as $image) {
@@ -213,67 +247,115 @@ class ListingController extends Controller
             ]);
         }
 
-        return response()->json($listing->load('images'), 201);
+        return response()->json($listing->load(['images', 'user']), 201);
     }
 
     public function update(Request $request, Listing $listing)
     {
         $user = $request->user();
 
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
         if ($user->role !== 'admin' && $listing->user_id !== $user->id) {
-            return response()->json(['message' => 'No permission'], 403);
+            return response()->json([
+                'message' => 'No permission',
+            ], 403);
         }
 
         $data = $request->validate([
             'price' => 'required|numeric|min:0',
         ]);
 
-        $listing->update($data);
+        $newPrice = (float) $data['price'];
+        $currentPrice = (float) $listing->price;
 
-        return response()->json($listing);
+        if ($newPrice < $currentPrice) {
+            $listing->update([
+                'original_price' => $listing->original_price ?: $currentPrice,
+                'price' => $newPrice,
+            ]);
+        } else {
+            $listing->update([
+                'price' => $newPrice,
+                'original_price' => null,
+            ]);
+        }
+
+        return response()->json($listing->load(['images', 'user']));
     }
 
     public function destroy(Request $request, Listing $listing)
     {
         $user = $request->user();
 
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
         if ($user->role !== 'admin' && $listing->user_id !== $user->id) {
-            return response()->json(['message' => 'No permission'], 403);
+            return response()->json([
+                'message' => 'No permission',
+            ], 403);
         }
 
         $listing->delete();
 
-        return response()->json(['message' => 'Listing deleted']);
+        return response()->json([
+            'message' => 'Listing deleted',
+        ]);
     }
 
     public function userListings(\App\Models\User $user)
     {
         return response()->json(
-            $user->listings()->with('images')->latest()->get()
+            $user->listings()
+                ->with('images')
+                ->latest()
+                ->get()
         );
     }
 
-    public function purchase(Listing $listing)
-{
-    if ($listing->status === 'sold') {
+    public function purchase(Request $request, Listing $listing)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
+        if ($listing->status === 'sold') {
+            return response()->json([
+                'message' => 'This listing is already sold.',
+            ], 422);
+        }
+
+        if ($listing->user_id === $user->id) {
+            return response()->json([
+                'message' => 'You cannot buy your own listing.',
+            ], 422);
+        }
+
+        $listing->update([
+            'status' => 'sold',
+        ]);
+
+        Purchase::create([
+            'listing_id' => $listing->id,
+            'buyer_id' => $user->id,
+            'seller_id' => $listing->user_id,
+        ]);
+
         return response()->json([
-            'message' => 'This listing is already sold.',
-        ], 422);
+            'message' => 'Listing purchased successfully.',
+            'listing' => $listing->load(['images', 'user']),
+        ]);
     }
-
-    if ($listing->user_id === auth()->id()) {
-        return response()->json([
-            'message' => 'You cannot buy your own listing.',
-        ], 422);
-    }
-
-    $listing->update([
-        'status' => 'sold',
-    ]);
-
-    return response()->json([
-        'message' => 'Listing purchased successfully.',
-        'listing' => $listing->load(['images', 'user']),
-    ]);
-}
 }

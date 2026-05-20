@@ -167,7 +167,7 @@
           </div>
 
           <button class="purchase-submit-btn" type="submit">
-            {{ t.completePurchase }}
+            <p>{{ t.completePurchase }}</p>
           </button>
 
           <p v-if="successMessage" class="purchase-success">
@@ -212,7 +212,7 @@
 
           <div class="summary-line">
             <span>{{ t.itemPrice }}</span>
-            <strong>{{ listing.price }} €</strong>
+            <strong>{{ formatPrice(listing.price) }} €</strong>
           </div>
 
           <div class="summary-line">
@@ -222,7 +222,7 @@
 
           <div class="summary-total">
             <span>{{ t.total }}</span>
-            <strong>{{ listing.price }} €</strong>
+            <strong>{{ formatPrice(listing.price) }} €</strong>
           </div>
         </div>
       </aside>
@@ -602,6 +602,8 @@ const updateLanguage = () => {
   language.value = (localStorage.getItem('language') as Language) || 'en'
 }
 
-
+const formatPrice = (price: number | string) => {
+  return `${Math.round(Number(price))} €`
+}
 
 </script>

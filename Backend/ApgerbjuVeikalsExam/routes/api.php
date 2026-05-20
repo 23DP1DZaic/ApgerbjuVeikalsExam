@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ReviewController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -19,6 +20,8 @@ Route::get('/users/{user}/listings', [ListingController::class, 'userListings'])
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/tree', [CategoryController::class, 'tree']);
+
+Route::get('/users/{user}/profile', [UserController::class, 'profile']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
@@ -50,5 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('auth:sanctum')->post('/listings/{listing}/purchase', [ListingController::class, 'purchase']);
 
-    Route::get('/users/{user}/profile', [UserController::class, 'profile']);
+    Route::get('/me/purchases', [ReviewController::class, 'myPurchases']);
+    Route::post('/reviews', [ReviewController::class, 'store']);
 });

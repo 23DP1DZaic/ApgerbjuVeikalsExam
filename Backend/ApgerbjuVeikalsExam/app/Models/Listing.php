@@ -23,6 +23,7 @@ class Listing extends Model
         'size',
         'condition',
         'status',
+        'original_price',
     ];
 
     protected $appends = [
