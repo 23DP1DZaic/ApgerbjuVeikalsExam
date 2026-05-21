@@ -4,19 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Conversation extends Model
+class Offer extends Model
 {
     protected $fillable = [
         'listing_id',
         'buyer_id',
         'seller_id',
-        'buyer_read_at',
-        'seller_read_at',
+        'amount',
+        'status',
+        'seller_expires_at',
+        'buyer_expires_at',
+        'accepted_at',
+        'declined_at',
+        'paid_at',
     ];
 
     protected $casts = [
-    'buyer_read_at' => 'datetime',
-    'seller_read_at' => 'datetime',
+        'seller_expires_at' => 'datetime',
+        'buyer_expires_at' => 'datetime',
+        'accepted_at' => 'datetime',
+        'declined_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function listing()
@@ -33,15 +41,4 @@ class Conversation extends Model
     {
         return $this->belongsTo(User::class, 'seller_id');
     }
-
-    public function messages()
-    {
-        return $this->hasMany(Message::class);
-    }
-
-    public function latestMessage()
-    {
-        return $this->hasOne(Message::class)->latestOfMany();
-    }
-    
 }

@@ -1,6 +1,3 @@
-Исправил: в `Reviews` у тебя был неправильный `listing.title` вместо `purchase.listing.title`, из-за этого ломался блок. Также убрал двойной `€` и сделал цены через `formatPrice`. 
-
-```vue
 <template>
   <div class="account-page">
     <div class="account-layout">
@@ -160,6 +157,112 @@
             </p>
           </div>
 
+          <div v-else-if="activeTab === 'offers'" class="offers-section">
+            <h3>Received offers</h3>
+
+            <div v-if="receivedOffers.length" class="offer-list">
+              <div
+                v-for="offer in receivedOffers"
+                :key="offer.id"
+                class="offer-card"
+              >
+                <div class="offer-card-main">
+                  <img
+                    v-if="offer.listing.images?.length"
+                    :src="`${API_URL}/storage/${offer.listing.images?.[0]?.image_path || ''}`"
+                    :alt="offer.listing.title"
+                  >
+
+                  <div v-else class="offer-card-no-image">
+                    No image
+                  </div>
+
+                  <div>
+                    <h4>{{ offer.listing.title }}</h4>
+                    <p>Buyer: {{ offer.buyer?.display_name || offer.buyer?.name || 'User' }}</p>
+                    <strong>Offer: {{ formatPrice(offer.amount) }}</strong>
+                    <span>Status: {{ offer.status }}</span>
+
+                    <small v-if="offer.seller_expires_at && offer.status === 'pending'">
+                      Seller has until: {{ formatDateTime(offer.seller_expires_at) }}
+                    </small>
+                  </div>
+                </div>
+
+                <div
+                  v-if="offer.status === 'pending'"
+                  class="offer-actions"
+                >
+                  <button
+                    type="button"
+                    class="offer-accept-btn"
+                    @click="acceptOffer(offer)"
+                  >
+                    Accept
+                  </button>
+
+                  <button
+                    type="button"
+                    class="offer-decline-btn"
+                    @click="declineOffer(offer)"
+                  >
+                    Decline
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p v-else class="empty-text">
+              No received offers.
+            </p>
+
+            <h3>Sent offers</h3>
+
+            <div v-if="sentOffers.length" class="offer-list">
+              <div
+                v-for="offer in sentOffers"
+                :key="offer.id"
+                class="offer-card"
+              >
+                <div class="offer-card-main">
+                  <img
+                    v-if="offer.listing.images?.length"
+                    :src="`${API_URL}/storage/${offer.listing.images?.[0]?.image_path || ''}`"
+                    :alt="offer.listing.title"
+                  >
+
+                  <div v-else class="offer-card-no-image">
+                    No image
+                  </div>
+
+                  <div>
+                    <h4>{{ offer.listing.title }}</h4>
+                    <p>Seller: {{ offer.seller?.display_name || offer.seller?.name || 'User' }}</p>
+                    <strong>Offer: {{ formatPrice(offer.amount) }}</strong>
+                    <span>Status: {{ offer.status }}</span>
+
+                    <small v-if="offer.buyer_expires_at && offer.status === 'accepted'">
+                      Buyer has until: {{ formatDateTime(offer.buyer_expires_at) }}
+                    </small>
+                  </div>
+                </div>
+
+                <button
+                  v-if="offer.status === 'accepted'"
+                  type="button"
+                  class="offer-pay-btn"
+                  @click="goToOfferPayment(offer)"
+                >
+                  Pay now
+                </button>
+              </div>
+            </div>
+
+            <p v-else class="empty-text">
+              No sent offers.
+            </p>
+          </div>
+
           <div
             v-else-if="activeTab === 'purchases'"
             class="listing-grid"
@@ -228,22 +331,22 @@
               </div>
 
               <div class="listing-card-info">
-              <h3>{{ listing.title }}</h3>
-              <p>{{ listing.category }}</p>
+                <h3>{{ listing.title }}</h3>
+                <p>{{ listing.category }}</p>
 
-              <div class="product-price-row">
-                <span
-                  v-if="listing.original_price && Number(listing.original_price) > Number(listing.price)"
-                  class="old-price"
-                >
-                  {{ formatPrice(listing.original_price) }}
-                </span>
+                <div class="product-price-row">
+                  <span
+                    v-if="listing.original_price && Number(listing.original_price) > Number(listing.price)"
+                    class="old-price"
+                  >
+                    {{ formatPrice(listing.original_price) }}
+                  </span>
 
-                <span class="current-price">
-                  {{ formatPrice(listing.price) }}
-                </span>
+                  <span class="current-price">
+                    {{ formatPrice(listing.price) }}
+                  </span>
+                </div>
               </div>
-            </div>
             </div>
           </div>
 
@@ -359,6 +462,25 @@ type PurchaseItem = {
   review?: PurchaseReview | null
 }
 
+type OfferItem = {
+  id: number
+  amount: number | string
+  status: string
+  seller_expires_at: string | null
+  buyer_expires_at: string | null
+  listing: Listing
+  buyer?: {
+    id: number
+    name: string
+    display_name: string | null
+  }
+  seller?: {
+    id: number
+    name: string
+    display_name: string | null
+  }
+}
+
 const router = useRouter()
 const route = useRoute()
 
@@ -368,6 +490,8 @@ const sellingListings = ref<Listing[]>([])
 const favoriteListings = ref<Listing[]>([])
 const likedListings = ref<Listing[]>([])
 const purchasedItems = ref<PurchaseItem[]>([])
+const receivedOffers = ref<OfferItem[]>([])
+const sentOffers = ref<OfferItem[]>([])
 
 const selectedPurchase = ref<PurchaseItem | null>(null)
 const isReviewModalOpen = ref(false)
@@ -378,7 +502,7 @@ const reviewSuccess = ref('')
 
 const loadingTab = ref(false)
 
-const tabs = ['listings', 'favorites', 'liked', 'purchases', 'reviews'] as const
+const tabs = ['listings', 'favorites', 'liked', 'purchases', 'reviews', 'offers'] as const
 type AccountTab = typeof tabs[number]
 
 const activeTab = ref<AccountTab>('listings')
@@ -418,6 +542,8 @@ const getTabLabel = (tab: AccountTab) => {
   if (tab === 'favorites') return 'Favorites'
   if (tab === 'liked') return 'Liked'
   if (tab === 'purchases') return 'Purchases'
+  if (tab === 'reviews') return 'Reviews'
+  if (tab === 'offers') return 'Offers'
 
   return 'Reviews'
 }
@@ -430,6 +556,8 @@ const activeTabTitle = computed(() => {
   if (activeTab.value === 'favorites') return 'Favorite Listings'
   if (activeTab.value === 'liked') return 'Liked Listings'
   if (activeTab.value === 'purchases') return 'Purchases'
+  if (activeTab.value === 'reviews') return 'Reviews'
+  if (activeTab.value === 'offers') return 'Offers'
 
   return 'Reviews'
 })
@@ -447,6 +575,7 @@ const emptyMessage = computed(() => {
   if (activeTab.value === 'favorites') return 'No favorite listings yet.'
   if (activeTab.value === 'liked') return 'No liked listings yet.'
   if (activeTab.value === 'purchases') return 'No purchases yet.'
+  if (activeTab.value === 'offers') return 'No offers yet.'
 
   return 'No reviews yet.'
 })
@@ -511,6 +640,27 @@ const loadPurchases = async () => {
   }
 }
 
+const loadOffers = async () => {
+  loadingTab.value = true
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/me/offers`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      receivedOffers.value = Array.isArray(data.received) ? data.received : []
+      sentOffers.value = Array.isArray(data.sent) ? data.sent : []
+    }
+  } catch (err) {
+    console.error('Load offers error:', err)
+  } finally {
+    loadingTab.value = false
+  }
+}
+
 const loadAccount = async () => {
   const currentUser = await getCurrentUser()
 
@@ -525,6 +675,10 @@ const loadAccount = async () => {
   await loadFavorites()
   await loadLikes()
   await loadPurchases()
+
+  if (activeTab.value === 'offers') {
+    await loadOffers()
+  }
 }
 
 const setActiveTab = async (tab: AccountTab) => {
@@ -547,6 +701,10 @@ const setActiveTab = async (tab: AccountTab) => {
 
   if (tab === 'purchases' || tab === 'reviews') {
     await loadPurchases()
+  }
+
+  if (tab === 'offers') {
+    await loadOffers()
   }
 }
 
@@ -615,8 +773,67 @@ const submitReview = async () => {
   }
 }
 
+const acceptOffer = async (offer: OfferItem) => {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/offers/${offer.id}/accept`, {
+      method: 'POST',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to accept offer.')
+      return
+    }
+
+    await loadOffers()
+    await loadAccount()
+  } catch (err) {
+    console.error('Accept offer error:', err)
+    alert('Server connection error.')
+  }
+}
+
+const declineOffer = async (offer: OfferItem) => {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/offers/${offer.id}/decline`, {
+      method: 'POST',
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      alert(data.message || 'Failed to decline offer.')
+      return
+    }
+
+    await loadOffers()
+  } catch (err) {
+    console.error('Decline offer error:', err)
+    alert('Server connection error.')
+  }
+}
+
+const goToOfferPayment = (offer: OfferItem) => {
+  router.push(`/offers/${offer.id}/pay`)
+}
+
 const goToListing = (id: number) => {
   router.push(`/listing/${id}`)
+}
+
+const formatDateTime = (value: string) => {
+  return new Date(value).toLocaleString('lv-LV', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+const formatPrice = (price: number | string) => {
+  return `${Math.round(Number(price))} €`
 }
 
 watch(
@@ -635,6 +852,10 @@ watch(
     if (activeTab.value === 'purchases' || activeTab.value === 'reviews') {
       await loadPurchases()
     }
+
+    if (activeTab.value === 'offers') {
+      await loadOffers()
+    }
   }
 )
 
@@ -642,8 +863,4 @@ onMounted(() => {
   activeTab.value = normalizeTab(route.query.tab)
   loadAccount()
 })
-
-const formatPrice = (price: number | string) => {
-  return `${Math.round(Number(price))} €`
-}
 </script>

@@ -65,4 +65,9 @@ class Listing extends Model
     {
         return $this->hasMany(Conversation::class);
     }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
 }

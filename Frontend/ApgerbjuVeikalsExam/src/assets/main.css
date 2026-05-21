@@ -4643,6 +4643,374 @@ input[type='number']::-webkit-inner-spin-button {
   font-size: 16px;
 }
 
+/* ================================
+   Chat Offer Card
+================================ */
+
+.chat-offer-card {
+  min-width: 180px;
+  max-width: 260px;
+  padding: 14px;
+  border: 1px solid #d9d9d9;
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: #111;
+}
+
+.chat-message-row.mine .chat-offer-card {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.chat-offer-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.chat-offer-card p {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.chat-offer-card small {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.chat-offer-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.chat-offer-accept,
+.chat-offer-decline,
+.chat-offer-pay {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--radius-md);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.chat-offer-accept,
+.chat-offer-pay {
+  border: 1px solid #111;
+  background: #111;
+  color: #fff !important;
+}
+
+.chat-message-row.mine .chat-offer-accept,
+.chat-message-row.mine .chat-offer-pay {
+  border-color: #fff;
+  background: #fff;
+  color: #111 !important;
+}
+
+.chat-offer-decline {
+  border: 1px solid #d00000;
+  background: #fff;
+  color: #d00000;
+}
+
+.chat-offer-decline:hover {
+  background: #fff2f2;
+}
+
+
+.purchase-page {
+  background: #f7f7f7;
+  min-height: 100vh;
+  padding: 32px 24px 60px;
+}
+
+.purchase-layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+
+.purchase-form-card,
+.purchase-summary-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.purchase-form-card h1 {
+  margin: 18px 0 8px;
+  font-size: 34px;
+}
+
+.purchase-form-card h2 {
+  margin: 26px 0 16px;
+  font-size: 22px;
+}
+
+.purchase-subtitle {
+  color: #555;
+  margin-bottom: 18px;
+}
+
+.purchase-demo-note {
+  border: 1px solid var(--color-border);
+  background: #f8f8f8;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.input-error {
+  border-color: #c40000 !important;
+}
+
+.field-error {
+  margin: 7px 0 0;
+  color: #c40000;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.purchase-submit-btn {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 24px;
+  border: 1px solid #111;
+  border-radius: var(--radius-md);
+  background: #111;
+  color: #fff !important;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.purchase-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.purchase-listing-preview {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.purchase-listing-preview img,
+.purchase-listing-preview .no-image {
+  width: 88px;
+  height: 110px;
+  object-fit: cover;
+  background: #f3f3f3;
+  border-radius: var(--radius-md);
+}
+
+.purchase-listing-preview h3 {
+  margin: 0 0 6px;
+}
+
+.purchase-listing-preview p {
+  margin: 0 0 6px;
+  color: #666;
+}
+
+.purchase-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--color-border);
+  padding: 14px 0;
+}
+
+.purchase-summary-row.total {
+  font-size: 18px;
+}
+
+.purchase-success-box {
+  margin-top: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  background: #fff;
+}
+
+
+
+@media (max-width: 900px) {
+  .purchase-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ================================
+   Message Unread Badges
+================================ */
+
+.header-message-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+
+.chat-unread-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d00000;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 20px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-message-link .unread-badge {
+  position: absolute;
+  top: -12px;
+  right: -18px;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.conversation-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.chat-unread-badge {
+  position: static;
+}
+
+.conversation-item.unread {
+  border-color: #111;
+  background: #fff;
+}
+
+.conversation-item.unread .conversation-last-message,
+.conversation-item.unread .conversation-user-name {
+  font-weight: 900;
+  color: #111;
+}
+
+/* ================================
+   Header Messages Notification
+================================ */
+
+.header-message-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.unread-badge {
+  min-width: 19px;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d00000;
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 19px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -13px;
+  right: -18px;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+
+.header-message-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.unread-badge,
+.chat-unread-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d00000;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 20px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-message-link .unread-badge {
+  position: absolute;
+  top: -12px;
+  right: -18px;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.conversation-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.conversation-item.unread {
+  border-color: #111;
+  background: #fff;
+}
+
+.conversation-item.unread .conversation-last-message,
+.conversation-item.unread .conversation-user-name {
+  font-weight: 900;
+  color: #111;
+}
+
+
+
+
+
+
+
+
+
 
 /* ================================
    Responsive

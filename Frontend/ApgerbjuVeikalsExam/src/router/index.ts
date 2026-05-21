@@ -17,6 +17,7 @@ import DeliveryView from '../views/DeliveryView.vue'
 import RefundsView from '../views/RefundsView.vue'
 import PurchaseView from '../views/PurchaseView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
+import OfferPaymentView from '../views/OfferPaymentView.vue'
 
 
 const router = createRouter({
@@ -157,6 +158,11 @@ const router = createRouter({
       name: 'user-profile',
       component: UserProfileView,
     },
+    {
+      path: '/offers/:id/pay',
+      name: 'offer-payment',
+      component: OfferPaymentView,
+    },
   ],
   scrollBehavior() {
     return {
@@ -182,5 +188,6 @@ router.beforeEach((to, _from, next) => {
 
   next()
 })
+
 
 export default router

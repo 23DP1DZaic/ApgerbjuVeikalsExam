@@ -118,69 +118,63 @@
           </button>
         </div>
 
-        <div v-if="listing.status === 'sold'" class="sold-info-box">
-          SOLD
-        </div>
+<div v-if="isSold" class="sold-info-box">
+  SOLD
+</div>
 
-        <template v-else>
-                <div v-if="isSold" class="sold-info-box">
-                  SOLD
-                </div>
+<div v-else-if="isOwnListing" class="owner-listing-actions">
+  <button
+    type="button"
+    class="delete-listing-detail-btn"
+    @click="deleteListing"
+  >
+    Delete listing
+  </button>
 
-                <div v-else-if="isOwnListing" class="owner-listing-actions">
-                  <button
-                    type="button"
-                    class="delete-listing-detail-btn"
-                    @click="deleteListing"
-                  >
-                    Delete listing
-                  </button>
+  <div class="change-price-box">
+    <label>Change price</label>
 
-      <div class="change-price-box">
-        <label>Change price</label>
+    <div class="change-price-row">
+      <input
+        v-model="newPrice"
+        type="text"
+        inputmode="numeric"
+        placeholder="New price"
+        :class="{ 'input-error': priceUpdateError }"
+        @input="newPrice = newPrice.replace(/\D/g, '')"
+      >
 
-        <div class="change-price-row">
-          <input
-            v-model="newPrice"
-            type="text"
-            inputmode="numeric"
-            placeholder="New price"
-            :class="{ 'input-error': priceUpdateError }"
-            @input="newPrice = newPrice.replace(/\D/g, '')"
-          >
+      <button
+        type="button"
+        @click="updatePrice"
+      >
+        Save
+      </button>
+    </div>
 
-          <button
-            type="button"
-            @click="updatePrice"
-          >
-            Save
-          </button>
-        </div>
+    <p v-if="priceUpdateError" class="change-price-message error">
+      {{ priceUpdateError }}
+    </p>
 
-        <p v-if="priceUpdateError" class="change-price-message error">
-          {{ priceUpdateError }}
-        </p>
+    <p v-if="priceUpdateSuccess" class="change-price-message success">
+      {{ priceUpdateSuccess }}
+    </p>
+  </div>
+</div>
 
-        <p v-if="priceUpdateSuccess" class="change-price-message success">
-          {{ priceUpdateSuccess }}
-        </p>
-      </div>
-          </div>
+<template v-else>
+  <button class="purchase-btn" @click="goToPurchase">
+    Purchase
+  </button>
 
-          <template v-else>
-            <button class="purchase-btn" @click="goToPurchase">
-              Purchase
-            </button>
+  <button class="secondary-btn" @click="openOfferModal">
+    Offer
+  </button>
 
-            <button class="secondary-btn" @click="openOfferModal">
-              Offer
-            </button>
-
-            <button class="secondary-btn" @click="openMessageModal">
-              Message
-            </button>
-          </template>
-        </template>
+  <button class="secondary-btn" @click="openMessageModal">
+    Message
+  </button>
+</template>
 
         <div class="details-section">
           <h3>Seller Description</h3>
@@ -224,7 +218,7 @@
       <div class="modal-listing-info">
         <strong>{{ listing.brand || 'Unknown brand' }}</strong>
         <p>{{ listing.title }}</p>
-        <span>{{ formatPrice(listing.price) }} €</span>
+        <span>{{ formatPrice(listing.price) }}</span>
       </div>
     </div>
 
@@ -237,6 +231,9 @@
     ></textarea>
 
     <p v-if="modalError" class="error">{{ modalError }}</p>
+    <p v-if="modalSuccess" class="purchase-success">
+      {{ modalSuccess }}
+    </p>
 
     <button
       class="modal-submit-btn"
@@ -274,7 +271,7 @@
       <div class="modal-listing-info">
         <strong>{{ listing.brand || 'Unknown brand' }}</strong>
         <p>{{ listing.title }}</p>
-        <span>{{ listing.price }} €</span>
+        <span>{{ formatPrice(listing.price) }}</span>
       </div>
     </div>
 
@@ -297,6 +294,9 @@
     </p>
 
     <p v-if="modalError" class="error">{{ modalError }}</p>
+    <p v-if="modalSuccess" class="purchase-success">
+      {{ modalSuccess }}
+    </p>
 
     <button
       class="modal-submit-btn"
@@ -324,6 +324,7 @@ const isSendingMessage = ref(false)
 const messageText = ref('')
 const offerPrice = ref('')
 const modalError = ref('')
+const modalSuccess = ref('')
 const newPrice = ref('')
 const priceUpdateError = ref('')
 const priceUpdateSuccess = ref('')
@@ -336,6 +337,7 @@ const openMessageModal = () => {
 
 const openOfferModal = () => {
   modalError.value = ''
+  modalSuccess.value = ''
   offerPrice.value = ''
   isOfferModalOpen.value = true
 }
@@ -344,6 +346,7 @@ const closeModals = () => {
   isMessageModalOpen.value = false
   isOfferModalOpen.value = false
   modalError.value = ''
+  modalSuccess.value = ''
 }
 
 const onlyOfferNumbers = () => {
@@ -431,49 +434,75 @@ const sendMessage = async () => {
 
 const sendOffer = async () => {
   modalError.value = ''
+  modalSuccess.value = ''
 
-  const price = Number(offerPrice.value)
+  if (!listing.value) return
 
-  if (!price || price <= 0) {
-    modalError.value = 'Offer price must be valid'
+  const token = getToken()
+
+  if (!token) {
+    router.push('/login')
     return
   }
 
-  if (listing.value && price >= Number(listing.value.price)) {
-    modalError.value = 'Offer must be lower than listing price'
+  const amount = Number(offerPrice.value)
+
+  if (!offerPrice.value || Number.isNaN(amount) || amount <= 0) {
+    modalError.value = 'Enter a valid offer price.'
+    return
+  }
+
+  if (amount >= Number(listing.value.price)) {
+    modalError.value = 'Offer must be lower than current price.'
     return
   }
 
   isSendingMessage.value = true
 
   try {
+    const offerResponse = await fetchWithAuth(`${API_URL}/api/listings/${listing.value.id}/offers`, {
+      method: 'POST',
+      body: JSON.stringify({
+        amount,
+      }),
+    })
+
+    const offerData = await offerResponse.json()
+
+    if (!offerResponse.ok) {
+      modalError.value = offerData.message || 'Failed to send offer.'
+      return
+    }
+
     const conversation = await startConversation()
 
-    const response = await fetchWithAuth(
+    const messageResponse = await fetchWithAuth(
       `${API_URL}/api/conversations/${conversation.id}/messages`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
         body: JSON.stringify({
-          body: `Offer: ${price} €`,
+          body: `__OFFER__:${offerData.id}`,
         }),
       }
     )
 
-    const data = await response.json()
+    const messageData = await messageResponse.json()
 
-    if (!response.ok) {
-      modalError.value = data.message || 'Failed to send offer'
+    if (!messageResponse.ok) {
+      modalError.value = messageData.message || 'Offer was created, but message was not sent.'
       return
     }
 
-    closeModals()
-    router.push(`/messages/${conversation.id}`)
-  } catch (error: any) {
-    modalError.value = error.message || 'Failed to send offer'
+    modalSuccess.value = 'Offer sent. Seller has 24 hours to accept or decline.'
+    offerPrice.value = ''
+
+    setTimeout(() => {
+      closeModals()
+      router.push(`/messages/${conversation.id}`)
+    }, 900)
+  } catch (error) {
+    console.error('Offer error:', error)
+    modalError.value = 'Server connection error.'
   } finally {
     isSendingMessage.value = false
   }
@@ -520,6 +549,7 @@ const listing = ref<Listing | null>(null)
 const loading = ref(true)
 const error = ref('')
 const selectedImage = ref<string | null>(null)
+
 
 const imageUrls = computed(() => {
   if (!listing.value?.images?.length) return []
@@ -749,4 +779,5 @@ const updatePrice = async () => {
 const formatPrice = (price: number | string) => {
   return `${Math.round(Number(price))} €`
 }
+
 </script>

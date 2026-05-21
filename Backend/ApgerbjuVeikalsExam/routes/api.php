@@ -8,6 +8,7 @@ use App\Http\Controllers\ListingInteractionController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\OfferController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -55,4 +56,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/me/purchases', [ReviewController::class, 'myPurchases']);
     Route::post('/reviews', [ReviewController::class, 'store']);
+
+    Route::get('/me/offers', [OfferController::class, 'index']);
+
+    Route::post('/listings/{listing}/offers', [OfferController::class, 'store']);
+
+    Route::post('/offers/{offer}/accept', [OfferController::class, 'accept']);
+    Route::post('/offers/{offer}/decline', [OfferController::class, 'decline']);
+    Route::post('/offers/{offer}/pay', [OfferController::class, 'pay']);
+
+    Route::get('/offers/{offer}', [OfferController::class, 'show']);
+
+    Route::get('/me/unread-messages-count', [ConversationController::class, 'unreadCount']);
+    Route::get('/me/unread-messages-count', [MessageController::class, 'unreadCount']);
+    
 });

@@ -6,129 +6,134 @@
           <router-link to="/">Sunny</router-link>
         </div>
 
-      <form class="header-search" @submit.prevent="submitHeaderSearch">
-        <input
-          v-model="headerSearch"
-          :placeholder="t.searchPlaceholder"
-        >
-        <button type="submit">{{ t.search }}</button>
-      </form>
+        <form class="header-search" @submit.prevent="submitHeaderSearch">
+          <input
+            v-model="headerSearch"
+            :placeholder="t.searchPlaceholder"
+          >
+          <button type="submit">{{ t.search }}</button>
+        </form>
 
         <nav class="header-actions">
           <router-link v-if="user" to="/create-listing">
             {{ t.addListing }}
           </router-link>
 
-          <router-link to="/messages">
+          <router-link to="/messages" class="header-message-link">
             {{ t.messages }}
-          </router-link>
 
-
-
-        <div
-          v-if="user"
-          ref="profileMenuRef"
-          class="user-menu profile-menu-wrapper"
-        >
-          <button
-            type="button"
-            class="user-info user-link profile-menu-button"
-            @click="isProfileMenuOpen = !isProfileMenuOpen"
-          >
-            <img
-              v-if="user.avatar_url"
-              :src="user.avatar_url"
-              alt="Avatar"
-              class="header-avatar-image"
+            <span
+              v-if="unreadMessagesCount > 0"
+              class="unread-badge"
             >
-
-            <div v-else class="avatar-circle">
-              {{ userInitial }}
-            </div>
-
-            <span class="user-name">
-              {{ user.display_name || user.name }}
+              {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
             </span>
+          </router-link>
 
-            <span class="profile-menu-arrow">›</span>
-          </button>
+          <div
+            v-if="user"
+            ref="profileMenuRef"
+            class="user-menu profile-menu-wrapper"
+          >
+            <button
+              type="button"
+              class="user-info user-link profile-menu-button"
+              @click="isProfileMenuOpen = !isProfileMenuOpen"
+            >
+              <img
+                v-if="user.avatar_url"
+                :src="user.avatar_url"
+                alt="Avatar"
+                class="header-avatar-image"
+              >
 
-        <div
-          v-if="isProfileMenuOpen"
-          class="profile-dropdown"
-        >
-          <div class="profile-dropdown-header">
-            <strong>{{ user.display_name || user.name }}</strong>
+              <div v-else class="avatar-circle">
+                {{ userInitial }}
+              </div>
+
+              <span class="user-name">
+                {{ user.display_name || user.name }}
+              </span>
+
+              <span class="profile-menu-arrow">›</span>
+            </button>
+
+            <div
+              v-if="isProfileMenuOpen"
+              class="profile-dropdown"
+            >
+              <div class="profile-dropdown-header">
+                <strong>{{ user.display_name || user.name }}</strong>
+              </div>
+
+              <router-link
+                to="/account?tab=listings"
+                class="profile-dropdown-link"
+                @click="closeProfileMenu"
+              >
+                Your Listings
+              </router-link>
+
+              <router-link
+                to="/account?tab=favorites"
+                class="profile-dropdown-link"
+                @click="closeProfileMenu"
+              >
+                Favorites
+              </router-link>
+
+              <router-link
+                to="/account?tab=liked"
+                class="profile-dropdown-link"
+                @click="closeProfileMenu"
+              >
+                Liked
+              </router-link>
+
+              <router-link
+                to="/account?tab=purchases"
+                class="profile-dropdown-link"
+                @click="closeProfileMenu"
+              >
+                Purchases
+              </router-link>
+
+              <router-link
+                to="/account?tab=reviews"
+                class="profile-dropdown-link"
+                @click="closeProfileMenu"
+              >
+                Reviews
+              </router-link>
+
+              <div class="profile-dropdown-divider"></div>
+
+              <router-link
+                to="/settings/profile"
+                class="profile-dropdown-link"
+                @click="closeProfileMenu"
+              >
+                Settings
+              </router-link>
+
+              <button
+                type="button"
+                class="profile-dropdown-link profile-dropdown-logout"
+                @click="logout"
+              >
+                Log out
+              </button>
+
+              <router-link
+                v-if="user?.role === 'admin'"
+                to="/admin/categories"
+                class="profile-dropdown-link profile-dropdown-admin"
+                @click="closeProfileMenu"
+              >
+                {{ t.adminCategories }}
+              </router-link>
+            </div>
           </div>
-
-          <router-link
-            to="/account?tab=listings"
-            class="profile-dropdown-link"
-            @click="closeProfileMenu"
-          >
-            Your Listings
-          </router-link>
-
-          <router-link
-            to="/account?tab=favorites"
-            class="profile-dropdown-link"
-            @click="closeProfileMenu"
-          >
-            Favorites
-          </router-link>
-
-          <router-link
-            to="/account?tab=liked"
-            class="profile-dropdown-link"
-            @click="closeProfileMenu"
-          >
-            Liked
-          </router-link>
-
-          <router-link
-            to="/account?tab=purchases"
-            class="profile-dropdown-link"
-            @click="closeProfileMenu"
-          >
-            Purchases
-          </router-link>
-
-          <router-link
-            to="/account?tab=reviews"
-            class="profile-dropdown-link"
-            @click="closeProfileMenu"
-          >
-            Reviews
-          </router-link>
-
-          <div class="profile-dropdown-divider"></div>
-
-          <router-link
-            to="/settings/profile"
-            class="profile-dropdown-link"
-            @click="closeProfileMenu"
-          >
-            Settings
-          </router-link>
-
-          <button
-            type="button"
-            class="profile-dropdown-link profile-dropdown-logout"
-            @click="logout"
-          >
-            Log out
-          </button>
-
-          <router-link
-          v-if="user?.role === 'admin'"
-          to="/admin/categories"
-          class="profile-dropdown-link profile-dropdown-admin"
-          @click="closeProfileMenu"
-        >
-          {{ t.adminCategories }}
-        </router-link>
-        </div>
-        </div>
 
           <div v-else class="auth-links">
             <router-link to="/login">{{ t.login }}</router-link>
@@ -158,7 +163,7 @@
             :class="{ active: activeMegaMenu === 'designers' }"
             @click="toggleMegaMenu('designers')"
           >
-          {{ t.designers }}
+            {{ t.designers }}
             <span class="nav-arrow">⌄</span>
           </button>
         </div>
@@ -174,67 +179,74 @@
           </button>
         </div>
 
-            <div class="nav-item mega-item">
-              <button
-                class="nav-link-button"
-                :class="{ active: activeMegaMenu === 'womenswear' }"
-                @click="toggleMegaMenu('womenswear')"
-              >
-            {{ t.womenswear }}
-                <span class="nav-arrow">⌄</span>
-              </button>
-            </div>
-
-            <div class="nav-item">
-              <router-link
-                :to="{ path: '/shop', query: { category: 'Low-Top Sneakers' } }"
-                @click="closeMegaMenu"
-              >
-              {{ t.sneakers }}
-              </router-link>
-            </div>
-
-            <div class="nav-item">
-              <router-link to="/about" @click="closeMegaMenu">
-              {{ t.aboutUs }}
-              </router-link>
-            </div>
-          </nav>
-
-          <div
-            v-if="activeMegaMenu"
-            class="mega-menu"
+        <div class="nav-item mega-item">
+          <button
+            class="nav-link-button"
+            :class="{ active: activeMegaMenu === 'womenswear' }"
+            @click="toggleMegaMenu('womenswear')"
           >
-    <div v-if="activeMegaMenu === 'designers'" class="mega-menu-inner designers-mega">
-      <div class="mega-title-column">
-        <h4>{{ t.popularDesigners }}</h4>
-      </div>
+            {{ t.womenswear }}
+            <span class="nav-arrow">⌄</span>
+          </button>
+        </div>
+
+        <div class="nav-item">
+          <router-link
+            :to="{ path: '/shop', query: { category: 'Low-Top Sneakers' } }"
+            @click="closeMegaMenu"
+          >
+            {{ t.sneakers }}
+          </router-link>
+        </div>
+
+        <div class="nav-item">
+          <router-link to="/about" @click="closeMegaMenu">
+            {{ t.aboutUs }}
+          </router-link>
+        </div>
+      </nav>
 
       <div
-        v-for="column in popularBrandColumns"
-        :key="column.join('-')"
-        class="mega-column"
+        v-if="activeMegaMenu"
+        class="mega-menu"
       >
-        <router-link
-          v-for="brand in column"
-          :key="brand"
-          :to="{ path: '/shop', query: { brand } }"
-          @click="closeMegaMenu"
+        <div
+          v-if="activeMegaMenu === 'designers'"
+          class="mega-menu-inner designers-mega"
         >
-          {{ brand }}
-        </router-link>
-      </div>
+          <div class="mega-title-column">
+            <h4>{{ t.popularDesigners }}</h4>
+          </div>
 
-      <div class="designers-footer">
-        <button type="button" class="see-all-designers-btn" @click="showDesignersSoon">
-          {{ t.seeAllDesigners }}
-        </button>
+          <div
+            v-for="column in popularBrandColumns"
+            :key="column.join('-')"
+            class="mega-column"
+          >
+            <router-link
+              v-for="brand in column"
+              :key="brand"
+              :to="{ path: '/shop', query: { brand } }"
+              @click="closeMegaMenu"
+            >
+              {{ brand }}
+            </router-link>
+          </div>
 
-        <p v-if="designerSoonMessage" class="designers-soon-message">
-          {{ designerSoonMessage }}
-        </p>
-      </div>
-</div>
+          <div class="designers-footer">
+            <button
+              type="button"
+              class="see-all-designers-btn"
+              @click="showDesignersSoon"
+            >
+              {{ t.seeAllDesigners }}
+            </button>
+
+            <p v-if="designerSoonMessage" class="designers-soon-message">
+              {{ designerSoonMessage }}
+            </p>
+          </div>
+        </div>
 
         <div v-if="activeMegaMenu === 'menswear'" class="mega-menu-inner">
           <div
@@ -243,18 +255,18 @@
             class="mega-column"
           >
             <router-link
-            class="mega-parent-link"
-            :to="{
-              path: '/shop',
-              query: {
-                gender: 'men',
-                parent_category: parent.name,
-              },
-            }"
-            @click="closeMegaMenu"
-          >
-            {{ parent.name }}
-          </router-link>
+              class="mega-parent-link"
+              :to="{
+                path: '/shop',
+                query: {
+                  gender: 'men',
+                  parent_category: parent.name,
+                },
+              }"
+              @click="closeMegaMenu"
+            >
+              {{ parent.name }}
+            </router-link>
 
             <router-link
               v-for="child in parent.children"
@@ -351,33 +363,33 @@
           <p>Vienkārša platforma unikālu apģērbu pirkšanai un pārdošanai.</p>
         </div>
 
-      <div class="footer-section">
-        <h4>Information</h4>
+        <div class="footer-section">
+          <h4>Information</h4>
 
-        <router-link to="/delivery">
-          Delivery
-        </router-link>
+          <router-link to="/delivery">
+            Delivery
+          </router-link>
 
-        <router-link to="/refunds">
-          Refunds
-        </router-link>
+          <router-link to="/refunds">
+            Refunds
+          </router-link>
 
-        <router-link to="/about">
-          About us
-        </router-link>
-      </div>
+          <router-link to="/about">
+            About us
+          </router-link>
+        </div>
 
-      <div class="footer-section">
-        <h4>Contact Us</h4>
+        <div class="footer-section">
+          <h4>Contact Us</h4>
 
-        <p class="footer-contact-row">
-          sunny@marketplace.com
-        </p>
+          <p class="footer-contact-row">
+            sunny@marketplace.com
+          </p>
 
-        <p class="footer-contact-row">
-          +371 00000000
-        </p>
-      </div>
+          <p class="footer-contact-row">
+            +371 00000000
+          </p>
+        </div>
 
         <div class="footer-section">
           <h4>{{ t.newsletterTitle }}</h4>
@@ -419,8 +431,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { getCurrentUser, clearAuth, type AuthUser, getUser } from './services/auth'
 import { API_URL, fetchWithAuth } from './services/api'
 
-
-
 type CategoryNode = {
   id: number
   name: string
@@ -434,6 +444,7 @@ const router = useRouter()
 const route = useRoute()
 
 const user = ref<AuthUser | null>(null)
+const unreadMessagesCount = ref(0)
 const headerSearch = ref('')
 
 const menCategoryTree = ref<CategoryNode[]>([])
@@ -477,7 +488,6 @@ const popularBrands = [
 
 const designerSoonMessage = ref('')
 
-
 const popularBrandColumns = computed(() => {
   const columnsCount = 3
   const itemsPerColumn = Math.ceil(popularBrands.length / columnsCount)
@@ -496,11 +506,34 @@ const showDesignersSoon = () => {
 
 const userInitial = computed(() => {
   const value = user.value?.display_name || user.value?.name || '?'
+
   return value.charAt(0).toUpperCase()
 })
 
+const loadUnreadMessagesCount = async () => {
+  if (!user.value) {
+    unreadMessagesCount.value = 0
+    return
+  }
+
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/me/unread-messages-count`, {
+      method: 'GET',
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      unreadMessagesCount.value = Number(data.count || 0)
+    }
+  } catch (err) {
+    console.error('Unread messages count error:', err)
+  }
+}
+
 const loadUser = async () => {
   user.value = await getCurrentUser()
+  await loadUnreadMessagesCount()
 }
 
 const loadCategoryTree = async (department: 'men' | 'women') => {
@@ -569,6 +602,7 @@ const logout = () => {
   closeProfileMenu()
   clearAuth()
   user.value = null
+  unreadMessagesCount.value = 0
   router.push('/login')
 }
 
@@ -587,22 +621,30 @@ onMounted(() => {
   loadUser()
   loadCategoryTree('men')
   loadCategoryTree('women')
-  document.addEventListener('click', handleClickOutsideMegaMenu)
-  window.addEventListener('auth-changed', refreshUser)
-  document.addEventListener('click', handleProfileMenuClickOutside)
-})
 
+  document.addEventListener('click', handleClickOutsideMegaMenu)
+  document.addEventListener('click', handleProfileMenuClickOutside)
+
+  window.addEventListener('auth-changed', refreshUser)
+  window.addEventListener('messages-read', loadUnreadMessagesCount)
+})
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutsideMegaMenu)
-  window.removeEventListener('auth-changed', refreshUser)
   document.removeEventListener('click', handleProfileMenuClickOutside)
+
+  window.removeEventListener('auth-changed', refreshUser)
+  window.removeEventListener('messages-read', loadUnreadMessagesCount)
 })
 
 watch(
   () => route.fullPath,
   () => {
     closeMegaMenu()
+
+    if (route.path === '/messages') {
+      loadUnreadMessagesCount()
+    }
   }
 )
 
@@ -675,8 +717,9 @@ const toggleLanguage = () => {
   )
 }
 
-const refreshUser = () => {
+const refreshUser = async () => {
   user.value = getUser()
+  await loadUnreadMessagesCount()
 }
 
 const isProfileMenuOpen = ref(false)
@@ -730,5 +773,4 @@ const subscribeNewsletter = () => {
   newsletterMessageType.value = 'success'
   newsletterEmail.value = ''
 }
-
 </script>

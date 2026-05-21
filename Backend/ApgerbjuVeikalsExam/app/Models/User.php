@@ -105,4 +105,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'buyer_id');
     }
+
+    public function sentOffers()
+    {
+        return $this->hasMany(Offer::class, 'buyer_id');
+    }
+
+    public function receivedOffers()
+    {
+        return $this->hasMany(Offer::class, 'seller_id');
+    }
 }
