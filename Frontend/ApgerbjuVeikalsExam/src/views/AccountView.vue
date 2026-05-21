@@ -24,7 +24,7 @@
                 </p>
 
                 <p class="account-joined">
-                  Joined in 2025
+                  Joined in 2026
                 </p>
               </div>
             </div>

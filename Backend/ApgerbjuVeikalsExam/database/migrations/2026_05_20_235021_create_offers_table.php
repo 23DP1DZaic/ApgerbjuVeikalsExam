@@ -1,201 +1,45 @@
 <?php
 
-namespace App\Http\Controllers;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use App\Models\Listing;
-use App\Models\Offer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-
-class OfferController extends Controller
+return new class extends Migration
 {
-    public function index(Request $request)
+    public function up(): void
     {
-        $user = $request->user();
+        Schema::create('offers', function (Blueprint $table) {
+            $table->id();
 
-        $received = Offer::with(['listing.images', 'buyer'])
-            ->where('seller_id', $user->id)
-            ->latest()
-            ->get();
+            $table->foreignId('listing_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-        $sent = Offer::with(['listing.images', 'seller'])
-            ->where('buyer_id', $user->id)
-            ->latest()
-            ->get();
+            $table->foreignId('buyer_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
 
-        return response()->json([
-            'received' => $received,
-            'sent' => $sent,
-        ]);
+            $table->foreignId('seller_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->decimal('amount', 10, 2);
+
+            $table->string('status')->default('pending');
+
+            $table->timestamp('seller_expires_at')->nullable();
+            $table->timestamp('buyer_expires_at')->nullable();
+
+            $table->timestamp('accepted_at')->nullable();
+            $table->timestamp('declined_at')->nullable();
+            $table->timestamp('paid_at')->nullable();
+
+            $table->timestamps();
+        });
     }
 
-    public function store(Request $request, Listing $listing)
+    public function down(): void
     {
-        $user = $request->user();
-
-        if ($listing->status === 'sold') {
-            return response()->json([
-                'message' => 'This listing is already sold.',
-            ], 422);
-        }
-
-        if ($listing->user_id === $user->id) {
-            return response()->json([
-                'message' => 'You cannot make an offer on your own listing.',
-            ], 422);
-        }
-
-        $data = $request->validate([
-            'amount' => 'required|numeric|min:1',
-        ]);
-
-        $offer = Offer::create([
-            'listing_id' => $listing->id,
-            'buyer_id' => $user->id,
-            'seller_id' => $listing->user_id,
-            'amount' => $data['amount'],
-            'status' => 'pending',
-            'seller_expires_at' => now()->addHours(24),
-        ]);
-
-        return response()->json(
-            $offer->load(['listing.images', 'buyer', 'seller']),
-            201
-        );
+        Schema::dropIfExists('offers');
     }
-
-    public function accept(Request $request, Offer $offer)
-    {
-        $user = $request->user();
-
-        if ($offer->seller_id !== $user->id) {
-            return response()->json([
-                'message' => 'No permission.',
-            ], 403);
-        }
-
-        if ($offer->status !== 'pending') {
-            return response()->json([
-                'message' => 'This offer is not pending.',
-            ], 422);
-        }
-
-        if ($offer->seller_expires_at && now()->greaterThan($offer->seller_expires_at)) {
-            $offer->update([
-                'status' => 'expired',
-            ]);
-
-            return response()->json([
-                'message' => 'This offer has expired.',
-            ], 422);
-        }
-
-        $listing = $offer->listing;
-
-        if ($listing->status === 'sold') {
-            return response()->json([
-                'message' => 'This listing is already sold.',
-            ], 422);
-        }
-
-        $listing->update([
-            'original_price' => $listing->original_price ?: $listing->price,
-            'price' => $offer->amount,
-        ]);
-
-        $offer->update([
-            'status' => 'accepted',
-            'accepted_at' => now(),
-            'buyer_expires_at' => now()->addHours(24),
-        ]);
-
-        Offer::where('listing_id', $listing->id)
-            ->where('id', '!=', $offer->id)
-            ->where('status', 'pending')
-            ->update([
-                'status' => 'declined',
-                'declined_at' => now(),
-            ]);
-
-        return response()->json(
-            $offer->fresh()->load(['listing.images', 'buyer', 'seller'])
-        );
-    }
-
-    public function decline(Request $request, Offer $offer)
-    {
-        $user = $request->user();
-
-        if ($offer->seller_id !== $user->id) {
-            return response()->json([
-                'message' => 'No permission.',
-            ], 403);
-        }
-
-        if ($offer->status !== 'pending') {
-            return response()->json([
-                'message' => 'This offer is not pending.',
-            ], 422);
-        }
-
-        $offer->update([
-            'status' => 'declined',
-            'declined_at' => now(),
-        ]);
-
-        return response()->json(
-            $offer->fresh()->load(['listing.images', 'buyer', 'seller'])
-        );
-    }
-
-    public function pay(Request $request, Offer $offer)
-    {
-        $user = $request->user();
-
-        if ($offer->buyer_id !== $user->id) {
-            return response()->json([
-                'message' => 'No permission.',
-            ], 403);
-        }
-
-        if ($offer->status !== 'accepted') {
-            return response()->json([
-                'message' => 'This offer is not accepted.',
-            ], 422);
-        }
-
-        if ($offer->buyer_expires_at && now()->greaterThan($offer->buyer_expires_at)) {
-            $offer->update([
-                'status' => 'expired',
-            ]);
-
-            return response()->json([
-                'message' => 'Payment time expired.',
-            ], 422);
-        }
-
-        $listing = $offer->listing;
-
-        if ($listing->status === 'sold') {
-            return response()->json([
-                'message' => 'This listing is already sold.',
-            ], 422);
-        }
-
-        $listing->update([
-            'status' => 'sold',
-            'price' => $offer->amount,
-        ]);
-
-        $offer->update([
-            'status' => 'paid',
-            'paid_at' => now(),
-        ]);
-
-        return response()->json([
-            'message' => 'Offer paid successfully.',
-            'listing' => $listing->load(['images', 'user']),
-            'offer' => $offer->fresh(),
-        ]);
-    }
-}
+};
