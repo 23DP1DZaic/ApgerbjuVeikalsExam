@@ -108,6 +108,8 @@ class AuthController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'password' => 'nullable|string|min:6|confirmed',
+            'hide_likes' => 'sometimes|boolean',
+            'hide_favorites' => 'sometimes|boolean',
         ]);
 
         $user->name = $data['name'];
@@ -116,6 +118,9 @@ class AuthController extends Controller
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
+
+        $user->hide_likes = $request->boolean('hide_likes');
+        $user->hide_favorites = $request->boolean('hide_favorites');
 
         $user->save();
 

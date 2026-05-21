@@ -5212,6 +5212,112 @@ input[type='number']::-webkit-inner-spin-button {
 
 
 
+/* ================================
+   Account Settings Sections
+================================ */
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.settings-section h2 {
+  margin: 0;
+  color: #111;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.settings-section-description {
+  margin: -4px 0 4px;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.privacy-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.privacy-option:hover {
+  border-color: #bdbdbd;
+  background: #fafafa;
+}
+
+.privacy-option input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #111;
+  cursor: pointer;
+}
+
+.privacy-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.privacy-option strong {
+  color: #111;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.privacy-option small {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-profile-review {
+  cursor: default;
+}
+
+.review-listing-mini {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.review-listing-mini img,
+.review-listing-mini .no-image {
+  width: 48px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: #f3f3f3;
+}
+
+.review-listing-mini span {
+  color: #111;
+  font-weight: 900;
+}
+
 
 
 
