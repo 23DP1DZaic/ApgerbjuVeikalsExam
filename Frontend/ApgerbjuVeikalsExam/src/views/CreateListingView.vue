@@ -174,58 +174,50 @@
           ></textarea>
         </div>
 
-        <div class="form-group full-width">
-          <label>Images</label>
+<div class="form-group">
+  <label>Photos</label>
 
-          <div class="file-upload-box">
-            <input
-              id="listing-images"
-              class="file-input-hidden"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              @change="addImage"
-            >
+  <div class="photo-grid">
+    <button
+      v-for="index in 5"
+      :key="index"
+      type="button"
+      class="photo-slot"
+      @click="openImagePicker"
+    >
+      <img
+        v-if="imagePreviews[index - 1]"
+        :src="imagePreviews[index - 1]"
+        alt="Listing photo preview"
+        class="photo-preview"
+      >
 
-            <label for="listing-images" class="file-upload-btn">
-              Browse
-            </label>
+      <span v-else class="photo-placeholder">
+        📷
+      </span>
+    </button>
+  </div>
 
-            <span class="file-upload-text">
-              {{ imageFiles.length ? `${imageFiles.length} image(s) selected` : 'No file selected' }}
-            </span>
-          </div>
+  <div class="image-upload-box">
+    <label class="browse-button">
+      Browse
+      <input
+        ref="imageInput"
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,image/webp"
+        class="hidden-file-input"
+        @change="handleImagesChange"
+      >
+    </label>
 
-          <p class="image-help">
-            Add 1–5 images. JPG, PNG, WEBP. Max 2MB each.
-          </p>
+    <span class="file-status">
+      {{ imageFiles.length ? `${imageFiles.length} file(s) selected` : 'No file selected' }}
+    </span>
+  </div>
 
-        <div v-if="imagePreviews.length" class="image-preview-grid">
-          <div
-            v-for="(preview, index) in imagePreviews"
-            :key="preview"
-            class="image-preview-card"
-          >
-            <img
-              :src="preview"
-              :alt="imageFiles[index]?.name || 'Listing image'"
-            >
-
-            <div class="image-preview-info">
-              <p class="image-preview-name">
-                {{ imageFiles[index]?.name || 'Listing image' }}
-              </p>
-
-              <button
-                type="button"
-                class="image-remove-btn"
-                @click="removeImage(index)"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-        </div>
+  <small>Add at least 3 images. Max 5 images. JPG, PNG, WEBP. Max 2MB each.</small>
+</div>
 
         <p v-if="message" class="success full-width">
           {{ message }}
@@ -270,8 +262,53 @@ const message = ref('')
 const error = ref('')
 
 const imageFiles = ref<File[]>([])
+const imageInput = ref<HTMLInputElement | null>(null)
 const imagePreviews = ref<string[]>([])
 const categories = ref<Category[]>([])
+
+const openImagePicker = () => {
+  imageInput.value?.click()
+}
+
+const handleImagesChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+
+  if (!input.files) return
+
+  error.value = ''
+
+  const files = Array.from(input.files)
+
+  if (files.length > 5) {
+    error.value = 'You can upload maximum 5 images.'
+    input.value = ''
+    imageFiles.value = []
+    imagePreviews.value = []
+    return
+  }
+
+  const invalidFile = files.find((file) => {
+    const isValidType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+    const isValidSize = file.size <= 2 * 1024 * 1024
+
+    return !isValidType || !isValidSize
+  })
+
+  if (invalidFile) {
+    error.value = 'Images must be JPG, PNG or WEBP and max 2MB each.'
+    input.value = ''
+    imageFiles.value = []
+    imagePreviews.value = []
+    return
+  }
+
+  imagePreviews.value.forEach((preview) => {
+    URL.revokeObjectURL(preview)
+  })
+
+  imageFiles.value = files
+  imagePreviews.value = files.map((file) => URL.createObjectURL(file))
+}
 
 const user = getUser()
 
@@ -385,6 +422,7 @@ const footwearCategoryNames = [
   'Formal Shoes',
   'Hi-Top Sneakers',
   'Low-Top Sneakers',
+  'High-Top Sneakers',
   'Sandals',
   'Slip Ons',
   'Sneakers',
@@ -718,7 +756,7 @@ const createListing = async () => {
     !form.color ||
     (!isAccessoryCategory.value && !form.size) ||
     !form.condition ||
-    imageFiles.value.length === 0
+    imageFiles.value.length < 3
   ) {
     error.value = 'Fill in all required fields'
     return
