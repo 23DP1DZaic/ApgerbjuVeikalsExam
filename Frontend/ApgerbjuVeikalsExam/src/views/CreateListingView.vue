@@ -73,12 +73,18 @@
           </p>
         </div>
 
-        <div class="form-group">
+        <div v-if="!isAccessoryCategory" class="form-group">
           <label>Size</label>
 
           <CustomSelect
             v-model="form.size"
-            :placeholder="isFootwearCategory ? 'Select shoe size' : 'Select clothing size'"
+            :placeholder="
+              isFootwearCategory
+                ? 'Select shoe size'
+                : isBottomsCategory
+                  ? 'Select pants size'
+                  : 'Select clothing size'
+            "
             :options="sizeOptions"
             :disabled="!form.category"
           />
@@ -385,6 +391,20 @@ const footwearCategoryNames = [
   'Footwear',
 ]
 
+const accessoryCategoryNames = [
+  'Accessories',
+  'Bags',
+  'Jewelry',
+]
+
+const bottomsCategoryNames = [
+  'Bottoms',
+  'Denim',
+  'Pants',
+  'Shorts',
+  'Skirts',
+]
+
 const colors = [
   { name: 'Black', value: '#000000' },
   { name: 'White', value: '#ffffff' },
@@ -422,16 +442,103 @@ const isFootwearCategory = computed(() => {
   })
 })
 
+const isAccessoryCategory = computed(() => {
+  const selectedParent = parentCategories.value.find((category) => {
+    return String(category.id) === String(form.parentCategory)
+  })
+
+  const selectedCategoryName = form.category.toLowerCase()
+  const selectedParentName = selectedParent?.name?.toLowerCase() || ''
+
+  return accessoryCategoryNames.some((name) => {
+    const normalizedName = name.toLowerCase()
+
+    return (
+      normalizedName === selectedCategoryName ||
+      normalizedName === selectedParentName
+    )
+  })
+})
+
+const isBottomsCategory = computed(() => {
+  return categoryMatches(bottomsCategoryNames)
+})
+
+
 const availableSizes = computed(() => {
   return isFootwearCategory.value ? shoeSizes : clothingSizes
 })
 
+const clothingSizeOptions = [
+  { value: 'XS', label: 'XS' },
+  { value: 'S', label: 'S' },
+  { value: 'M', label: 'M' },
+  { value: 'L', label: 'L' },
+  { value: 'XL', label: 'XL' },
+  { value: 'XXL', label: 'XXL' },
+]
+
+const shoeSizeOptions = [
+  { value: '36', label: '36' },
+  { value: '37', label: '37' },
+  { value: '38', label: '38' },
+  { value: '39', label: '39' },
+  { value: '40', label: '40' },
+  { value: '41', label: '41' },
+  { value: '42', label: '42' },
+  { value: '43', label: '43' },
+  { value: '44', label: '44' },
+  { value: '45', label: '45' },
+  { value: '46', label: '46' },
+]
+
+const pantsSizeOptions = [
+  { value: 'W26', label: 'W26' },
+  { value: 'W28', label: 'W28' },
+  { value: 'W30', label: 'W30' },
+  { value: 'W32', label: 'W32' },
+  { value: 'W34', label: 'W34' },
+  { value: 'W36', label: 'W36' },
+  { value: 'W38', label: 'W38' },
+]
+
 const sizeOptions = computed(() => {
-  return availableSizes.value.map((size) => ({
-    label: size,
-    value: size,
-  }))
+  if (isFootwearCategory.value) {
+    return shoeSizeOptions
+  }
+
+  if (isBottomsCategory.value) {
+    return pantsSizeOptions
+  }
+
+  return clothingSizeOptions
 })
+
+const selectedParentCategory = computed(() => {
+  return parentCategories.value.find((category) => {
+    return String(category.id) === String(form.parentCategory)
+  })
+})
+
+const selectedCategoryName = computed(() => {
+  return form.category.toLowerCase()
+})
+
+const selectedParentCategoryName = computed(() => {
+  return selectedParentCategory.value?.name?.toLowerCase() || ''
+})
+
+const categoryMatches = (names: string[]) => {
+  return names.some((name) => {
+    const normalizedName = name.toLowerCase()
+
+    return (
+      normalizedName === selectedCategoryName.value ||
+      normalizedName === selectedParentCategoryName.value
+    )
+  })
+}
+
 
 const parentCategories = computed(() => {
   if (!form.gender) return []
@@ -609,7 +716,7 @@ const createListing = async () => {
     !form.gender ||
     !form.brand ||
     !form.color ||
-    !form.size ||
+    (!isAccessoryCategory.value && !form.size) ||
     !form.condition ||
     imageFiles.value.length === 0
   ) {
@@ -626,7 +733,7 @@ const createListing = async () => {
   formData.append('gender', form.gender)
   formData.append('brand', selectedBrand)
   formData.append('color', form.color)
-  formData.append('size', form.size)
+  formData.append('size', isAccessoryCategory.value ? 'One Size' : form.size)
   formData.append('condition', form.condition)
 
   imageFiles.value.forEach((file) => {
