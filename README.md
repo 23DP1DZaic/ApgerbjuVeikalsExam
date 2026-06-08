@@ -1,64 +1,113 @@
-# ApģērbuVeikalsExam (vēl neizdomaju nosaukumu)
-Mūsdienīga tīmekļa platforma apģērbu tirdzniecībai un sludinājumu publicēšanai, iedvesmota no tādiem risinājumiem kā Depop. Projekts tiek izstrādāts kā mācību darbs, izmantojot Vue 3 Frontend pusē un Laravel Backend pusē.
+# Sunny Marketplace 
 
----
----
----
+Mūsdienīga tīmekļa platforma apģērbu pirkšanai, pārdošanai un sludinājumu publicēšanai. Projekts ir izstrādāts izmantojot **Vue 3** frontend pusē un **Laravel** backend pusē.
+
+Projektu var palaist lokāli uz datora, bet tas ir arī pieejams tiešsaistē: **https://sunny-marketplace.vercel.app/**
+
+
 ## Projekta apraksts
 
-ApģērbuVeikalsExam ir Full-stack tīmekļa lietotne, kas paredzēta apģērbu sludinājumu publicēšanai, pārlūkošanai un filtrēšanai. Platforma paredzēta gan pircējiem, gan pārdevējiem, nodrošinot vienkāršu un pārskatāmu lietošanas pieredzi.
+Sunny Marketplace ir full-stack tīmekļa lietotne, kur lietotāji var reģistrēties, ievietot savus apģērbu sludinājumus, apskatīt citu lietotāju preces, rakstīt ziņas, izteikt cenu piedāvājumus un veikt pirkumus.
+Lai pilnvērtīgi izmantotu vietni, lietotājam vispirms ir jāreģistrējas vai jāpieslēdzas savam kontam. Pēc tam lietotājs var gan pirkt, gan pārdot apģērbus.
 
-**Platforma ļauj:**
-👕 Pārlūkot apģērbu sludinājumus
 
-🔍 Filtrēt apģērbus pēc kategorijām un cenas
+## Galvenās iespējas
 
-📦 Apskatīt detalizētu informāciju par preci
+* Lietotāja reģistrācija un pieslēgšanās
+* Profila rediģēšana
+* Sludinājumu pievienošana ar attēliem
+* Sludinājumu apskate un detalizēta preces informācija
+* Preču filtrēšana pēc kategorijas, izmēra, krāsas, cenas un citiem kritērijiem
+* Preču kārtošana pēc cenas vai jaunākajiem sludinājumiem
+* “Like” funkcija
+* Favorītu saraksts
+* Ziņojumu sistēma starp pircēju un pārdevēju
+* Cenu piedāvājumu jeb offer sistēma
+* Pirkuma noformēšana
+* Atsauksmju pievienošana pēc pirkuma
+* Pārdevēja publiskais profils
+* Admin panelis kategoriju pārvaldībai
+* Latviešu un angļu valodas atbalsts
+* Publiski pieejams hostings
 
-🛒 Sagatavot pamatu groza un pirkuma funkcionalitātei
 
-🔗 Saņemt datus no back-end caur API
+## Kā darbojas vietne
 
----
+Lietotājs var apskatīt sludinājumus arī kā viesis, taču, lai pārdotu, pirktu, rakstītu ziņas, pievienotu favorītus vai izteiktu piedāvājumus, ir nepieciešams konts.
+Pēc reģistrācijas lietotājs var pievienot savu sludinājumu, norādot preces nosaukumu, aprakstu, cenu, kategoriju, izmēru, krāsu, stāvokli un attēlus. Citi lietotāji šo sludinājumu var apskatīt, saglabāt favorītos, atzīmēt ar “like”, nosūtīt pārdevējam ziņu vai piedāvāt savu cenu.
+Ja pārdevējs pieņem cenu piedāvājumu, pircējam ir ierobežots laiks, lai veiktu pirkumu. Pēc pirkuma lietotājs var atstāt atsauksmi par pārdevēju.
 
-## Projekta struktūra
-ApgerbjuVeikalsExam/
-1. Backend/ApgerbjuVeikalsExam/ - **Laravel API**
-2. Frontend/ApgerbjuVeikalsExam/ - **Vue 3 + Vite**
 
----
+## Izmantotās tehnoloģijas
 
-# Sākšana
-Priekšnoteikumi:
-- PHP 8.2+
-- Node.js 18+
-- npm
-- Composer
-- MySQL (vai cita SQL datubāze)
+### Frontend
 
----
+* Vue 3
+* Vite
+* TypeScript
+* Vue Router
+* CSS
 
-# Instalācija
+### Backend
+
+* Laravel
+* PHP
+* MySQL
+* Laravel Sanctum
+* REST API
+
+### Hosting
+
+* Frontend: Vercel
+* Backend: Railway
+* Database: Railway MySQL
+
+
+## Lokāla projekta palaišana
+
+Nepieciešams instalēt:
+
+* PHP 8.2 vai jaunāku versiju
+* Composer
+* Node.js
+* npm
+* MySQL
+
 ## Repozitorija klonēšana
 
-**`git clone`**
-**`cd ApgerbjuVeikalsExam`**
+```bash
+git clone https://github.com/23DP1DZaic/ApgerbjuVeikalsExam.git
+cd ApgerbjuVeikalsExam
+```
 
----
+## Backend palaišana
 
-## Backend iestatīšana
+```bash
+cd Backend/ApgerbjuVeikalsExam
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan storage:link
+php artisan serve
+```
 
-**`cd Backend/ApgerbjuVeikalsExam`**
+Backend pēc noklusējuma būs pieejams:
 
-**`composer install`**
-**`cp .env.example .env`**
-**`php artisan key:generate`**
+```txt
+http://127.0.0.1:8000
+```
 
----
+## Frontend palaišana
 
-## Frontend iestatīšana
+```bash
+cd Frontend/ApgerbjuVeikalsExam
+npm install
+npm run dev
+```
 
-**`cd Frontend/ApgerbjuVeikalsExam`**
+Frontend parasti būs pieejams:
 
-**`npm install`**
-**`npm run dev`**
+```txt
+http://localhost:5173
+```
