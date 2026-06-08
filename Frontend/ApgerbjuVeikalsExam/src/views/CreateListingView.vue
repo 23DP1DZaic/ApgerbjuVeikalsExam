@@ -174,50 +174,50 @@
           ></textarea>
         </div>
 
-<div class="form-group">
-  <label>Photos</label>
+        <div class="form-group">
+          <label>Photos</label>
 
-  <div class="photo-grid">
-    <button
-      v-for="index in 5"
-      :key="index"
-      type="button"
-      class="photo-slot"
-      @click="openImagePicker"
-    >
-      <img
-        v-if="imagePreviews[index - 1]"
-        :src="imagePreviews[index - 1]"
-        alt="Listing photo preview"
-        class="photo-preview"
-      >
+          <div class="image-upload-box">
+            <label class="browse-button">
+              Browse
+              <input
+                ref="imageInput"
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden-file-input"
+                @change="handleImagesChange"
+              >
+            </label>
 
-      <span v-else class="photo-placeholder">
-        📷
-      </span>
-    </button>
-  </div>
+            <span class="file-status">
+              {{ imageFiles.length ? `${imageFiles.length} file(s) selected` : 'No file selected' }}
+            </span>
+          </div>
 
-  <div class="image-upload-box">
-    <label class="browse-button">
-      Browse
-      <input
-        ref="imageInput"
-        type="file"
-        multiple
-        accept="image/jpeg,image/png,image/webp"
-        class="hidden-file-input"
-        @change="handleImagesChange"
-      >
-    </label>
+          <div class="photo-grid">
+            <button
+              v-for="index in 5"
+              :key="index"
+              type="button"
+              class="photo-slot"
+              @click="openImagePicker"
+            >
+              <img
+                v-if="imagePreviews[index - 1]"
+                :src="imagePreviews[index - 1]"
+                alt="Listing photo preview"
+                class="photo-preview"
+              >
 
-    <span class="file-status">
-      {{ imageFiles.length ? `${imageFiles.length} file(s) selected` : 'No file selected' }}
-    </span>
-  </div>
+              <span v-else class="photo-placeholder">
+                +
+              </span>
+            </button>
+          </div>
 
-  <small>Add at least 3 images. Max 5 images. JPG, PNG, WEBP. Max 2MB each.</small>
-</div>
+          <small>Add at least 3 images. Max 5 images. JPG, PNG, WEBP. Max 2MB each.</small>
+        </div>
 
         <p v-if="message" class="success full-width">
           {{ message }}
