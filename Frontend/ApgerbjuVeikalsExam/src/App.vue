@@ -265,7 +265,7 @@
               }"
               @click="closeMegaMenu"
             >
-              {{ parent.name }}
+              {{ categoryLabel(parent.name) }}
             </router-link>
 
             <router-link
@@ -280,7 +280,7 @@
               }"
               @click="closeMegaMenu"
             >
-              {{ child.name }}
+              {{ categoryLabel(child.name) }}
             </router-link>
 
             <router-link
@@ -294,7 +294,7 @@
               }"
               @click="closeMegaMenu"
             >
-              View {{ parent.name }}
+              {{ t.viewCategory }} {{ categoryLabel(parent.name) }}
             </router-link>
           </div>
         </div>
@@ -316,7 +316,7 @@
               }"
               @click="closeMegaMenu"
             >
-              {{ parent.name }}
+              {{ categoryLabel(parent.name) }}
             </router-link>
 
             <router-link
@@ -331,7 +331,7 @@
               }"
               @click="closeMegaMenu"
             >
-              {{ child.name }}
+              {{ categoryLabel(child.name) }}
             </router-link>
 
             <router-link
@@ -345,7 +345,7 @@
               }"
               @click="closeMegaMenu"
             >
-              View {{ parent.name }}
+              {{ t.viewCategory }} {{ categoryLabel(parent.name) }}
             </router-link>
           </div>
         </div>
@@ -485,6 +485,96 @@ const popularBrands = [
   'Yohji Yamamoto',
   'Zara',
 ].sort((a, b) => a.localeCompare(b))
+
+const lvCategoryLabels: Record<string, string> = {
+  // Parent categories
+  Accessories: 'Aksesuāri',
+  Bottoms: 'Apakšdaļa',
+  Footwear: 'Apavi',
+  Outerwear: 'Virsdrēbes',
+  Tailoring: 'Klasiskais apģērbs',
+  Tops: 'Augšdaļa',
+
+  // Men Tops
+  'Long Sleeve T-Shirts': 'T-krekli ar garām piedurknēm',
+  Polos: 'Polo krekli',
+  'Shirts (Button Ups)': 'Krekli ar pogām',
+  'Short Sleeve T-Shirts': 'T-krekli ar īsām piedurknēm',
+  'Sweaters & Knitwear': 'Džemperi un trikotāža',
+  'Sweatshirts & Hoodies': 'Džemperi un hūdiji',
+  'Tank Tops & Sleeveless': 'Krekli bez piedurknēm',
+  Jerseys: 'Sporta krekli',
+
+  // Men Bottoms
+  'Casual Pants': 'Ikdienas bikses',
+  'Cropped Pants': 'Saīsinātas bikses',
+  Denim: 'Džinsi',
+  Leggings: 'Legingi',
+  'Overalls & Jumpsuits': 'Kombinezoni',
+  Shorts: 'Šorti',
+  'Sweatpants & Joggers': 'Sporta bikses un džogeri',
+  Swimwear: 'Peldapģērbs',
+
+  // Men Outerwear
+  Bombers: 'Bomberi',
+  'Cloaks & Capes': 'Apmetņi',
+  'Denim Jackets': 'Džinsu jakas',
+  'Heavy Coats': 'Silti mēteļi',
+  'Leather Jackets': 'Ādas jakas',
+  'Light Jackets': 'Vieglas jakas',
+  Parkas: 'Parkas',
+  Raincoats: 'Lietusmēteļi',
+  Vests: 'Vestes',
+
+  // Footwear
+  Boots: 'Zābaki',
+  'Casual Leather Shoes': 'Ikdienas ādas apavi',
+  'Formal Shoes': 'Klasiskie apavi',
+  'Hi-Top Sneakers': 'Augstās kedas',
+  'High-Top Sneakers': 'Augstās kedas',
+  'Low-Top Sneakers': 'Zemās kedas',
+  Sandals: 'Sandales',
+  'Slip Ons': 'Slip-on apavi',
+  Flats: 'Zempapēžu apavi',
+  Heels: 'Augstpapēžu kurpes',
+
+  // Accessories
+  'Bags & Luggage': 'Somas un bagāža',
+  Bags: 'Somas',
+  Belts: 'Jostas',
+  Glasses: 'Brilles',
+  'Gloves & Scarves': 'Cimdi un šalles',
+  Hats: 'Cepures',
+  'Jewelry & Watches': 'Rotaslietas un pulksteņi',
+  Jewelry: 'Rotaslietas',
+  Scarves: 'Šalles',
+  Wallets: 'Maki',
+  Watches: 'Pulksteņi',
+  'Socks & Underwear': 'Zeķes un apakšveļa',
+  Sunglasses: 'Saulesbrilles',
+
+  // Tailoring
+  Blazers: 'Žaketes',
+  'Formal Shirting': 'Klasiskie krekli',
+  'Formal Trousers': 'Klasiskās bikses',
+  'Formal Dresses': 'Klasiskas kleitas',
+  'Formal Pants': 'Klasiskas bikses',
+  Sets: 'Komplekti',
+  Suits: 'Uzvalki',
+  Tuxedos: 'Smokingu kostīmi',
+
+  // Women
+  Blouses: 'Blūzes',
+  'Crop Tops': 'Īsie topi',
+  'Long Sleeve Tops': 'Topi ar garām piedurknēm',
+  'Short Sleeve Tops': 'Topi ar īsām piedurknēm',
+  'Tank Tops': 'Topi bez piedurknēm',
+  Jeans: 'Džinsi',
+  Pants: 'Bikses',
+  Skirts: 'Svārki',
+  Coats: 'Mēteļi',
+  'Puffer Jackets': 'Pufīgās jakas',
+}
 
 const designerSoonMessage = ref('')
 
@@ -677,6 +767,7 @@ const translations = {
     newsletterEmpty: 'Please enter your email address.',
     newsletterInvalid: 'Please enter a valid email address.',
     newsletterSuccess: 'You have successfully subscribed to the newsletter!',
+    viewCategory: 'View',
   },
 
   lv: {
@@ -701,10 +792,19 @@ const translations = {
     newsletterEmpty: 'Lūdzu, ievadi e-pasta adresi.',
     newsletterInvalid: 'Lūdzu, ievadi derīgu e-pasta adresi.',
     newsletterSuccess: 'Tu veiksmīgi pierakstījies jaunumiem!',
+    viewCategory: 'Skatīt',
   },
 }
 
 const t = computed(() => translations[language.value])
+
+const categoryLabel = (categoryName: string) => {
+  if (language.value === 'lv') {
+    return lvCategoryLabels[categoryName] || categoryName
+  }
+
+  return categoryName
+}
 
 const toggleLanguage = () => {
   language.value = language.value === 'en' ? 'lv' : 'en'
