@@ -329,7 +329,7 @@ const trendingListings = computed(() => {
     .sort((a, b) => {
       return Number(b.likes_count || 0) - Number(a.likes_count || 0)
     })
-    .slice(0, 6)
+    .slice(0, 3)
 })
 
 // Fetch listings: loads all available listings and then frontend sorts by likes
