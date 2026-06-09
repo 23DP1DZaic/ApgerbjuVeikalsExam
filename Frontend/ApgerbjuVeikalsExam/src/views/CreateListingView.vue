@@ -485,6 +485,105 @@ const lvColorLabels: Record<string, string> = {
   Gold: 'Zelta',
 }
 
+const lvCategoryLabels: Record<string, string> = {
+  // Parent categories
+  Accessories: 'Aksesuāri',
+  Bottoms: 'Apakšdaļa',
+  Footwear: 'Apavi',
+  Outerwear: 'Virsdrēbes',
+  Tailoring: 'Klasiskais apģērbs',
+  Tops: 'Augšdaļa',
+
+  // Men Tops
+  'Long Sleeve T-Shirts': 'T-krekli ar garām piedurknēm',
+  Polos: 'Polo krekli',
+  'Shirts (Button Ups)': 'Krekli ar pogām',
+  'Short Sleeve T-Shirts': 'T-krekli ar īsām piedurknēm',
+  'Sweaters & Knitwear': 'Džemperi un trikotāža',
+  'Sweatshirts & Hoodies': 'Džemperi un hūdiji',
+  'Tank Tops & Sleeveless': 'Krekli bez piedurknēm',
+  Jerseys: 'Sporta krekli',
+
+  // Men Bottoms
+  'Casual Pants': 'Ikdienas bikses',
+  'Cropped Pants': 'Saīsinātas bikses',
+  Denim: 'Džinsi',
+  Leggings: 'Legingi',
+  'Overalls & Jumpsuits': 'Kombinezoni',
+  Shorts: 'Šorti',
+  'Sweatpants & Joggers': 'Sporta bikses un džogeri',
+  Swimwear: 'Peldapģērbs',
+
+  // Men Outerwear
+  Bombers: 'Bomberi',
+  'Cloaks & Capes': 'Apmetņi',
+  'Denim Jackets': 'Džinsu jakas',
+  'Heavy Coats': 'Silti mēteļi',
+  'Leather Jackets': 'Ādas jakas',
+  'Light Jackets': 'Vieglas jakas',
+  Parkas: 'Parkas',
+  Raincoats: 'Lietusmēteļi',
+  Vests: 'Vestes',
+
+  // Men Footwear
+  Boots: 'Zābaki',
+  'Casual Leather Shoes': 'Ikdienas ādas apavi',
+  'Formal Shoes': 'Klasiskie apavi',
+  'Hi-Top Sneakers': 'Augstās kedas',
+  'Low-Top Sneakers': 'Zemās kedas',
+  Sandals: 'Sandales',
+  'Slip Ons': 'Slip-on apavi',
+
+  // Men Accessories
+  'Bags & Luggage': 'Somas un bagāža',
+  Belts: 'Jostas',
+  Glasses: 'Brilles',
+  'Gloves & Scarves': 'Cimdi un šalles',
+  Hats: 'Cepures',
+  'Jewelry & Watches': 'Rotaslietas un pulksteņi',
+  Wallets: 'Maki',
+  'Socks & Underwear': 'Zeķes un apakšveļa',
+  Sunglasses: 'Saulesbrilles',
+
+  // Men Tailoring
+  Blazers: 'Žaketes',
+  'Formal Shirting': 'Klasiskie krekli',
+  'Formal Trousers': 'Klasiskās bikses',
+  Suits: 'Uzvalki',
+  Tuxedos: 'Smokingu kostīmi',
+
+  // Women Tops
+  Blouses: 'Blūzes',
+  'Crop Tops': 'Īsie topi',
+  'Long Sleeve Tops': 'Topi ar garām piedurknēm',
+  'Short Sleeve Tops': 'Topi ar īsām piedurknēm',
+  'Tank Tops': 'Topi bez piedurknēm',
+
+  // Women Bottoms
+  Jeans: 'Džinsi',
+  Pants: 'Bikses',
+  Skirts: 'Svārki',
+
+  // Women Outerwear
+  Coats: 'Mēteļi',
+  'Puffer Jackets': 'Pufīgās jakas',
+
+  // Women Footwear
+  Flats: 'Zempapēžu apavi',
+  Heels: 'Augstpapēžu kurpes',
+
+  // Women Accessories
+  Bags: 'Somas',
+  Jewelry: 'Rotaslietas',
+  Scarves: 'Šalles',
+  Watches: 'Pulksteņi',
+
+  // Women Tailoring
+  'Formal Dresses': 'Klasiskas kleitas',
+  'Formal Pants': 'Klasiskas bikses',
+  Sets: 'Komplekti',
+}
+
 // Language event: listens to language switcher from header
 const handleLanguageChanged = (event: Event) => {
   const nextLanguage = (event as CustomEvent<Language>).detail
@@ -492,6 +591,14 @@ const handleLanguageChanged = (event: Event) => {
   if (nextLanguage === 'en' || nextLanguage === 'lv') {
     language.value = nextLanguage
   }
+}
+
+const categoryLabel = (categoryName: string) => {
+  if (language.value === 'lv') {
+    return lvCategoryLabels[categoryName] || categoryName
+  }
+
+  return categoryName
 }
 
 // User: used to check if user is logged in before creating listing
@@ -691,7 +798,7 @@ const parentCategories = computed(() => {
 // Parent category options: CustomSelect format
 const parentCategoryOptions = computed(() => {
   return parentCategories.value.map((category) => ({
-    label: category.name,
+    label: categoryLabel(category.name),
     value: String(category.id),
   }))
 })
@@ -710,7 +817,7 @@ const subcategories = computed(() => {
 // Subcategory options: CustomSelect format
 const subcategoryOptions = computed(() => {
   return subcategories.value.map((category) => ({
-    label: category.name,
+    label: categoryLabel(category.name),
     value: category.name,
   }))
 })
