@@ -57,17 +57,53 @@
         </div>
 
         <!-- Brand select -->
-        <div class="form-group">
+        <div
+          ref="brandDropdownRef"
+          class="form-group brand-combobox-wrapper"
+        >
           <label>{{ t.brand }}</label>
 
-        <div :class="{ 'field-error-control': hasFieldError('brand') }">
-          <CustomSelect
+          <input
             v-model="form.brand"
+            type="text"
+            class="brand-combobox-input"
+            :class="{ 'field-error-input': hasFieldError('brand') }"
             :placeholder="form.category ? t.brandPlaceholder : t.selectSubcategoryFirst"
-            :options="brandOptions"
             :disabled="!form.category"
-          />
-        </div>
+            @focus="isBrandDropdownOpen = true"
+            @input="isBrandDropdownOpen = true"
+          >
+
+          <div
+            v-if="isBrandDropdownOpen && form.category"
+            class="brand-combobox-menu"
+          >
+            <button
+              v-for="brand in filteredBrands"
+              :key="brand"
+              type="button"
+              class="brand-combobox-option"
+              @click="selectBrand(brand)"
+            >
+              {{ brand }}
+            </button>
+
+            <button
+              v-if="form.brand.trim() && !brandExists"
+              type="button"
+              class="brand-combobox-option custom-brand-option"
+              @click="selectBrand(form.brand.trim())"
+            >
+              {{ t.useCustomBrand }} "{{ form.brand.trim() }}"
+            </button>
+
+            <div
+              v-if="filteredBrands.length === 0 && !form.brand.trim()"
+              class="brand-combobox-empty"
+            >
+              {{ t.startTypingBrand }}
+            </div>
+          </div>
 
           <p class="field-help">
             {{ t.brandHelp }}
@@ -403,6 +439,9 @@ const translations = {
     women: 'Women',
     new: 'New',
     used: 'Used',
+
+    useCustomBrand: 'Use custom brand',
+    startTypingBrand: 'Start typing to search brands',
   },
 
   lv: {
@@ -461,6 +500,9 @@ const translations = {
     women: 'Sievietēm',
     new: 'Jauns',
     used: 'Lietots',
+
+    useCustomBrand: 'Izmantot savu zīmolu',
+    startTypingBrand: 'Sāc rakstīt, lai meklētu zīmolus',
   },
 }
 
@@ -630,6 +672,9 @@ const categories = ref<Category[]>([])
 const isColorDropdownOpen = ref(false)
 const colorDropdownRef = ref<HTMLElement | null>(null)
 
+const isBrandDropdownOpen = ref(false)
+const brandDropdownRef = ref<HTMLElement | null>(null)
+
 // Select options: department
 const genderOptions = computed(() => [
   { label: t.value.men, value: 'men' },
@@ -683,6 +728,7 @@ const brands = [
   'Moncler',
   'New Balance',
   'Nike',
+  'Number (N)ine',
   'Off-White',
   'Our Legacy',
   'Palace',
@@ -707,12 +753,40 @@ const brands = [
   'Other',
 ].sort((a, b) => a.localeCompare(b))
 
-const brandOptions = computed(() => {
-  return brands.map((brand) => ({
-    label: brand,
-    value: brand,
-  }))
+// const brandOptions = computed(() => {
+//   return brands.map((brand) => ({
+//     label: brand,
+//     value: brand,
+//   }))
+// })
+
+const filteredBrands = computed(() => {
+  const search = form.brand.trim().toLowerCase()
+
+  if (!search) {
+    return brands.slice(0, 25)
+  }
+
+  return brands
+    .filter((brand) => {
+      return brand.toLowerCase().includes(search)
+    })
+    .slice(0, 25)
 })
+
+const brandExists = computed(() => {
+  const search = form.brand.trim().toLowerCase()
+
+  return brands.some((brand) => {
+    return brand.toLowerCase() === search
+  })
+})
+
+const selectBrand = (brand: string) => {
+  form.brand = brand
+  isBrandDropdownOpen.value = false
+}
+
 
 // Category groups: used to change size field behavior
 const footwearCategoryNames = [
@@ -1046,6 +1120,13 @@ const handleClickOutside = (event: MouseEvent) => {
   ) {
     isColorDropdownOpen.value = false
   }
+
+  if (
+    brandDropdownRef.value &&
+    !brandDropdownRef.value.contains(target)
+  ) {
+    isBrandDropdownOpen.value = false
+  }
 }
 
 // Create listing: validates fields and sends FormData to backend
@@ -1068,14 +1149,10 @@ const createListing = async () => {
     return
   }
 
-  const normalizedBrand = form.brand.trim().toLowerCase()
-
-  const selectedBrand = brands.find((brand) => {
-    return brand.toLowerCase() === normalizedBrand
-  })
+  const selectedBrand = form.brand.trim()
 
   if (!selectedBrand) {
-    error.value = t.value.invalidBrand
+    error.value = t.value.fillRequired
     return
   }
 
