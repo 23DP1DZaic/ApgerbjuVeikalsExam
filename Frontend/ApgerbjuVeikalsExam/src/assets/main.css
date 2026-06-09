@@ -2005,38 +2005,47 @@ input[type='number']::-webkit-inner-spin-button {
 }
 
 .settings-sidebar {
-  background: #111;
-  color: #fff;
-  border-radius: var(--radius-xl);
-  padding: 18px 14px;
-  height: fit-content;
-  box-shadow: var(--shadow-md);
+  width: 240px;
+  background: #ffffff;
+  color: #111111;
+  border: 1px solid #dcdcdc;
+  border-radius: 20px;
+  padding: 22px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 .settings-sidebar h3 {
-  font-size: 18px;
   margin: 0 0 18px;
+  color: #111111;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .settings-nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .settings-link {
   display: block;
-  color: #dddddd;
+  padding: 14px 16px;
+  border-radius: 12px;
   text-decoration: none;
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  transition: background var(--transition-fast);
+  color: #111111;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.2s ease;
 }
 
-.settings-link:hover,
-.router-link-active.settings-link {
-  background: rgba(255, 255, 255, 0.12);
+.settings-link:hover {
+  background: #f3f3f3;
+  color: #111111;
+}
+
+.settings-link.router-link-active {
+  background: #f0f0f0;
+  color: #111111;
 }
 
 .settings-card {
