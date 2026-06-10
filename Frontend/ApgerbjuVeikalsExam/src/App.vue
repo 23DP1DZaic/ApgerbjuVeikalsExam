@@ -15,11 +15,18 @@
         </form>
 
         <nav class="header-actions">
-          <router-link v-if="user" to="/create-listing">
+          <router-link
+            v-if="user"
+            to="/create-listing"
+            class="header-action-pill header-add-listing"
+          >
             {{ t.addListing }}
           </router-link>
 
-          <router-link to="/messages" class="header-message-link">
+          <router-link
+            to="/messages"
+            class="header-message-link header-action-pill"
+          >
             {{ t.messages }}
 
             <span
@@ -156,8 +163,15 @@
         </nav>
       </div>
 
-      <nav class="category-nav" ref="megaMenuRef">
-        <div class="nav-item mega-item">
+      <nav
+        ref="megaMenuRef"
+        class="category-nav"
+        :class="{ 'mega-open': activeMegaMenu }"
+      >
+        <div
+          class="nav-item mega-item"
+          :class="{ 'active-mobile-nav': activeMegaMenu === 'designers' }"
+        >
           <button
             class="nav-link-button"
             :class="{ active: activeMegaMenu === 'designers' }"
@@ -168,7 +182,10 @@
           </button>
         </div>
 
-        <div class="nav-item mega-item">
+       <div
+          class="nav-item mega-item"
+          :class="{ 'active-mobile-nav': activeMegaMenu === 'menswear' }"
+        >
           <button
             class="nav-link-button"
             :class="{ active: activeMegaMenu === 'menswear' }"
@@ -179,7 +196,10 @@
           </button>
         </div>
 
-        <div class="nav-item mega-item">
+        <div
+            class="nav-item mega-item"
+            :class="{ 'active-mobile-nav': activeMegaMenu === 'womenswear' }"
+          >
           <button
             class="nav-link-button"
             :class="{ active: activeMegaMenu === 'womenswear' }"
@@ -210,6 +230,17 @@
         v-if="activeMegaMenu"
         class="mega-menu"
       >
+      <div class="mobile-mega-header">
+      <strong>{{ activeMegaMenuTitle }}</strong>
+
+      <button
+        type="button"
+        @click="closeMegaMenu"
+      >
+        {{ t.closeMenu }}
+      </button>
+    </div>
+
         <div
           v-if="activeMegaMenu === 'designers'"
           class="mega-menu-inner designers-mega"
@@ -768,6 +799,7 @@ const translations = {
     newsletterInvalid: 'Please enter a valid email address.',
     newsletterSuccess: 'You have successfully subscribed to the newsletter!',
     viewCategory: 'View',
+    closeMenu: 'Close',
   },
 
   lv: {
@@ -793,10 +825,19 @@ const translations = {
     newsletterInvalid: 'Lūdzu, ievadi derīgu e-pasta adresi.',
     newsletterSuccess: 'Tu veiksmīgi pierakstījies jaunumiem!',
     viewCategory: 'Skatīt',
+    closeMenu: 'Aizvērt',
   },
 }
 
 const t = computed(() => translations[language.value])
+
+const activeMegaMenuTitle = computed(() => {
+  if (activeMegaMenu.value === 'designers') return t.value.designers
+  if (activeMegaMenu.value === 'menswear') return t.value.menswear
+  if (activeMegaMenu.value === 'womenswear') return t.value.womenswear
+
+  return ''
+})
 
 const categoryLabel = (categoryName: string) => {
   if (language.value === 'lv') {
